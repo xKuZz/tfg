@@ -290,7 +290,7 @@ def sofm(samples, rows, cols, iters, nsamples, sigma_0, sigma_f, eta_0, eta_f, t
             
             
 if __name__ == '__main__':
-	"""
+    """
     Realicemos un ejemplo para comprobar el correcto funcionamiento del algoritmo.
     """
     import matplotlib.pyplot as plt
