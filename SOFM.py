@@ -1,9 +1,11 @@
 ﻿import numpy as np
-from numba import cuda, float32, int32, int64, void, jit
+from numba import cuda
 from numba.cuda.random import create_xoroshiro128p_states, xoroshiro128p_uniform_float32
 import time
 import math
-import pyculib
+import cupy as cp
+import numba
+
 """
 Implementación de mapas autoorganizados o redes de Kohonen en CUDA con Numba.
 Se considera una versión online del algoritmo (analiza las muestras de una en una, no en batchs).
@@ -25,7 +27,7 @@ de salida.
 
 El tercer kernel realiza una reducción para encontrar la unidad con menor distancia a la muestra proporcionada.
 Mientras que hemos propuesto una implementación de cómo se haría, hemos optado por utilizar la función
-amin() de cuBLAS que nos proporciona resultados más rápido.
+argmin() de cupy que nos proporciona resultados más rápido.
 
 El último kernel actualiza la matriz de pesos.
 """
@@ -56,13 +58,14 @@ Kernel para calcular la distancia euclídea de un vector con el resto de sus pes
      
 """
 
-@cuda.jit('(uint64, float32[:], float32[:], float32[:], int32)', fastmath=True)
+@cuda.jit
 def cuda_euclidean_distance(ids, samples, weights, out, d):
     idx = cuda.grid(1)
     # Fase 1: Ponemos el vector del array en memoria compartida
-    shared_vector = cuda.shared.array(shape=0, dtype=float32)
-    if idx < d:
-        shared_vector[idx] = samples[ids * d + idx]
+    shared_vector = cuda.shared.array(shape=0, dtype=numba.float32)
+    if idx == 0:
+        for i in range(d):
+            shared_vector[i] = samples[ids * d + i]
     cuda.syncthreads()
 
     # Fase 2: Calculamos la distancia euclídea
@@ -73,25 +76,24 @@ def cuda_euclidean_distance(ids, samples, weights, out, d):
             distance += i_distance * i_distance
             
         # Fase 3: Lo escribimos en el array de salida.
-        out[idx] = math.sqrt(distance)
-
+        out[idx] = distance
 """
 El siguiente kernel realizado encuentra el valor con la menor distancia posible.
 Este kernel ha sido implementado mediante la siguiente reducción.
 Puesto que el kernel creado es entre 2 y 4 veces más lento que la implementación
-de amin de cuBLAS se propone utilizar dicha opción para esa operación.
+de argmin de cupy se propone utilizar dicha opción para esa operación.
 
 El problema de la implementación realizada es hemos de llamar múltiples veces al mismo
-kernel mientras que probablemente la versión de cuBLAS utilice alguna versión utilizando atomics
-u optimizaciones más avanzadas que la versión propuesta.
+kernel mientras que probablemente la versión de cupy utilice alguna versión más optimizada y
+no tiene necesidad de ejecutar un bucle en python para tamaños muy grandes.
 """
 
 
-@cuda.jit('(float32[:], float32[:], int32[:])')
+@cuda.jit
 def cuda_min_element(my_array, my_mins, my_indexes):
     # 1. Declaramos la memoria compartida
-    shared_mem = cuda.shared.array(shape=128, dtype=float32)
-    shared_idx = cuda.shared.array(shape=128, dtype=int32)
+    shared_mem = cuda.shared.array(shape=128, dtype=numba.float32)
+    shared_idx = cuda.shared.array(shape=128, dtype=numba.int32)
     
     # 2. Obtenemos los índices
     tidx = cuda.threadIdx.x
@@ -185,7 +187,7 @@ def reduce_min_index(a):
             
         return output_index
             
-    
+            
 """
 El tercer kernel se encarga de actualizar la matriz de pesos
 :param ids Índice de la muestra considerada.
@@ -199,7 +201,7 @@ El tercer kernel se encarga de actualizar la matriz de pesos
 :param sigma_squared Valor de sigma al cuadrado para el cáculo del vecindario.
 """
 
-@cuda.jit('uint64, float32[:],  float32[:], uint64, uint64, uint64, uint64, float32, float32', fastmath=True)
+@cuda.jit
 def cuda_bmu_update(ids, samples, weights, d, bmu_row, bmu_col, cols, eta, sigma_squared):
     idx = cuda.grid(1)
     if idx * d < weights.size:
@@ -211,9 +213,9 @@ def cuda_bmu_update(ids, samples, weights, d, bmu_row, bmu_col, cols, eta, sigma
 
         d_f = (current_col - bmu_col) * (current_col - bmu_col)
         d_f += (current_row - bmu_row) * (current_row - bmu_row)
-        if d_f < sigma_squared:
+        if d_f <= sigma_squared:
             # 2. Actualizamos acorde a esa distancia y el valor de sigma
-            d_f = math.exp(- float(d_f)/2/sigma_squared)
+            d_f = math.exp(-d_f/(2*sigma_squared))
             for i in range(d):
                 weights[idx * d + i] += eta * d_f * (samples[ids * d + i] - weights[idx * d + i])
             
@@ -244,7 +246,7 @@ def sofm(samples, rows, cols, iters, nsamples, sigma_0, sigma_f, eta_0, eta_f, t
     d = samples[0].size
     d_weights = cuda.device_array(rows * cols * d, np.float32)
     d_samples = cuda.to_device(samples.flatten())
-    distances = cuda.device_array(rows * cols, np.float32)
+    distances = cp.zeros(rows * cols, np.float32)
     
     # 1. Inicializamos la matriz de pesos.
     # 1.a Preparamos parámetros para kernel.
@@ -260,8 +262,7 @@ def sofm(samples, rows, cols, iters, nsamples, sigma_0, sigma_f, eta_0, eta_f, t
     # 2.a Preparamos los parámetros para el resto de kernels
     sm_size = samples[0].size * samples[0].dtype.itemsize
     blocks = rows * cols // tpb + 1
-    cuBLAS = pyculib.blas.Blas()
-    
+ 
     samples_indexes = np.arange(len(samples))
     # En cada iteración de entrenamiento del algoritmo
     for t in range(iters):
@@ -276,9 +277,9 @@ def sofm(samples, rows, cols, iters, nsamples, sigma_0, sigma_f, eta_0, eta_f, t
         # Para cada muestra
         for i in selected_samples:
             # 2.c Calculamos la distancia euclídea
-            cuda_euclidean_distance[blocks, tpb, 0, sm_size](i, d_samples, d_weights, distances, d)
+            cuda_euclidean_distance[blocks, tpb,0,sm_size](i, d_samples, d_weights, distances, d)
             # 2.d Obtenemos el índice de la menor distancia
-            min_index = cuBLAS.amin(distances)
+            min_index = int(cp.argmin(distances))
             # 2.e Actualizamos la matriz de los pesos
             bmu_row = min_index // cols
             bmu_col = min_index % cols
@@ -289,10 +290,8 @@ def sofm(samples, rows, cols, iters, nsamples, sigma_0, sigma_f, eta_0, eta_f, t
     return d_weights.copy_to_host()
             
             
+            
 if __name__ == '__main__':
-    """
-    Realicemos un ejemplo para comprobar el correcto funcionamiento del algoritmo.
-    """
     import matplotlib.pyplot as plt
     from sklearn.datasets import fetch_olivetti_faces
     faces = fetch_olivetti_faces()
