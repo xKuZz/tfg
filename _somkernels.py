@@ -29,7 +29,7 @@ def euclidean_distance(ids, samples, weights, out, d):
     idx = cuda.grid(1)
     # Fase 1: Ponemos el vector del array en memoria compartida
     shared_vector = cuda.shared.array(shape=0, dtype=numba.float32)
-    if idx == 0:
+    if cuda.threadIdx.x == 0:
         for i in range(d):
             shared_vector[i] = samples[ids * d + i]
     cuda.syncthreads()
