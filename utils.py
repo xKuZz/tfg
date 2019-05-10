@@ -1,5 +1,6 @@
 import numba
 from numba import cuda
+import numpy as np
 """
 Implementación de scan para Numba CUDA.
 Basado en https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html
