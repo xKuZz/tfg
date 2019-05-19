@@ -371,4 +371,3 @@ def reduce_sum(a):
         run_kernel(p)
 
         return p[5][0]
-
