@@ -683,6 +683,6 @@ def multi_reduce_min_index(device_array):
     elif 512 < row_size <= 1024:
         cuda_multi_min_element_1024[blocks, 1024](device_array, device_indexes)
     else:
-        return reduce_min_index(my_array)
+        return np.array([reduce_min_index(device_array[i]) for i in range(blocks)])
     
     return device_indexes
