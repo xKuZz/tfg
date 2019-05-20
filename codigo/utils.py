@@ -371,3 +371,318 @@ def reduce_sum(a):
         run_kernel(p)
 
         return p[5][0]
+
+
+"""
+Multi reducción por filas. Una fila no puede tener más de 1024 elementos.
+"""
+@cuda.jit
+def cuda_multi_min_element_64(my_array, my_indexes):
+    # 1. Declaramos la memoria compartida
+    shared_mem = cuda.shared.array(shape=64, dtype=numba.float32)
+    shared_idx = cuda.shared.array(shape=64, dtype=numba.int32)
+    
+    # 2. Obtenemos los índices
+    tidx = cuda.threadIdx.x
+    bidx = cuda.blockIdx.x
+  
+    # 3. Inicialiamos el bloque y rellenamos con infinito
+    if tidx < my_array.shape[1]:
+        shared_mem[tidx] = my_array[bidx, tidx]
+    else:
+        shared_mem[tidx] = np.inf
+
+    shared_idx[tidx] = tidx
+        
+    cuda.syncthreads()    
+       
+    # 4. Hacemos unroll para un warp (nos ahorramos syncthreads)
+    if tidx < 32:
+        if shared_mem[tidx + 32] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 32]
+            shared_idx[tidx] = shared_idx[tidx + 32]
+        if shared_mem[tidx + 16] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 16]
+            shared_idx[tidx] = shared_idx[tidx + 16]
+        if shared_mem[tidx + 8] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 8]
+            shared_idx[tidx] = shared_idx[tidx + 8]
+        if shared_mem[tidx + 4] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 4]
+            shared_idx[tidx] = shared_idx[tidx + 4]
+        if shared_mem[tidx + 2] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 2]
+            shared_idx[tidx] = shared_idx[tidx + 2]
+        if shared_mem[tidx + 1] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 1]
+            shared_idx[tidx] = shared_idx[tidx + 1]
+            
+    # El primer thread de cada bloque indica su minimo
+    if tidx == 0:
+        my_indexes[cuda.blockIdx.x] = shared_idx[tidx]
+
+@cuda.jit
+def cuda_multi_min_element_128(my_array, my_indexes):
+    # 1. Declaramos la memoria compartida
+    shared_mem = cuda.shared.array(shape=128, dtype=numba.float32)
+    shared_idx = cuda.shared.array(shape=128, dtype=numba.int32)
+    
+    # 2. Obtenemos los índices
+    tidx = cuda.threadIdx.x
+    bidx = cuda.blockIdx.x
+  
+    # 3. Inicialiamos el bloque y rellenamos con infinito
+    if tidx < my_array.shape[1]:
+        shared_mem[tidx] = my_array[bidx, tidx]
+    else:
+        shared_mem[tidx] = np.inf
+
+    shared_idx[tidx] = tidx
+        
+    cuda.syncthreads()    
+    # 4. Unroll de bloque
+    # Consideramos que estamos usando 128 hebras por bloque.
+    if tidx < 64:
+        if shared_mem[tidx + 64] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 64]
+            shared_idx[tidx] = shared_idx[tidx + 64]
+    
+    cuda.syncthreads()
+    
+    # 5. Hacemos unroll para un warp (nos ahorramos syncthreads)
+    if tidx < 32:
+        if shared_mem[tidx + 32] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 32]
+            shared_idx[tidx] = shared_idx[tidx + 32]
+        if shared_mem[tidx + 16] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 16]
+            shared_idx[tidx] = shared_idx[tidx + 16]
+        if shared_mem[tidx + 8] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 8]
+            shared_idx[tidx] = shared_idx[tidx + 8]
+        if shared_mem[tidx + 4] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 4]
+            shared_idx[tidx] = shared_idx[tidx + 4]
+        if shared_mem[tidx + 2] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 2]
+            shared_idx[tidx] = shared_idx[tidx + 2]
+        if shared_mem[tidx + 1] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 1]
+            shared_idx[tidx] = shared_idx[tidx + 1]
+            
+    # El primer thread de cada bloque indica su minimo
+    if tidx == 0:
+        my_indexes[cuda.blockIdx.x] = shared_idx[tidx]
+
+
+@cuda.jit
+def cuda_multi_min_element_256(my_array, my_indexes):
+    # 1. Declaramos la memoria compartida
+    shared_mem = cuda.shared.array(shape=256, dtype=numba.float32)
+    shared_idx = cuda.shared.array(shape=256, dtype=numba.int32)
+    
+    # 2. Obtenemos los índices
+    tidx = cuda.threadIdx.x
+    bidx = cuda.blockIdx.x
+  
+    # 3. Inicialiamos el bloque y rellenamos con infinito
+    if tidx < my_array.shape[1]:
+        shared_mem[tidx] = my_array[bidx, tidx]
+    else:
+        shared_mem[tidx] = np.inf
+
+    shared_idx[tidx] = tidx
+        
+    cuda.syncthreads()    
+    # 4. Unroll de bloque
+    if tidx < 128:
+        if shared_mem[tidx + 128] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 128]
+            shared_idx[tidx] = shared_idx[tidx + 128]
+
+    cuda.syncthreads()
+    if tidx < 64:
+        if shared_mem[tidx + 64] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 64]
+            shared_idx[tidx] = shared_idx[tidx + 64]
+    
+    cuda.syncthreads()
+    
+    # 5. Hacemos unroll para un warp (nos ahorramos syncthreads)
+    if tidx < 32:
+        if shared_mem[tidx + 32] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 32]
+            shared_idx[tidx] = shared_idx[tidx + 32]
+        if shared_mem[tidx + 16] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 16]
+            shared_idx[tidx] = shared_idx[tidx + 16]
+        if shared_mem[tidx + 8] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 8]
+            shared_idx[tidx] = shared_idx[tidx + 8]
+        if shared_mem[tidx + 4] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 4]
+            shared_idx[tidx] = shared_idx[tidx + 4]
+        if shared_mem[tidx + 2] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 2]
+            shared_idx[tidx] = shared_idx[tidx + 2]
+        if shared_mem[tidx + 1] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 1]
+            shared_idx[tidx] = shared_idx[tidx + 1]
+            
+    # El primer thread de cada bloque indica su minimo
+    if tidx == 0:
+        my_indexes[cuda.blockIdx.x] = shared_idx[tidx]
+
+@cuda.jit
+def cuda_multi_min_element_512(my_array, my_indexes):
+    # 1. Declaramos la memoria compartida
+    shared_mem = cuda.shared.array(shape=512, dtype=numba.float32)
+    shared_idx = cuda.shared.array(shape=512, dtype=numba.int32)
+    
+    # 2. Obtenemos los índices
+    tidx = cuda.threadIdx.x
+    bidx = cuda.blockIdx.x
+  
+    # 3. Inicialiamos el bloque y rellenamos con infinito
+    if tidx < my_array.shape[1]:
+        shared_mem[tidx] = my_array[bidx, tidx]
+    else:
+        shared_mem[tidx] = np.inf
+
+    shared_idx[tidx] = tidx
+        
+    cuda.syncthreads()    
+
+    # 4. Unroll de bloque
+    if tidx < 256:
+        if shared_mem[tidx + 256] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 256]
+            shared_idx[tidx] = shared_idx[tidx + 256]
+    cuda.syncthreads()
+
+    if tidx < 128:
+        if shared_mem[tidx + 128] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 128]
+            shared_idx[tidx] = shared_idx[tidx + 128]
+
+    cuda.syncthreads()
+    if tidx < 64:
+        if shared_mem[tidx + 64] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 64]
+            shared_idx[tidx] = shared_idx[tidx + 64]
+    
+    cuda.syncthreads()
+    
+    # 5. Hacemos unroll para un warp (nos ahorramos syncthreads)
+    if tidx < 32:
+        if shared_mem[tidx + 32] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 32]
+            shared_idx[tidx] = shared_idx[tidx + 32]
+        if shared_mem[tidx + 16] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 16]
+            shared_idx[tidx] = shared_idx[tidx + 16]
+        if shared_mem[tidx + 8] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 8]
+            shared_idx[tidx] = shared_idx[tidx + 8]
+        if shared_mem[tidx + 4] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 4]
+            shared_idx[tidx] = shared_idx[tidx + 4]
+        if shared_mem[tidx + 2] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 2]
+            shared_idx[tidx] = shared_idx[tidx + 2]
+        if shared_mem[tidx + 1] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 1]
+            shared_idx[tidx] = shared_idx[tidx + 1]
+            
+    # El primer thread de cada bloque indica su minimo
+    if tidx == 0:
+        my_indexes[cuda.blockIdx.x] = shared_idx[tidx]
+
+@cuda.jit
+def cuda_multi_min_element_1024(my_array, my_indexes):
+    # 1. Declaramos la memoria compartida
+    shared_mem = cuda.shared.array(shape=1024, dtype=numba.float32)
+    shared_idx = cuda.shared.array(shape=1024, dtype=numba.int32)
+    
+    # 2. Obtenemos los índices
+    tidx = cuda.threadIdx.x
+    bidx = cuda.blockIdx.x
+  
+    # 3. Inicialiamos el bloque y rellenamos con infinito
+    if tidx < my_array.shape[1]:
+        shared_mem[tidx] = my_array[bidx, tidx]
+    else:
+        shared_mem[tidx] = np.inf
+
+    shared_idx[tidx] = tidx
+        
+    cuda.syncthreads()    
+
+    # 4. Unroll de bloque
+    if tidx < 512:
+        if shared_mem[tidx + 512] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 512]
+            shared_idx[tidx] = shared_idx[tidx + 512]
+    cuda.syncthreads()
+
+    if tidx < 256:
+        if shared_mem[tidx + 256] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 256]
+            shared_idx[tidx] = shared_idx[tidx + 256]
+    cuda.syncthreads()
+
+    if tidx < 128:
+        if shared_mem[tidx + 128] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 128]
+            shared_idx[tidx] = shared_idx[tidx + 128]
+
+    cuda.syncthreads()
+    if tidx < 64:
+        if shared_mem[tidx + 64] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 64]
+            shared_idx[tidx] = shared_idx[tidx + 64]
+    
+    cuda.syncthreads()
+    
+    # 5. Hacemos unroll para un warp (nos ahorramos syncthreads)
+    if tidx < 32:
+        if shared_mem[tidx + 32] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 32]
+            shared_idx[tidx] = shared_idx[tidx + 32]
+        if shared_mem[tidx + 16] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 16]
+            shared_idx[tidx] = shared_idx[tidx + 16]
+        if shared_mem[tidx + 8] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 8]
+            shared_idx[tidx] = shared_idx[tidx + 8]
+        if shared_mem[tidx + 4] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 4]
+            shared_idx[tidx] = shared_idx[tidx + 4]
+        if shared_mem[tidx + 2] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 2]
+            shared_idx[tidx] = shared_idx[tidx + 2]
+        if shared_mem[tidx + 1] < shared_mem[tidx]:
+            shared_mem[tidx] = shared_mem[tidx + 1]
+            shared_idx[tidx] = shared_idx[tidx + 1]
+            
+    # El primer thread de cada bloque indica su minimo
+    if tidx == 0:
+        my_indexes[cuda.blockIdx.x] = shared_idx[tidx]
+
+def multi_reduce_min_index(device_array):
+    blocks, row_size = device_array.shape
+    device_indexes = cuda.device_array(blocks)
+    if 0 < row_size <= 64:
+        cuda_multi_min_element_64[blocks,64](device_array, device_indexes)
+    elif 64 < row_size <= 128:
+        cuda_multi_min_element_128[blocks,128](device_array, device_indexes)
+    elif 128 < row_size <= 256:
+        cuda_multi_min_element_256[blocks, 256](device_array, device_indexes)
+    elif 256 < row_size <= 512:
+        cuda_multi_min_element_512[blocks, 512](device_array, device_indexes)
+    elif 512 < row_size <= 1024:
+        cuda_multi_min_element_1024[blocks, 1024](device_array, device_indexes)
+    else:
+        return reduce_min_index(my_array)
+    
+    return device_indexes

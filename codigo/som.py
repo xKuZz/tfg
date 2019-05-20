@@ -5,7 +5,6 @@ import numba
 import math
 import utils
 import time
-import cupy as cp
 """
 Kernels Numba para batch SOM
 Necesitamos:
@@ -228,15 +227,14 @@ def gpu_work_iter(d, rows, cols, weights, sigma_squared, tpb=128):
         dsamples = cuda.to_device(inp.ravel())
         dweights = cuda.to_device(weights)
         # 2. Generamos un estructura en el dispositivo para almacenar las distancias
-        distances = cp.empty((N, nneurons), dtype=np.float32)
+        distances = cuda.device_array((N, nneurons), dtype=np.float32)
         
         # 3. Calcuamos las distancias
         sm_size = 4 * d
         euclidean_distance[(nneurons, N // tpb + 1),tpb, 0, sm_size](dsamples, dweights, distances, N, d)
         
         # 4. Realizamos las reducciones para todas las muestras
-        #bmu = np.array([utils.reduce_min_index(distances.ravel()[nneurons*i:nneurons*(i+1)]) for i in range(N)])
-        bmu = cp.argmin(distances, axis=1)
+        bmu = utils.multi_reduce_min_index(distances)
 
         # 5. Calculamos el numerador y denominador parcial asociado
         num = np.zeros(rows * cols * d, np.float32)
@@ -362,80 +360,3 @@ def spark_cpu_batch_som(rdd_data, d, max_iters, rows, cols, smooth_iters=None, s
 
        
     return weights
-
-"""
-VERSIÓN CON MI REDUCCIÓN
-"""
-
-def gpu_work_iter_my_red(d, rows, cols, weights, sigma_squared, tpb=128):
-    # Declarada función interna para devolverla y poder utilizar
-    # múltiples parámetros al llamar a mapPartitions
-    def _gpu_work(data):
-        # 1. Procesamos el dataset
-        inp = np.asarray(list(data), dtype=np.float32)
-        N = inp.size // d
-       
-        nneurons = rows * cols
-        dsamples = cuda.to_device(inp.ravel())
-        dweights = cuda.to_device(weights)
-        # 2. Generamos un estructura en el dispositivo para almacenar las distancias
-        distances = cp.empty((N, nneurons), dtype=np.float32)
-        
-        # 3. Calcuamos las distancias
-        sm_size = 4 * d
-        euclidean_distance[(nneurons, N // tpb + 1),tpb, 0, sm_size](dsamples, dweights, distances, N, d)
-        
-        # 4. Realizamos las reducciones para todas las muestras
-        bmu = np.array([utils.reduce_min_index(distances.ravel()[nneurons*i:nneurons*(i+1)]) for i in range(N)])
-        #bmu = cp.argmin(distances, axis=1)
-
-        # 5. Calculamos el numerador y denominador parcial asociado
-        num = np.zeros(rows * cols * d, np.float32)
-        den = np.zeros(rows * cols, np.float32)
-        
-        dnum = cuda.to_device(num)
-        dden = cuda.to_device(den)
-        prepare_update[(N, (rows * cols) // tpb + 1), tpb,0, sm_size](bmu, dsamples, dnum, dden, rows, cols, d, sigma_squared)
-        
-        return dnum.copy_to_host(), dden.copy_to_host()
-    return _gpu_work
-
-def spark_gpu_batch_sommy_red(rdd_data, d, max_iters, rows, cols, smooth_iters=None, sigma_0=10, 
-                          sigma_f=0.1, tau=400, seed=None, tpb=128):
-    
-    # 1. Inicializamos pesos aleatorios
-    blocks = rows * cols * d // tpb + 1
-    d_weights = cuda.device_array(rows * cols * d, np.float32)
-    
-    rng_states = create_xoroshiro128p_states(rows * cols * d, seed=seed)
-    cuda_init_weights[rows * cols * d // tpb + 1, tpb](rng_states, d_weights)
-    
-    weights = d_weights.copy_to_host()
-    
-     
-    # 2. Bucle del algoritmo
-    for t in range(max_iters):
-        # 2.a Actualizamos los parámetros de control si procede
-        if smooth_iters is None or t < max_iters:
-            sigma = sigma_0 * math.exp((-t/tau))
-        else:
-            sigma = sigma_f
-            
-        sigma_squared = sigma * sigma
-        
-        # 2.b Cada nodo del clúster de spark trabajará con un subconjunto
-        # de las muestras del RDD para encontrar la BMU y realizar la suma
-        # parcial de su ecucación de actualización de pesos
-        out = rdd_data.mapPartitions(gpu_work_iter_my_red(d, rows, cols, weights, sigma_squared))
-        
-        # 2.c En un único nodo usamos la GPU para juntar todas las sumas parciales obtenidas
-        #   y realizar la división
-        out = out.collect()
-        numParts = len(out) // 2
-
-        partials = np.concatenate(out)
-        finish_update[rows * cols // tpb + 1, tpb](weights, partials, numParts, rows, cols, d)
-       
-    return weights
-
-
