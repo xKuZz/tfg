@@ -1,0 +1,20 @@
+\babel@toc {spanish}{}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Esquema de una red neuronal de Kohonen.\relax }}{6}{figure.caption.8}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Diagrama de flujo para el mapa autoorganizado online.\relax }}{23}{figure.caption.13}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Una reducci\IeC {\'o}n paralela de una sumatoria en CUDA.\relax }}{26}{figure.caption.16}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Diagrama de flujo para el mapa autoorganizado batch.\relax }}{29}{figure.caption.19}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Diagrama de flujo de la implementaci\IeC {\'o}n del \IeC {\'a}rbol de decisi\IeC {\'o}n.\relax }}{31}{figure.caption.21}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Fase up-sweep del scan.\relax }}{33}{figure.caption.22}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Fase down-sweep del scan.\relax }}{34}{figure.caption.23}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Tiempos de ejecuci\IeC {\'o}n del mapaautoorganizado para SUSY.\relax }}{39}{figure.caption.24}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Ganancias del mapaautoorganizado para SUSY.\relax }}{40}{figure.caption.25}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Tiempo de entrenamiento y ganacia seg\IeC {\'u}n profundidad en Spambase.\relax }}{43}{figure.caption.28}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Tiempo de entrenamiento y ganacia seg\IeC {\'u}n profundidad en MAGIC.\relax }}{44}{figure.caption.29}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Precisi\IeC {\'o}n seg\IeC {\'u}n profundidad en SPAMBASE.\relax }}{45}{figure.caption.30}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Precisi\IeC {\'o}n seg\IeC {\'u}n profundidad en MAGIC.\relax }}{46}{figure.caption.31}
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Diagrama de cajas y bigotes para el tiempo de entrenamiento del random forest para SUSY.\relax }}{48}{figure.caption.34}
+\addvspace {10\p@ }

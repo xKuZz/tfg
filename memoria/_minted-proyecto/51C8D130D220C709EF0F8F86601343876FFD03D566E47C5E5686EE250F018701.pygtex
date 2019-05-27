@@ -1,0 +1,36 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@cuda.jit}
+\PYG{k}{def} \PYG{n+nf}{prepare\PYGZus{}update}\PYG{p}{(}\PYG{n}{bmu}\PYG{p}{,} \PYG{n}{samples}\PYG{p}{,} \PYG{n}{num}\PYG{p}{,} \PYG{n}{den}\PYG{p}{,}
+    \PYG{n}{nrows}\PYG{p}{,} \PYG{n}{ncols}\PYG{p}{,} \PYG{n}{d}\PYG{p}{,} \PYG{n}{sigma\PYGZus{}squared}\PYG{p}{):}
+    \PYG{c+c1}{\PYGZsh{} 1. Tomamos los índices que correspondan}
+    \PYG{n}{sample\PYGZus{}idx} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockIdx}\PYG{o}{.}\PYG{n}{x}
+    \PYG{n}{neuron\PYGZus{}idx} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockIdx}\PYG{o}{.}\PYG{n}{y} \PYG{o}{*} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockDim}\PYG{o}{.}\PYG{n}{x} \PYG{o}{+} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{threadIdx}\PYG{o}{.}\PYG{n}{x}
+
+    \PYG{c+c1}{\PYGZsh{} 2. Metemos en memoria compartida la muestra que se lee en todo el bloque}
+    \PYG{n}{shared\PYGZus{}sample} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{shared}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{shape}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n}{numba}\PYG{o}{.}\PYG{n}{float32}\PYG{p}{)}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{d} \PYG{o}{//} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockDim}\PYG{o}{.}\PYG{n}{x} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{):}
+        \PYG{n}{i\PYGZus{}stride} \PYG{o}{=} \PYG{n}{i} \PYG{o}{*} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockDim}\PYG{o}{.}\PYG{n}{x}
+        \PYG{n}{my\PYGZus{}pos} \PYG{o}{=} \PYG{n}{i\PYGZus{}stride} \PYG{o}{+} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{threadIdx}\PYG{o}{.}\PYG{n}{x}
+        \PYG{k}{if} \PYG{n}{my\PYGZus{}pos} \PYG{o}{\PYGZlt{}} \PYG{n}{d}\PYG{p}{:}
+            \PYG{n}{shared\PYGZus{}sample}\PYG{p}{[}\PYG{n}{my\PYGZus{}pos}\PYG{p}{]} \PYG{o}{=} \PYG{n}{samples}\PYG{p}{[}\PYG{n}{sample\PYGZus{}idx} \PYG{o}{*} \PYG{n}{d} \PYG{o}{+} \PYG{n}{my\PYGZus{}pos}\PYG{p}{]}
+    \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{syncthreads}\PYG{p}{()}
+
+    \PYG{c+c1}{\PYGZsh{} 3. Si procede realizar cálculos los hacemos}
+    \PYG{k}{if} \PYG{n}{neuron\PYGZus{}idx} \PYG{o}{\PYGZlt{}} \PYG{n}{nrows} \PYG{o}{*} \PYG{n}{ncols}\PYG{p}{:}
+        \PYG{n}{bmu\PYGZus{}row} \PYG{o}{=} \PYG{n}{bmu}\PYG{p}{[}\PYG{n}{sample\PYGZus{}idx}\PYG{p}{]} \PYG{o}{//} \PYG{n}{ncols}
+        \PYG{n}{bmu\PYGZus{}col} \PYG{o}{=} \PYG{n}{bmu}\PYG{p}{[}\PYG{n}{sample\PYGZus{}idx}\PYG{p}{]} \PYG{o}{\PYGZpc{}} \PYG{n}{ncols}
+        \PYG{n}{neuron\PYGZus{}row} \PYG{o}{=} \PYG{n}{neuron\PYGZus{}idx} \PYG{o}{//} \PYG{n}{ncols}
+        \PYG{n}{neuron\PYGZus{}col} \PYG{o}{=} \PYG{n}{neuron\PYGZus{}idx} \PYG{o}{\PYGZpc{}} \PYG{n}{ncols}
+
+        \PYG{n}{dist} \PYG{o}{=} \PYG{p}{(}\PYG{n}{neuron\PYGZus{}row} \PYG{o}{\PYGZhy{}} \PYG{n}{bmu\PYGZus{}row}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{neuron\PYGZus{}row} \PYG{o}{\PYGZhy{}} \PYG{n}{bmu\PYGZus{}row}\PYG{p}{)} \PYG{o}{+} \PYGZbs{}
+               \PYG{p}{(}\PYG{n}{neuron\PYGZus{}col} \PYG{o}{\PYGZhy{}} \PYG{n}{bmu\PYGZus{}col}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{neuron\PYGZus{}col} \PYG{o}{\PYGZhy{}} \PYG{n}{bmu\PYGZus{}col}\PYG{p}{)}
+
+        \PYG{k}{if} \PYG{n}{dist} \PYG{o}{\PYGZlt{}=} \PYG{n}{sigma\PYGZus{}squared}\PYG{p}{:}
+            \PYG{n}{hck} \PYG{o}{=} \PYG{n}{math}\PYG{o}{.}\PYG{n}{exp}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{n}{dist}\PYG{o}{/}\PYG{p}{(}\PYG{l+m+mi}{2} \PYG{o}{*} \PYG{n}{sigma\PYGZus{}squared}\PYG{p}{))}
+            \PYG{c+c1}{\PYGZsh{} Guardamos sumatoria del denominador}
+            \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{atomic}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{den}\PYG{p}{,} \PYG{n}{neuron\PYGZus{}row} \PYG{o}{*} \PYG{n}{ncols} \PYG{o}{+} \PYG{n}{neuron\PYGZus{}col}\PYG{p}{,} \PYG{n}{hck}\PYG{p}{)}
+            \PYG{c+c1}{\PYGZsh{} Guardamos sumatoria del numerador}
+            \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{d}\PYG{p}{):}
+                \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{atomic}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{num}\PYG{p}{,} \PYG{n}{neuron\PYGZus{}row}\PYG{o}{*}\PYG{n}{ncols}\PYG{o}{*}\PYG{n}{d} \PYG{o}{+} \PYG{n}{neuron\PYGZus{}col}\PYG{o}{*}\PYG{n}{d}\PYG{o}{+}\PYG{n}{i}
+                                \PYG{n}{hck} \PYG{o}{*} \PYG{n}{shared\PYGZus{}sample}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+\end{Verbatim}

@@ -1,0 +1,17 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: proyecto.aux
+The style file: IEEEtran.bst
+Database file #1: bibliografia/bibliografia.bib
+Warning--entry type for "olivetti" isn't style-file defined
+--line 123 of file bibliografia/bibliografia.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+Warning--empty booktitle in cudasomonline
+Warning--missing publisher in cudasombatch
+Warning--empty journal in svatensson
+Warning--empty booktitle in compsom
+Warning--empty booktitle in numba
+Warning--missing publisher in scan
+
+Done.
+(There were 7 warnings)

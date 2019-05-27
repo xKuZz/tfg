@@ -1,0 +1,27 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@cuda.jit}
+\PYG{k}{def} \PYG{n+nf}{euclidean\PYGZus{}distance}\PYG{p}{(}\PYG{n}{samples}\PYG{p}{,} \PYG{n}{weights}\PYG{p}{,} \PYG{n}{distances}\PYG{p}{,} \PYG{n}{nsamples}\PYG{p}{,} \PYG{n}{d}\PYG{p}{):}
+    \PYG{c+c1}{\PYGZsh{} 1. Tomamos los índices que nos correspoden}
+    \PYG{n}{neuron\PYGZus{}idx} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockIdx}\PYG{o}{.}\PYG{n}{x}
+    \PYG{n}{samples\PYGZus{}idx} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockIdx}\PYG{o}{.}\PYG{n}{y} \PYG{o}{*} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockDim}\PYG{o}{.}\PYG{n}{x} \PYG{o}{+} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{threadIdx}\PYG{o}{.}\PYG{n}{x}
+
+
+    \PYG{c+c1}{\PYGZsh{} 2. Ponemos los pesos de la neurona en memoria compartida}
+    \PYG{n}{shared\PYGZus{}weights} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{shared}\PYG{o}{.}\PYG{n}{array}\PYG{p}{(}\PYG{n}{shape}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{dtype}\PYG{o}{=}\PYG{n}{numba}\PYG{o}{.}\PYG{n}{float32}\PYG{p}{)}
+    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{d} \PYG{o}{//} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockDim}\PYG{o}{.}\PYG{n}{x} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{):}
+        \PYG{n}{i\PYGZus{}stride} \PYG{o}{=} \PYG{n}{i} \PYG{o}{*} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{blockDim}\PYG{o}{.}\PYG{n}{x}
+        \PYG{n}{my\PYGZus{}pos} \PYG{o}{=} \PYG{n}{i\PYGZus{}stride} \PYG{o}{+} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{threadIdx}\PYG{o}{.}\PYG{n}{x}
+        \PYG{k}{if} \PYG{n}{my\PYGZus{}pos} \PYG{o}{\PYGZlt{}} \PYG{n}{d}\PYG{p}{:}
+            \PYG{n}{shared\PYGZus{}weights}\PYG{p}{[}\PYG{n}{my\PYGZus{}pos}\PYG{p}{]} \PYG{o}{=} \PYG{n}{weights}\PYG{p}{[}\PYG{n}{neuron\PYGZus{}idx} \PYG{o}{*} \PYG{n}{d} \PYG{o}{+} \PYG{n}{my\PYGZus{}pos}\PYG{p}{]}
+
+    \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{syncthreads}\PYG{p}{()}
+
+    \PYG{c+c1}{\PYGZsh{} 3. Procedemos a realizar el cálculo de la distancia si procede}
+    \PYG{k}{if} \PYG{n}{samples\PYGZus{}idx} \PYG{o}{\PYGZlt{}} \PYG{n}{nsamples}\PYG{p}{:}
+        \PYG{n}{distance} \PYG{o}{=} \PYG{l+m+mf}{0.0}
+        \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{d}\PYG{p}{):}
+            \PYG{n}{i\PYGZus{}distance} \PYG{o}{=} \PYG{n}{samples}\PYG{p}{[}\PYG{n}{samples\PYGZus{}idx} \PYG{o}{*} \PYG{n}{d} \PYG{o}{+} \PYG{n}{i}\PYG{p}{]} \PYG{o}{\PYGZhy{}} \PYG{n}{shared\PYGZus{}weights}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}
+            \PYG{n}{distance} \PYG{o}{+=} \PYG{n}{i\PYGZus{}distance} \PYG{o}{*} \PYG{n}{i\PYGZus{}distance}
+
+        \PYG{n}{distances}\PYG{p}{[}\PYG{n}{samples\PYGZus{}idx}\PYG{p}{,} \PYG{n}{neuron\PYGZus{}idx}\PYG{p}{]} \PYG{o}{=} \PYG{n}{distance}
+\end{Verbatim}
