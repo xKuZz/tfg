@@ -33,27 +33,77 @@ Para evaluar el rendimiento de ambos modelos para conjuntos de \textit{Big Data}
 
 
 \section{Experimentos para evaluar el mapa autoorganizado.}
-En el caso del mapa autoorganizado tanto la versión como para CPU como para GPU ejecutan el mismo algoritmo por lo que la métrica de interés durante las ejecuciones realizadas es el tiempo de ejecución. En primer lugar, durante la fase de desarrollo usamos el conjunto de las caras de \textit{Olivetti}, que nos permitió comprobar de manera empírica y gráfica que los resultados son correctos. En caso de funcionar, correctamente generamos un conjunto de imagenes con la misma dimensión del mapa que son o se parecen a algunas de las caras de los sujetos y donde las imágenes más parecidas se encuentran próximas las unas con las otras. \\
+\subsection{Verificación de la implementación del modelo.}
+En el caso del mapa autoorganizado tanto la versión como para CPU como para GPU ejecutan el mismo algoritmo por lo que la métrica de interés durante las ejecuciones realizadas es el tiempo de ejecución. En primer lugar, durante la fase de desarrollo usamos el conjunto de las caras de \textit{Olivetti}, que nos permitió comprobar de manera empírica y gráfica que los resultados son correctos. En caso de funcionar correctamente, generamos un conjunto de imagenes con la misma dimensión del mapa que son o se parecen a algunas de las caras de los sujetos y donde las imágenes más parecidas se encuentran próximas las unas con las otras. \\
 
-\textit{NOTA: Pendiente de ejecutar un ejemplo representantivo para un mapa de neuronas apropiado para un papel A4.}
-
-Posteriormente, para evaluar la capacidad del algoritmo ante un conjunto de mayores dimensiones utilizamos SUSY. Para este experimento ignoramos las etiquetas de salida y utilizamos para un mapa de neuronas de 8 filas y 7 columnas con los parámetros de control $\tau$ a 10 y $\sigma_0$ a 4. El algoritmo lo ejecutamos durante 10 iteraciones y realizamos 5 repeticiones de cada experimento para tomar una medida de tiempo promedio más fiable. En este experimento no nos limitamos sólo a evaluar con el conjunto de muestras al completo (5 millones de muestras) sino que probamos desde medio millón de muestras hasta el conjunto completo aumentando en cada paso medio millón de muestras. Los resultados de este experimentos los podemos observar en las siguientes figuras.\\
+Para evaluar que tanto nuestra implementación para CPU usando \textit{NumPy} como nuestra implementación para CUDA son correctas generamos un mapa de 5 filas y 6 columnas y ejecutamos el algoritmo durante 50 iteraciones, con 25 para la primera fase y otras 25 para la segunda fase y con los parámetros de control $\sigma_0, \sigma_f$ y $\tau$ a 3, 0,1 y 50, respectivamente. Además, puesto que aunque ambos algoritmos hagan los mismo utilizan métodos para la generación de los pesos aleatorios iniciales distintos, tomamos las dos medidas de calidad del mapa autoorganizado consideradas: el error de cuantificación y el error topográfico.\\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.8]{imagenes/tiempossusysom.png}
-\caption{Tiempos de ejecución del mapaautoorganizado para SUSY.}
+\includegraphics[scale=0.3]{imagenes/facescpu.png}
+\caption{Imagen obtenida en el experimento para CPU del mapa autoorganizado.}
+\label{img:somcpu}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.3]{imagenes/facesgpu.png}
+\caption{Imagen obtenida en el experimento para GPU del mapa autoorganizado.}
+\label{img:somgpu}
+\end{figure}
+
+En la figura \ref{img:somcpu}, podemos observar los resultados obtenidos para la ejecución de este algoritmo sobre CPU. En ella podemos observar como personas con piel de color más oscuro se encuentran hacia la esquina inferior izquierda o personas con gafas en la esquina superior derecha. En este ejemplo obtenemos un error de cuantificación de 6,55 y un error topográfico de 0,25, tardando un total de 251,49 segundos en su ejecución.\\
+
+
+En la figura \ref{img:somgpu}, podemos observar los resultados obtenidos para la ejecución de este algoritmo sobre nuestro dispositivo \textit{CUDA}. En ella podemos observar como personas con piel de color más oscuro se encuentran hacia la esquina inferior derecha y todas las personas de la derecha llevan gafas, entre otros detalles. Para este ejemplo obtenemos un error de cuantificación de 6,57 y un error topográfico de 0.02, tardando un total de 357,41 segundos en su ejecución.\\
+	
+En este pequeño experimento hemos podido comprobar visualmente que ambas implementaciones funcionan correctamente y proporcionan resultados similares. Gran parte de los errores de implementación que ocurrireron durante el desarrollo de este algoritmo del proyecto fueron detectados gracias a este experimento. El hecho de que la versión para GPU tarde más que la versión para CPU se debe al reducido número de muestras de este conjunto de datos (400) que no llegan a utilizar ni la mitad de la capacidad de nuestra tarjeta gráfica.
+
+\subsection{Uso del modelo sobre un conjunto de datos grandes dimensiones.}
+Posteriormente, para evaluar la capacidad del algoritmo ante un conjunto de mayores dimensiones, utilizamos SUSY. Para este experimento ignoramos las etiquetas de salida y utilizamos para un mapa de neuronas de 8 filas y 7 columnas con los parámetros de control $\tau$ a 10, $\sigma_0$ a 4, $\sigma_f$ a 0,1. El algoritmo lo ejecutamos durante 10 iteraciones (5 cada fase) y realizamos 5 repeticiones de cada experimento para tomar una medida de tiempo promedio, con el fin de obtener resultados más fiables que realizando una única ejecución. En este experimento nos centramos en evaluar como varía el rendimiento de nuestra implementación según vamos aumentando el número de muestras que evaluamos. Para ello, tomamos subcojuntos del RDD partición del 10 \% del número de muestras del conjunto de datos (medio millón de muestras) y aumentado de 10 \% en 10 \% hasta evaluar el conjunto completo (5 millones de muestras).\\
+
+\begin{table}[ht]
+\begin{tabular}{@{}l|c|c|c@{}}
+\textit{\textbf{Nº de Muestras}} & \multicolumn{1}{l|}{\textit{\textbf{Tiempo CPU (s)}}} & \multicolumn{1}{l|}{\textit{\textbf{Tiempo GPU (s)}}} & \multicolumn{1}{l}{\textit{\textbf{Ganancia}}} \\ \midrule
+\textit{\textbf{500000}}         & 1607,32                                               & 1024,68                                               & 1,57                                           \\
+\textit{\textbf{1000000}}        & 2473,72                                               & 1038,77                                               & 2,38                                           \\
+\textit{\textbf{1500000}}        & 3330,50                                               & 1068,09                                               & 3,12                                           \\
+\textit{\textbf{2000000}}        & 4190,89                                               & 1092,70                                               & 3,84                                           \\
+\textit{\textbf{2500000}}        & 5076,56                                               & 1119,72                                               & 4,53                                           \\
+\textit{\textbf{3000000}}        & 5860,05                                               & 1137,68                                               & 5,15                                           \\
+\textit{\textbf{3500000}}        & 6806,87                                               & 1158,58                                               & 5,88                                           \\
+\textit{\textbf{4000000}}        & 7684,52                                               & 1171,87                                               & 6,56                                           \\
+\textit{\textbf{4500000}}        & 8526,80                                               & 1181,42                                               & 7,22                                           \\
+\textit{\textbf{5000000}}        & 9406,62                                               & 1197,52                                               & 7,80                                          
+\end{tabular}
+\caption{Tiempos promedios de ejecución y ganancias para el experimento del mapa autoorganizado sobre SUSY.}
+\label{tab:susysom}
+\end{table}
+
+En la tabla \ref{tab:susysom} vemos las diferencias entre los tiempos promedios de 5 ejecuciones para CPU y 5 ejecuciones para GPU según los percentiles de muestras propuestos para el experimento. La evolución de los tiempos de ejecución para la GPU oscila en un pequeño intervalo entre los 1025 segundos (17 minutos) y casi 2000 segundos (20 minutos). Sin embargo, la evolución de los tiempos para la CPU osicla entre los 1607 segundos (27 minutos) y los 9406 minutos (2 horas y 37 minutos).  Para una mejor visualización de estos resultados planteamos la gráfica de la figura \ref{img:somsusy}, en la que combinamos las gráficas de lineas para la evolución de los tiempos promedios con las ganancias obtenidas en una gráfica de barras. \\
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.7]{imagenes/susysom.png}
+\caption{Gráfica con tiempos promedios y ganancias para SUSY.}
 \label{img:somsusy}
 \end{figure}
 
+En la gráfica planteada vemos de manera clara cómo al aumentar el número de muestras nuestra implementación que combina \textit{CUDA} y \textit{Spark} rinde considerablemente mejor. Antes de resaltar algunos de los resultados obtenidos, hemos de tener en cuenta que, al leer el archivo CSV, \textit{Spark} generó un \textit{RDD} con 72 particiones, es decir, 6 particiones para cada uno de los 12 núcleos (6 físicos y 6 lógicos) de nuestro AMD Ryzen 5 2600X. A la hora de evaluar con la GPU hemos mantenido el mismo número de particiones, por lo que en al evaluar 500000 en realidad estamos realizando 72 ejecuciones independientes del algoritmo y combinando los resutados obtenidos de todas esas particiones. Mientras que la generación de múltiples particiones facilita que los conflictos que se puedan generar para realizar las operaciones atómicas sean menores, resulta claro que conforme aumentamos el tamaño de la muestra obtenemos ganancias considerablemente mayores, llegando a tener un tiempo de ejecución casi 8 veces más rápido en nuestra GTX 1060 que en los 12 cores de nuestro Ryzen para el ejemplo más complejo que hemos planteado.
+
+
+
+\subsection{Resultados de nvprof sobre la versión final del algoritmo.}
+Por último, mostramos los resultados obtenidos de un ejemplo de ejecución que realiza los cálculos parciales para generar un mapa de 10x10 neuronas sobre un problema de dimensión 18 y con 100000 muestras y con el parámetro de control $\sigma^2=10$. Los resultados obtenidos por el mismo los hemos sintetizado en el siguiente diagrama de sectores, donde cada sector representa el porcentaje del tiempo total que cada actividad de la GPU es usado del tiempo total de ejecución. \\
+
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.8]{imagenes/gananciassom.png}
-\caption{Ganancias del mapaautoorganizado para SUSY.}
-\label{img:gananciassomsusy}
+\includegraphics[scale=0.9]{imagenes/profilesomquesito.png}
+\caption{Diagrama de sectores de los resultados de nvprof para el mapa autoorganizado.}
+\label{img:somquesito}
 \end{figure}
 
-En este experimento podemos ver cómo evoluciona la ganancia de nuestra implementación que combina \textit{CUDA} y \textit{Spark} para evaluar un número de muestras elevado. En primer lugar, hemos de tener en cuenta que, al leer el archivo CSV, \textit{Spark} generó un \textit{RDD} con 72 particiones, es decir, 6 particiones para cada uno de los 12 núcleos (6 físicos y 6 lógicos) de nuestro AMD Ryzen 5 2600X. A la hora de evaluar con la GPU hemos mantenido el mismo número de particiones, por lo que en al evaluar 500000 en realidad estamos realizando 72 ejecuciones independientes del algoritmo y combinando todos los resultados obtenidos. Mientras que la generación de múltiples particiones facilita que los conflictos que se puedan generar para realizar las operaciones atómicas sean menores, resulta claro que conforme aumentamos el tamaño de la muestra obtenemos ganancias considerablemente mayores, como podemos observar en la figura \ref{img:gananciassomsusy}. Es por ello, que, a la hora de utilizar este algoritmo en la práctica hemos de concluir que hemos de exprimir al máximo las capacidades de la memoria del dispositivo CUDA para obtener las mejores ganancias. En nuestro caso, en el ejemplo más complejo que hemos evaluado obtenemos un tiempo de ejecución casi 8 veces más rápido en nuestra GTX 1060 que en los 12 cores de nuestro Ryzen.
+En la figura \ref{img:somquesito} vemos el diagrama de sectores en cuestión, que nos indica que para una ejecución el cuello de botella es el \textit{kernel} que realiza los cálculos parciales de numeradores y denominadores de la fórmula de la actualización de pesos, ocupando un 59 \% de tiempo de ejecución seguido del cálculo de la distancia euclídea con un 32 \% del tiempo de ejecución, es decir, el segundo \textit{kernel} es prácticamente el doble de rápido que el primero. Estas dos operaciones ocupan alrededor del 90 \% del tiempoo de ejecución, dejando tan sólo un 3 \% del tiempo para la reducción, un 6 \% en transladar las muestras al dispositivo y una cantidad de tiempo despreciable en devolver los resultados obtenidos al \textit{host}. Básandonos en los resultados obtenidos, hemos de hacer hincapié en que posibles futuros trabajos basados en la implementación del mapa autoorganizado que hemos desarrollado han de centrarse principalmente en buscar mejores maneras de realizar esos cálculos parciales que requerían de operaciones atómicas o, en su defecto, mejorar el cálculo de la distancia euclídea o incluso utilizar otras medidas de distancia que puedan ser paralelizadas con mayor eficiencia.
 
 \newpage
 \section{Experimentos para evaluar el árbol de decisión.}
@@ -194,3 +244,15 @@ A la hora de realizar este experimento podemos observar cómo los tiempos de eje
 \end{figure}
 
 De todos los experimentos realizados podemos concluir que mientras que, efectivamente nuestro modelo es más rápido siempre y cuando no generemos árboles demasiado profundos o tengamos una cantidad de atributos muy elevada. En este trabajo, nos hemos centrado en conseguir esa ganancia durante el proceso de entrenamiento. No obstante, pueden ser líneas de trabajo futuras sobre este modelo un análisis específico de los parámetros de profundidad y número de árboles óptimos, la utilización de otros criterios además del utilizado, o el uso del tiempo extra obtenido para mejorar los resultados ya sea con algún preprocesamiento de datos o el uso de criterios de poda más avanzados, entre otros.
+
+\subsection{Resultados de nvprof sobre la versión final del algoritmo.}
+Por último, como realizábamos para el modelo anterior, analizamos el punto final en el que hemos dejado nuestra implementación utilizando el profiler de NVIDIA, \textit{nvprof}. Para realizar el \textit{profile}, entrenamos MAGIC en un árbol de profundidad 6. El diagrama de sectores de la figura \ref{img:treequesito} nos presenta un resumen de dichos resultados.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.9]{imagenes/profiletreequesito.png}
+\caption{Diagrama de sectores de los resultados de nvprof para el árbol de decision.}
+\label{img:treequesito}
+\end{figure}
+
+Como cabía esperar el cuello de botella es la implementación de la primitiva de \textit{scan} pues es utilizada amplia y reiteradamente durante la ejecución del algoritmo con un 46 \% seguido de la implementación del \textit{Radix Sort} de \textit{CuPy} que utilizamos para organizar las listas de atributos al inicio del algoritmo con un 22 \% y posteriormente la reorganización de las listas de atributos con un 14 \%. Dados estos resultados, queda claro que, si es posible, es prioritario optimizar la operación de \textit{scan} implementada.

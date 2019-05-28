@@ -41,10 +41,14 @@
 \contentsline {section}{\numberline {4.1}Entorno de pruebas.}{37}{section.4.1}
 \contentsline {section}{\numberline {4.2}Conjuntos de datos utilizados.}{38}{section.4.2}
 \contentsline {section}{\numberline {4.3}Experimentos para evaluar el mapa autoorganizado.}{39}{section.4.3}
-\contentsline {section}{\numberline {4.4}Experimentos para evaluar el \IeC {\'a}rbol de decisi\IeC {\'o}n.}{41}{section.4.4}
-\contentsline {subsection}{\numberline {4.4.1}Tablas de resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{42}{subsection.4.4.1}
-\contentsline {subsection}{\numberline {4.4.2}An\IeC {\'a}lisis de los resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{43}{subsection.4.4.2}
-\contentsline {subsection}{\numberline {4.4.3}Tabla de resultados del random forest.}{47}{subsection.4.4.3}
-\contentsline {subsection}{\numberline {4.4.4}An\IeC {\'a}lisis de los resultados del random forest.}{48}{subsection.4.4.4}
-\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{51}{chapter.5}
-\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{54}{chapter*.35}
+\contentsline {subsection}{\numberline {4.3.1}Verificaci\IeC {\'o}n de la implementaci\IeC {\'o}n del modelo.}{39}{subsection.4.3.1}
+\contentsline {subsection}{\numberline {4.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{41}{subsection.4.3.2}
+\contentsline {subsection}{\numberline {4.3.3}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{42}{subsection.4.3.3}
+\contentsline {section}{\numberline {4.4}Experimentos para evaluar el \IeC {\'a}rbol de decisi\IeC {\'o}n.}{44}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Tablas de resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{45}{subsection.4.4.1}
+\contentsline {subsection}{\numberline {4.4.2}An\IeC {\'a}lisis de los resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{46}{subsection.4.4.2}
+\contentsline {subsection}{\numberline {4.4.3}Tabla de resultados del random forest.}{50}{subsection.4.4.3}
+\contentsline {subsection}{\numberline {4.4.4}An\IeC {\'a}lisis de los resultados del random forest.}{51}{subsection.4.4.4}
+\contentsline {subsection}{\numberline {4.4.5}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{52}{subsection.4.4.5}
+\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{55}{chapter.5}
+\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{58}{chapter*.39}

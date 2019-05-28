@@ -35,10 +35,14 @@
 \BOOKMARK [1][-]{section.4.1}{Entorno de pruebas.}{chapter.4}% 35
 \BOOKMARK [1][-]{section.4.2}{Conjuntos de datos utilizados.}{chapter.4}% 36
 \BOOKMARK [1][-]{section.4.3}{Experimentos para evaluar el mapa autoorganizado.}{chapter.4}% 37
-\BOOKMARK [1][-]{section.4.4}{Experimentos para evaluar el \341rbol de decisi\363n.}{chapter.4}% 38
-\BOOKMARK [2][-]{subsection.4.4.1}{Tablas de resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 39
-\BOOKMARK [2][-]{subsection.4.4.2}{An\341lisis de los resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 40
-\BOOKMARK [2][-]{subsection.4.4.3}{Tabla de resultados del random forest.}{section.4.4}% 41
-\BOOKMARK [2][-]{subsection.4.4.4}{An\341lisis de los resultados del random forest.}{section.4.4}% 42
-\BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 43
-\BOOKMARK [0][-]{chapter*.35}{Bibliograf\355a}{}% 44
+\BOOKMARK [2][-]{subsection.4.3.1}{Verificaci\363n de la implementaci\363n del modelo.}{section.4.3}% 38
+\BOOKMARK [2][-]{subsection.4.3.2}{Uso del modelo sobre un conjunto de datos grandes dimensiones.}{section.4.3}% 39
+\BOOKMARK [2][-]{subsection.4.3.3}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.3}% 40
+\BOOKMARK [1][-]{section.4.4}{Experimentos para evaluar el \341rbol de decisi\363n.}{chapter.4}% 41
+\BOOKMARK [2][-]{subsection.4.4.1}{Tablas de resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 42
+\BOOKMARK [2][-]{subsection.4.4.2}{An\341lisis de los resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 43
+\BOOKMARK [2][-]{subsection.4.4.3}{Tabla de resultados del random forest.}{section.4.4}% 44
+\BOOKMARK [2][-]{subsection.4.4.4}{An\341lisis de los resultados del random forest.}{section.4.4}% 45
+\BOOKMARK [2][-]{subsection.4.4.5}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.4}% 46
+\BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 47
+\BOOKMARK [0][-]{chapter*.39}{Bibliograf\355a}{}% 48
