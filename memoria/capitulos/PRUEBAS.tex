@@ -243,10 +243,10 @@ A la hora de realizar este experimento podemos observar cómo los tiempos de eje
 \label{img:boxplot}
 \end{figure}
 
-De todos los experimentos realizados podemos concluir que mientras que, efectivamente nuestro modelo es más rápido siempre y cuando no generemos árboles demasiado profundos o tengamos una cantidad de atributos muy elevada. En este trabajo, nos hemos centrado en conseguir esa ganancia durante el proceso de entrenamiento. No obstante, pueden ser líneas de trabajo futuras sobre este modelo un análisis específico de los parámetros de profundidad y número de árboles óptimos, la utilización de otros criterios además del utilizado, o el uso del tiempo extra obtenido para mejorar los resultados ya sea con algún preprocesamiento de datos o el uso de criterios de poda más avanzados, entre otros.
+De todos los experimentos realizados podemos concluir que mientras que, efectivamente nuestro modelo es más rápido siempre y cuando no generemos árboles demasiado profundos o tengamos una cantidad de atributos muy elevada. En este trabajo, nos hemos centrado en conseguir esa ganancia durante el proceso de entrenamiento. No obstante, pueden ser líneas de trabajo futuras sobre este modelo un análisis específico de los parámetros de profundidad y número de árboles óptimos, la utilización de otros criterios además del utilizado, o el uso del tiempo extra obtenido para mejorar los resultados ya sea con algún preprocesamiento de datos o el uso de criterios de poda más avanzados, entre otros.\\
 
 \subsection{Resultados de nvprof sobre la versión final del algoritmo.}
-Por último, como realizábamos para el modelo anterior, analizamos el punto final en el que hemos dejado nuestra implementación utilizando el profiler de NVIDIA, \textit{nvprof}. Para realizar el \textit{profile}, entrenamos MAGIC en un árbol de profundidad 6. El diagrama de sectores de la figura \ref{img:treequesito} nos presenta un resumen de dichos resultados.
+Por último, como realizábamos para el modelo anterior, analizamos el punto final en el que hemos dejado nuestra implementación utilizando el profiler de NVIDIA, \textit{nvprof}. Para realizar el \textit{profile}, entrenamos MAGIC en un árbol de profundidad 6. El diagrama de sectores de la figura \ref{img:treequesito} nos presenta un resumen de dichos resultados.\\
 
 \begin{figure}[ht]
 \centering
@@ -255,4 +255,4 @@ Por último, como realizábamos para el modelo anterior, analizamos el punto fin
 \label{img:treequesito}
 \end{figure}
 
-Como cabía esperar el cuello de botella es la implementación de la primitiva de \textit{scan} pues es utilizada amplia y reiteradamente durante la ejecución del algoritmo con un 46 \% seguido de la implementación del \textit{Radix Sort} de \textit{CuPy} que utilizamos para organizar las listas de atributos al inicio del algoritmo con un 22 \% y posteriormente la reorganización de las listas de atributos con un 14 \%. Dados estos resultados, queda claro que, si es posible, es prioritario optimizar la operación de \textit{scan} implementada.
+Como cabía esperar el cuello de botella es la implementación de la primitiva de \textit{scan} pues es utilizada amplia y reiteradamente durante la ejecución del algoritmo con un 46 \% seguido de la implementación del \textit{Radix Sort} de \textit{CuPy} que utilizamos para organizar las listas de atributos al inicio del algoritmo con un 22 \% y posteriormente la reorganización de las listas de atributos con un 14 \%. Dados estos resultados, queda claro que, si es posible, es prioritario optimizar la operación de \textit{scan} implementada aunque buscar alternativas para la organización inicial de las listas de atributos o la reorganización que ocurre cada nivel serían también opciones interesantes.
