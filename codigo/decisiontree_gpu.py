@@ -190,7 +190,7 @@ def validacion_cruzada(dataset, k=10, depth=5, my_min=1):
         accuracy[i] = evaluar(dataset[samples_test[i]], model)
 
         
-    return np.mean(accuracy), np.mean(times)
+    return [np.mean(accuracy), np.mean(times)]
 
 
 def np_train_tree(dataset, max_depth=6, min_samples_per_node=1):
@@ -342,10 +342,11 @@ def validacion_cruzada_np(dataset, k=10, depth=5, my_min=1):
         times[i] = fin-inicio
         accuracy[i] = evaluar(dataset[samples_test[i]], model)
 
-    return np.mean(accuracy), np.mean(times)
+    return [np.mean(accuracy), np.mean(times)]
 
 if __name__ == '__main__':
-    magic = np.genfromtxt('../datasets/magic04.data', delimiter=',', dtype=np.float32)
-    depth = 6
+    magic = np.genfromtxt('../datasets/spambase.data', delimiter=',', dtype=np.float32)
+    magic = magic[np.random.randint(magic.shape[0], size=100000),:]
+    depth = 10
     print(validacion_cruzada(magic, depth))
     print(validacion_cruzada_np(magic, depth))
