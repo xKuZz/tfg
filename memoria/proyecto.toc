@@ -24,31 +24,33 @@
 \contentsline {section}{\numberline {3.2}Proceso de implementaci\IeC {\'o}n.}{21}{section.3.2}
 \contentsline {section}{\numberline {3.3}Desarrollo del mapa autoorganizado de Kohonen.}{22}{section.3.3}
 \contentsline {subsection}{\numberline {3.3.1}Limitaciones del mapa autoorganizado online.}{22}{subsection.3.3.1}
-\contentsline {subsection}{\numberline {3.3.2}Desarrollo del mapa autoorganizado batch.}{22}{subsection.3.3.2}
-\contentsline {subsubsection}{\numberline {3.3.2.1}Inicializaci\IeC {\'o}n aleatoria de la matriz de pesos.}{23}{subsubsection.3.3.2.1}
-\contentsline {subsubsection}{\numberline {3.3.2.2}C\IeC {\'a}lculo de las distancias eucl\IeC {\'\i }deas entre todas las muestras y los pesos.}{24}{subsubsection.3.3.2.2}
-\contentsline {subsubsection}{\numberline {3.3.2.3}Encontrar la BMU para cada muestra.}{25}{subsubsection.3.3.2.3}
-\contentsline {subsubsection}{\numberline {3.3.2.4}Actualizar la matriz de pesos.}{26}{subsubsection.3.3.2.4}
-\contentsline {subsubsection}{\numberline {3.3.2.5}Actualizar los par\IeC {\'a}metros de control.}{29}{subsubsection.3.3.2.5}
-\contentsline {section}{\numberline {3.4}Desarrollo de un modelo de \IeC {\'a}rbol de decisi\IeC {\'o}n.}{30}{section.3.4}
-\contentsline {subsection}{\numberline {3.4.1}Lista de atributos.}{30}{subsection.3.4.1}
-\contentsline {subsection}{\numberline {3.4.2}Esquema general del algoritmo implementado.}{30}{subsection.3.4.2}
-\contentsline {subsection}{\numberline {3.4.3}La operaci\IeC {\'o}n de scan.}{32}{subsection.3.4.3}
-\contentsline {subsection}{\numberline {3.4.4}C\IeC {\'a}lculo del criterio de Gini.}{33}{subsection.3.4.4}
-\contentsline {subsection}{\numberline {3.4.5}Reorganizaci\IeC {\'o}n de la listas de atributos.}{34}{subsection.3.4.5}
-\contentsline {subsection}{\numberline {3.4.6}Limitaciones y uso de Spark.}{35}{subsection.3.4.6}
-\contentsline {chapter}{\numberline {4}Desarrollo de pruebas y an\IeC {\'a}lisis de resultados.}{37}{chapter.4}
-\contentsline {section}{\numberline {4.1}Entorno de pruebas.}{37}{section.4.1}
-\contentsline {section}{\numberline {4.2}Conjuntos de datos utilizados.}{38}{section.4.2}
-\contentsline {section}{\numberline {4.3}Experimentos para evaluar el mapa autoorganizado.}{39}{section.4.3}
-\contentsline {subsection}{\numberline {4.3.1}Verificaci\IeC {\'o}n de la implementaci\IeC {\'o}n del modelo.}{39}{subsection.4.3.1}
-\contentsline {subsection}{\numberline {4.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{41}{subsection.4.3.2}
-\contentsline {subsection}{\numberline {4.3.3}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{42}{subsection.4.3.3}
-\contentsline {section}{\numberline {4.4}Experimentos para evaluar el \IeC {\'a}rbol de decisi\IeC {\'o}n.}{44}{section.4.4}
-\contentsline {subsection}{\numberline {4.4.1}Tablas de resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{45}{subsection.4.4.1}
-\contentsline {subsection}{\numberline {4.4.2}An\IeC {\'a}lisis de los resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{46}{subsection.4.4.2}
-\contentsline {subsection}{\numberline {4.4.3}Tabla de resultados del random forest.}{50}{subsection.4.4.3}
-\contentsline {subsection}{\numberline {4.4.4}An\IeC {\'a}lisis de los resultados del random forest.}{51}{subsection.4.4.4}
-\contentsline {subsection}{\numberline {4.4.5}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{52}{subsection.4.4.5}
-\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{55}{chapter.5}
-\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{58}{chapter*.39}
+\contentsline {subsection}{\numberline {3.3.2}Uso de Spark.}{23}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}Representaci\IeC {\'o}n de la estructura de pesos de las neuronas.}{25}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.4}Kernels implementados.}{26}{subsection.3.3.4}
+\contentsline {subsubsection}{\numberline {3.3.4.1}Inicializaci\IeC {\'o}n pseudoaleatoria de matriz de pesos.}{26}{subsubsection.3.3.4.1}
+\contentsline {subsubsection}{\numberline {3.3.4.2}C\IeC {\'a}lculo de las distancias eucl\IeC {\'\i }deas entre todas las muestras y los pesos.}{27}{subsubsection.3.3.4.2}
+\contentsline {subsubsection}{\numberline {3.3.4.3}Encontrar la BMU para cada muestra.}{28}{subsubsection.3.3.4.3}
+\contentsline {subsubsection}{\numberline {3.3.4.4}Actualizar la matriz de pesos.}{29}{subsubsection.3.3.4.4}
+\contentsline {subsubsection}{\numberline {3.3.4.5}Actualizar los par\IeC {\'a}metros de control.}{32}{subsubsection.3.3.4.5}
+\contentsline {section}{\numberline {3.4}Desarrollo de un modelo de \IeC {\'a}rbol de decisi\IeC {\'o}n.}{33}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Lista de atributos.}{33}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Esquema general del algoritmo implementado.}{34}{subsection.3.4.2}
+\contentsline {subsection}{\numberline {3.4.3}La operaci\IeC {\'o}n de scan.}{35}{subsection.3.4.3}
+\contentsline {subsection}{\numberline {3.4.4}C\IeC {\'a}lculo del criterio de Gini.}{36}{subsection.3.4.4}
+\contentsline {subsection}{\numberline {3.4.5}Reorganizaci\IeC {\'o}n de la listas de atributos.}{38}{subsection.3.4.5}
+\contentsline {subsection}{\numberline {3.4.6}Limitaciones y uso de Spark.}{38}{subsection.3.4.6}
+\contentsline {chapter}{\numberline {4}Desarrollo de pruebas y an\IeC {\'a}lisis de resultados.}{41}{chapter.4}
+\contentsline {section}{\numberline {4.1}Entorno de pruebas.}{41}{section.4.1}
+\contentsline {section}{\numberline {4.2}Conjuntos de datos utilizados.}{42}{section.4.2}
+\contentsline {section}{\numberline {4.3}Experimentos para evaluar el mapa autoorganizado.}{43}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Verificaci\IeC {\'o}n de la implementaci\IeC {\'o}n del modelo.}{43}{subsection.4.3.1}
+\contentsline {subsection}{\numberline {4.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{44}{subsection.4.3.2}
+\contentsline {subsection}{\numberline {4.3.3}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{46}{subsection.4.3.3}
+\contentsline {section}{\numberline {4.4}Experimentos para evaluar el \IeC {\'a}rbol de decisi\IeC {\'o}n.}{48}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Tablas de resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{49}{subsection.4.4.1}
+\contentsline {subsection}{\numberline {4.4.2}An\IeC {\'a}lisis de los resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{50}{subsection.4.4.2}
+\contentsline {subsection}{\numberline {4.4.3}Tabla de resultados del random forest.}{54}{subsection.4.4.3}
+\contentsline {subsection}{\numberline {4.4.4}An\IeC {\'a}lisis de los resultados del random forest.}{55}{subsection.4.4.4}
+\contentsline {subsection}{\numberline {4.4.5}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{56}{subsection.4.4.5}
+\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{59}{chapter.5}
+\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{62}{chapter*.42}

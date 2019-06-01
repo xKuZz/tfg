@@ -3,21 +3,47 @@
 Para el desarrollo de las pruebas, mi ordenador personal ha sido utilizado. Las especificaciones ténicas relevantes del mismo son:
 
 \begin{itemize}
-\item \textbf{Placa Base:} MSI B450M Bazooka
-\item \textbf{Sistema Operativo:} Windows 10 64 bits
-\item \textbf{CPU:} AMD Ryzen 5 2600X
-\item \textbf{RAM:} Kingston HyperX Fury Black DDR4 2400 MHz PC4-19200 8GB CL15
-\item \textbf{GPU}: \underline{Zotac GeForce GTX 1060 AMP! Edition}
-\subitem \textbf{Núcleos CUDA}: 1280
-\subitem \textbf{Frecuencia del procesador:} 1556 MHz (1771 MHz Boost)
-\subitem \textbf{Frecuencia de la memoria:} 8 GHz
-\subitem \textbf{Memoria}: 6 GB DDR5
-\subitem \textbf{Bus de memoria:} 192-bit
-\subitem \textbf{Compute Capability:} 6.1
-
+\item \textbf{Placa Base:} MSI B450M Bazooka.
+\item \textbf{Sistema Operativo:} Windows 10 64 bits.
+\item \textbf{CPU:} AMD Ryzen 5 2600X.
+\item \textbf{RAM:} Kingston HyperX Fury Black DDR4 2400 MHz PC4-19200 8GB CL15.
+\item \textbf{GPU}: \underline{Zotac GeForce GTX 1060 AMP! Edition.}
 \end{itemize}
 
-\newpage
+% Please add the following required packages to your document preamble:
+% \usepackage{booktabs}
+% \usepackage{longtable}
+% Note: It may be necessary to compile the document several times to get a multi-page table to line up properly
+\begin{longtable}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{\textbf{Características}}     & \textbf{Valor}           \\* \midrule
+\endfirsthead
+%
+\endhead
+%
+\bottomrule
+\endfoot
+%
+\endlastfoot
+%
+\textbf{Núcleos CUDA}                            & 1290                     \\
+\textbf{Frecuencia del procesador}               & 1771 MHz                 \\
+\textbf{Frecuencia de la memoria}                & 4004 Mhz                 \\
+\textbf{Memoria global total}                    & 6 GB DDR5                \\
+\textbf{Bus de memoria}                          & 192-bit                  \\
+\textbf{Compute Capability}                      & 6.1                      \\
+\textbf{Número de hebras por bloque}             & 1024                     \\
+\textbf{Dimensión máxima del bloque (x, y, z)}   & 1024, 1024, 64           \\
+\textbf{Dimensión máxima del ``grid'' (x, y, z)} & 2147483647, 65535, 65535 \\
+\textbf{Número de registros por bloque}          & 65536                    \\
+\textbf{Memoria compartida por bloque}           & 49152 KB                 \\
+\textbf{Número de multiprocesadores}             & 10                       \\
+\textbf{Modelo de driver CUDA}                   & WDDM                     \\
+\textbf{Versión del driver CUDA}                 & 417.35                   \\
+\textbf{Versión del SDK CUDA}                    & 10.0                     \\* \bottomrule
+\caption{Características de la GPU NVIDIA GeForce GTX 1060 6 GB}
+\label{tab:esptec}\\
+\end{longtable}
 
 \section{Conjuntos de datos utilizados.}
 

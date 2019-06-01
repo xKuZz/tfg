@@ -6,60 +6,173 @@ Para realizar la implementación de cada algoritmo hemos realizado un proceso c�
 \begin{itemize}
 	\item \textbf{Análisis} - En la primera iteración, analizar los trabajos relacionados. En las posteriores, analizar los resultados obtenidos del profiler, determinar los cuellos de botella y buscar posibles alternativas para solucionar el problema.
 	\item \textbf{Implementación} - Realizar la implementación en CUDA de los cambios o elementos nuevos obtenidos del proceso de análisis.
-	\item \textbf{Profiling} - Utilizar el profiler de NVIDIA, \textit{nvprof}, sobre un ejemplo razonable para evaluar el rendimiento del algoritmo.
+	\item \textbf{Profiling} - Utilizar el profiler de NVIDIA, \textit{Nsight}, sobre un ejemplo razonable para evaluar el rendimiento del algoritmo.
 \end{itemize}
 
 En este capítulo, explicaremos las soluciones finales a las que hemos llegado y destacaremos algunas de las decisiones tomadas y el razonamiento para haberlas seleccionado. Para facilitar la comprensión y tener en cuenta las dependencias de datos de los algoritmos durante el proceso de desarrollo hemos utilizado diagramas de flujo adaptados que nos permitan tener una visión general de las dependencias existentes entre los procesos y datos de una manera esquemática para cada uno de los modelos. 
 
 \section{Desarrollo del mapa autoorganizado de Kohonen.}
-Para implementar los mapas autoorganizados de Kohonen, primero consideramos la versión tradicional \textit{online} y, posteriormente, tras ver las limitaciones de la primera, evaluamos la versión computada en \textit{batchs}. Ambas implemntaciones ha sido realizadas tanto para CPU secuencial (un núcleo) como para CUDA. El código desarrollado en la versión para CPU secuencial ha sido realizado en \textit{Python} usando \textit{NumPy} conforme a lo explicado al presentar el modelo. En este capítulo, nos centramos en la implementación realizada en \textit{CUDA}.
+Para implementar los mapas autoorganizados de Kohonen, primero consideramos la versión tradicional \textit{online} y, posteriormente, tras ver las limitaciones de la primera, evaluamos la versión computada en \textit{batchs}. Ambas implemntaciones ha sido realizadas tanto para CPU como para CUDA. El código desarrollado en la versión para CPU ha sido realizado en \textit{Python} usando \textit{NumPy} conforme a lo explicado al presentar el modelo. En este capítulo, nos centramos en la implementación realizada en \textit{CUDA}.
 
 \subsection{Limitaciones del mapa autoorganizado online.}
-En la figura \ref{img:somonline} podemos observar un esquema de cómo podríamos resolver el mapa autoorganizado online utilizando CUDA.
+Mientras que la implementación del mapa autoorganizado \textit{online} fue el punto de partida para la realización de este trabajo tuvimos que descartar esta versión del algoritmo, ya que, el objetivo de este trabjo es resolver problemas con un gran número de muestras utilizando \textit{CUDA} y \textit{Spark}.\\
+
+En esta versión, en cada iteración, se selecciona una única muestra del conjunto de datos y ésta es evaluada para actualizar los pesos de las neuronas, que serán el punto de partida de la siguiente iteración, limitando a una el número de muestras que pueden procesarse a la vez y, por tanto, secuencializando el proceso.\\
+
+La opción más apropiada para paralelizar este algoritmo, sería procesar una única muestra usando tantas hebras como neuronas tenga el mapa de salida. En ese caso, en cada iteración, cada hebra podría calcular su distancia euclídea de la muestra con los pesos de la neurona asociada a la hebra, usaríamos el algoritmo de la reducción (que explicaremos posteriormente) para encontrar la BMU y, cada hebra, realizaría la actualización de los pesos de su neurona, si procediera. Sin embargo, este procedimiento sólo conseguiría ganancias significativas con respecto a su versión para CPU con un mapa de neuronas considerablemente grande, factor que no parece razonable en un algoritmo cuyo principal uso es el \textit{clustering}.\\
+
+Determinadas estas limitaciones y, dado que nuestro objetivo es evaluar un conjunto con un número de muestras elevado, optamos por implementar la versión del mapa autoorganizado que nos permite evaluar múltiples muestras simultáneamente, el mapa autoorganizado \textit{batch}.
+
+Para el desarrollo de esta versión del algoritmo hemos combinado el uso de \textit{CUDA} mediante \textit{Numba} y \textit{Spark}. En primer lugar, vamos a ver un esquema general del uso de \textit{Spark} para afrontar nuestro algoritmo iterativo y, a continuación, explicaremos en detalle la implementación de los \textit{kernels} para \textit{CUDA}.
+
+\subsection{Uso de Spark.}
+Utilizar \textit{Spark} para implementar este algoritmo nos permite tanto afrontar problemas de tamaños superiores a la capacidad de memoria de nuestro dispositivo como llevar la implementación realizada a un clúster con múltiples nodos con acceso a un dispositivo \textit{CUDA} que tengan todas las dependencias de \textit{software} instaladas.\\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.35]{imagenes/flujosomonline.png}
-\caption{Diagrama de flujo para el mapa autoorganizado online.}
-\label{img:somonline}
+\includegraphics[scale=0.5]{imagenes/flujosparksom.png}
+\caption{Diagrama de flujo del mapa autoorganizado desarrollado.}
+\label{image:flujosparksom}
 \end{figure}
 
-Mientras que este fue el punto de partida para la realización de este trabajo tuvimos que descartar esta versión del algoritmo. Mientras que nosotros buscamos resolver problemas con un gran número de muestras utilizando \textit{CUDA} y \textit{Spark}, dicho algoritmo requiere que una única muestra sea evaluada por iteración, ya que cada muestra, al ser evaluada, modifica los pesos para la siguiente iteración en la que otra muestra realizará el mismo proceso. Por ello, esta opción ha sido descartada aunque si nos encontrásemos ante un problema con un número de neuronas superior al número de muestras de entrada, factor que no parece natural en un algoritmo cuyo principal uso es el \textit{clustering}, el algoritmo es susceptible a ser paralelizado en base al número de neuronas del mapa. \\
-
-Determinada esa limitación fundamental, vamos a centrarnos en la versión del mapa autoorganizado que hemos implementado, el mapa autoorganizado \textit{batch}.
-
-\subsection{Desarrollo del mapa autoorganizado batch.}
-Para el desarrollo de esta versión del algoritmo de una manera eficiente dos factores han sido clave: el \textbf{uso de la memoria compartida} y \textbf{la reducción}.
-Podemos descomponer la implementación del algoritmo en resolver los siguientes subproblemas:
-
+El algoritmo empieza en un único nodo de \textit{Spark} utilizando el primer kernel desarrollado, \textit{rand\_weights}, para inicializar de manera pseudoaleatoria los valores de la estructura de pesos en función de una semilla proporcionada por el usuario. Con esta estructura ya generada, empieza el proceso iterativo en el que:
 \begin{itemize}
-	\item 1. Inicialización aleatoria de la matriz de pesos.
-	\item 2. Cálculo de las distancias euclídeas entre todas las muestras y los pesos.
-	\item 3. Encontrar la BMU para cada muestra.
-	\item 4. Actualizar la matriz de pesos.
-	\item 5. Actualizar los parámetros de control.
+    \item 1) Calculamos el párámetro de control $\sigma$ para la iteración en función de las ecuaciones correspondientes.
+    \item 2) Utilizando la función \textit{mapPartitions}, a cada partición del \textit{RDD} le aplicamos una función que encapsula otro \textit{kernel} desarrollado, \textit{som\_iter}, que se encarga de evaluar la suma parcial de los numeradores y denominadoresde la actualización de pesos para cada neurona en función de las muestras asociadas a la partición del \textit{RDD}.
+    \item 3) Para finalizar la iteración, \textit{Spark} reúne mediante \textit{collect} las sumas parciales obtenidas y, usando el último \textit{kernel} implementado, \textit{finish\_update} obtiene los pesos finales de la iteración.
 \end{itemize}
 
-\subsubsection{Inicialización aleatoria de la matriz de pesos.}
-Este proceso es realizado por el nodo de Spark que controlaría la ejecución del clúster una única vez al inicio del algoritmo, pero utilizando la GPU. \textit{Numba CUDA} nos proporciona herramientas para la generación de valores flotantes en el rango comprendido entre 0 y 1 basadas en el método de Box-Muller. Hemos utilizado esta herramienta para la generación de nuestra matriz de vectores de pesos inicial.
+Este proceso, que contiene 3 fases, es realizado hasta alcanzar el número máximo de iteraciones. Hemos de destacar que, puesto que todas las particiones han de partir de la mismos pesos de las neuronas en cada iteración. Por ello, al incicio de la iteración, es necesario distribuir la matriz de pesos a cada nodo de \textit{Spark} que realiza los cálculos de una partición y, al final de la iteración, reunir todos los pesos parciales en un único nodo, permitiéndonos obtener los pesos finales de la iteración. \\
+
+Sin embargo, para que \textit{Spark} pueda realizar esa distribución a lo largo del clúster es necesario que, al final de la iteración, se haga la transferencia de memoria de dispositivo a \textit{host} de los pesos parciales y, al inicio de la iteración, se haga la transferencia de \textit{host} a dispositivo de la pesos de las neuronas correspondientes a esa iteración.
 
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
-@cuda.jit
-def cuda_init_weights(rng_states, weights):
-    idx = cuda.grid(1)
-    if idx < weights.size:
-        weights[idx] = xoroshiro128p_uniform_float32(rng_states, idx)
+def spark_gpu_batch_som(rdd_data, d, max_iters, rows, cols, smooth_iters=None,
+                        sigma_0=10, sigma_f=0.1, tau=400, seed=None, tpb=1024):
+    """
+    :param rdd_data RDD con el conjunto de muestras a evaluar.
+    :param d Tamaño de una muestra, dimensión del problema.
+    :param max_iters Número de iteraciones a realizar.
+    :param rows Número de filas en el mapa de neuronas.
+    :param cols Número de columnas en el mapa de neuronas.
+    :param smooth_iters Número de iteraciones en las que el parámetro
+           sigma decrece siguiendo una función gaussiana. 
+    :param sigma_0 Valor de sigma inicial.
+    :param sigma_f Valor de sigma tras alcanzar la iteración smooth_iters.
+    :param tau Valor de tau para la función gaussiana.
+    :param seed Semilla pseudoaleatoria para la generación inicial de pesos.
+    :param tpb Número de hebras por bloque para la inicialización de pesos y
+           la actualización final de los pesos.
+    """
+    
+    # 1. Declaramos la estructura de los pesos.
+    d_weights = cuda.device_array((rows, cols ,d), np.float32)
 
-d_weights = cuda.device_array(rows * cols * d, np.float32)
-rng_states = create_xoroshiro128p_states(rows * cols * d, seed=seed)
-cuda_init_weights[rows * cols * d // tpb + 1, tpb](rng_states, d_weights)
+    # 1.2 Usamos Numba para generar los pesos de forma pseudoaleatoria.
+    rng_states = create_xoroshiro128p_states(rows * cols * d, seed=seed)
+    rand_weights[(d_weights.size) // tpb + 1, tpb](rng_states, d_weights)
+     
+    # 1.3 Traemos los pesos de la memoria de la GPU a la memoria del host.
+    weights = d_weights.copy_to_host()
+
+    # 2. Inicio del proceso iterativo
+    for t in range(max_iters):
+        # 2.a Actualizamos sigma en función de los tau y la iteración.
+        if smooth_iters is None or t < max_iters:
+            sigma = sigma_0 * math.exp((-t/tau))
+        else:
+            sigma = sigma_f
+            
+        sigma_squared = sigma * sigma
+        
+        # 2.b Cada nodo del clúster de spark trabajará con un subconjunto
+        # de las muestras del RDD para encontrar la BMU y realizar la suma
+        # parcial de su ecucación de actualización de pesos.
+        out = rdd_data.mapPartitions(gpu_work_iter(weights, sigma_squared))
+        
+        # 2.c En un único nodo usamos la GPU para juntar todas las sumas 
+        #     parciales obtenidas y realizar la división
+        out = out.collect()
+        numParts = len(out) // 2
+
+        partials = np.concatenate(out)
+        finish_update[rows * cols // tpb + 1, tpb](weights, partials, numParts)
+       
+    # 3. Devolvemos los pesos obtenidos
+    return weights
 \end{minted}
-\captionof{listing}{Incialización aleatoria de la matriz de pesos.\\}
+\captionof{listing}{Uso de Spark para entrenar el mapa autoorganizado.}
+\label{code:somspark}
+\end{code}
+
+\subsection{Representación de la estructura de pesos de las neuronas.}
+La estructura que contiene los pesos de las neuronas se corresponde a un array tridimensional. El primer eje indica la fila que ocupa la neurona en el mapa, el segundo eje indica la columna que ocupa la neurona en el mapa y el último eje la característica del problema a la que queremos acceder.\\
+
+Mientras que nosotros podemos hacer uso de esta abstracción para acceder de manera tridimensional gracias a Numba, en realidad, en el dispositivo CUDA se trata de un array unidimensional \textit{row-major}.
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=2.0]{imagenes/row-major.png}
+\caption{Representación de un array 3D como un array 1D row-major.}
+\label{image:rowmajor}
+\end{figure}
+
+\subsection{Kernels implementados.}
+\subsubsection{Inicialización pseudoaleatoria de matriz de pesos.}
+\begin{code}
+\begin{minted}[fontsize=\footnotesize]{python}
+@cuda.jit
+def rand_weights(rng_states, d_weights):
+    """
+    Kernel para inicializar aleatoriamente la estructura de pesos con 
+    valores en el intervalo [0, 1) tomados de una distribución uniforme
+    :param rng_states Estados aleatorios.
+    :param d_weigths Vector de filas * columnas * d valores que contendrá 
+           los pesos asociados a las neuronas.
+    """
+    # La hebra coge su identificador unidimensional único.
+    idx = cuda.grid(1)
+
+    # La hebra calcula en función del su índice 
+    # y cocientes y restos de divisiones entereas
+    n_rows, n_cols, d = d_weights.shape
+
+    # Cálculo de la fila (eje X).
+    row = idx // (n_cols * d)
+
+    # Cálculo de la columna (eje Y).
+    col_d = idx % (n_cols * d)
+    col = col_d // d
+    # Cálculo de la característica (eje Z).
+    i = col_d % d
+    
+    # Sacamos el aleatorio correspondiente.
+    if idx < d_weights.size:
+        d_weights[row, col, i] = xoroshiro128p_uniform_float32(rng_states, idx)
+
+\end{minted}
+\captionof{listing}{Inicialización aleatoria de la matriz de pesos.\\}
 \label{code:numbainitweights}
 \end{code}
 
-Una vez estos pesos han sido generados se realiza un proceso iterativo con los subproblemas 2 al 5 hasta alcanzar el número de iteraciones máximo determinado por el usuario. Cada nodo ejecutor de Spark se encarga de calcular los resultados sobre un subconjunto de muestras, combinándolos al final de la iteración el nodo que lleva el control de la ejecución. Este proceso es realizado utilizando la función \textit{mapPartitions} de \textit{Spark} que nos permite realizar la misma operación sobre las diferentes particiones del \textit{RDD} que contiene los datos y obtener otro \textit{RDD} reuniendo los resultados obtenidos de la operación.
+Este proceso (código fuente \ref{code:numbainitweights}) es realizado por el nodo de Spark que controlaría la ejecución del clúster una única vez al inicio del algoritmo, pero utilizando la GPU. \textit{Numba CUDA} nos proporciona herramientas para la generación de valores flotantes en el rango comprendido entre 0 y 1 basadas en el método de Box-Muller. Hemos utilizado esta herramienta para la generación de nuestra matriz de vectores de pesos inicial. Una vez generados, son trasladados de vuelta a la CPU para ser distribuidos a todos los nodos ejecutores de \textit{Spark}. \\
+
+Al lanzar este kernel, se utilizan tantas hebras como números aleatorios (tabla \ref{tab:randkernel}), distribuidos en bloques de un tamaño indicado por el usuario.
+\begin{table}[ht]
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Kernel}        & \textbf{Nº de Bloques}                                 & \textbf{Nº de hebras por bloque}                                                                       \\ \midrule
+\textbf{rand\_weights} & ($filas$ $\cdot$ $columnas$ $\cdot$ $d$) $//$ $tpb$ + 1 & $tpb$ \\ \bottomrule
+\end{tabular}
+
+\textit{\\$d=$ dimensión del problema.\\$tpb=$ hebras por bloque (indicados por el usuario).\\ $//=$ cociente de división entera.}
+\caption{Parámetro para el lanzamiento del kernel rand\_weights.}
+\label{tab:randkernel}
+\end{table}
+
+
 
 \subsubsection{Cálculo de las distancias euclídeas entre todas las muestras y los pesos.}
 El cálculo de la distancia euclídea es una operación masiva uno a uno realizada con todas las muestras de entrada con cada uno de los vectores que representa los pesos de las neuronas del mapa. Para optimizar este operación en \textit{CUDA} hemos realizados dos optimizaciones. Por un lado, puesto que nuestro objetivo final es encontrar la posición de la combinación muestra-neurona con la distancia mínima podemos eliminar el cálculo de la raíz cuadrada de la fórmula de la distancia euclídea pues es una operación costosa y no altera la relación de orden generada. Por otro lado, utilizamos la memoria compartida para asegurarnos de que algunos elementos que son ampliamente utilizados en el bloque permanezca en esa caché de acceso más rápido que la memoria global. En concreto, en este caso, lanzamos una malla bidimenisonal de bloques con tantas filas como número de neuronas y columnas como el número de muestras dividido por el tamaño de un bloque más una. Dada esta distribución, en el mismo bloque estamos calculando la distancia entre la neurona con el asociado a la fila en la malla y el subcojunto de muestras asociada a la columna de la malla. Puesto que los pesos de la neurona son utilizados en todo su bloque, éstos son cargados en la memoria compartida del bloque.

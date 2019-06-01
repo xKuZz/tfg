@@ -23,26 +23,28 @@
 \BOOKMARK [1][-]{section.3.2}{Proceso de implementaci\363n.}{chapter.3}% 23
 \BOOKMARK [1][-]{section.3.3}{Desarrollo del mapa autoorganizado de Kohonen.}{chapter.3}% 24
 \BOOKMARK [2][-]{subsection.3.3.1}{Limitaciones del mapa autoorganizado online.}{section.3.3}% 25
-\BOOKMARK [2][-]{subsection.3.3.2}{Desarrollo del mapa autoorganizado batch.}{section.3.3}% 26
-\BOOKMARK [1][-]{section.3.4}{Desarrollo de un modelo de \341rbol de decisi\363n.}{chapter.3}% 27
-\BOOKMARK [2][-]{subsection.3.4.1}{Lista de atributos.}{section.3.4}% 28
-\BOOKMARK [2][-]{subsection.3.4.2}{Esquema general del algoritmo implementado.}{section.3.4}% 29
-\BOOKMARK [2][-]{subsection.3.4.3}{La operaci\363n de scan.}{section.3.4}% 30
-\BOOKMARK [2][-]{subsection.3.4.4}{C\341lculo del criterio de Gini.}{section.3.4}% 31
-\BOOKMARK [2][-]{subsection.3.4.5}{Reorganizaci\363n de la listas de atributos.}{section.3.4}% 32
-\BOOKMARK [2][-]{subsection.3.4.6}{Limitaciones y uso de Spark.}{section.3.4}% 33
-\BOOKMARK [0][-]{chapter.4}{Desarrollo de pruebas y an\341lisis de resultados.}{}% 34
-\BOOKMARK [1][-]{section.4.1}{Entorno de pruebas.}{chapter.4}% 35
-\BOOKMARK [1][-]{section.4.2}{Conjuntos de datos utilizados.}{chapter.4}% 36
-\BOOKMARK [1][-]{section.4.3}{Experimentos para evaluar el mapa autoorganizado.}{chapter.4}% 37
-\BOOKMARK [2][-]{subsection.4.3.1}{Verificaci\363n de la implementaci\363n del modelo.}{section.4.3}% 38
-\BOOKMARK [2][-]{subsection.4.3.2}{Uso del modelo sobre un conjunto de datos grandes dimensiones.}{section.4.3}% 39
-\BOOKMARK [2][-]{subsection.4.3.3}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.3}% 40
-\BOOKMARK [1][-]{section.4.4}{Experimentos para evaluar el \341rbol de decisi\363n.}{chapter.4}% 41
-\BOOKMARK [2][-]{subsection.4.4.1}{Tablas de resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 42
-\BOOKMARK [2][-]{subsection.4.4.2}{An\341lisis de los resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 43
-\BOOKMARK [2][-]{subsection.4.4.3}{Tabla de resultados del random forest.}{section.4.4}% 44
-\BOOKMARK [2][-]{subsection.4.4.4}{An\341lisis de los resultados del random forest.}{section.4.4}% 45
-\BOOKMARK [2][-]{subsection.4.4.5}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.4}% 46
-\BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 47
-\BOOKMARK [0][-]{chapter*.39}{Bibliograf\355a}{}% 48
+\BOOKMARK [2][-]{subsection.3.3.2}{Uso de Spark.}{section.3.3}% 26
+\BOOKMARK [2][-]{subsection.3.3.3}{Representaci\363n de la estructura de pesos de las neuronas.}{section.3.3}% 27
+\BOOKMARK [2][-]{subsection.3.3.4}{Kernels implementados.}{section.3.3}% 28
+\BOOKMARK [1][-]{section.3.4}{Desarrollo de un modelo de \341rbol de decisi\363n.}{chapter.3}% 29
+\BOOKMARK [2][-]{subsection.3.4.1}{Lista de atributos.}{section.3.4}% 30
+\BOOKMARK [2][-]{subsection.3.4.2}{Esquema general del algoritmo implementado.}{section.3.4}% 31
+\BOOKMARK [2][-]{subsection.3.4.3}{La operaci\363n de scan.}{section.3.4}% 32
+\BOOKMARK [2][-]{subsection.3.4.4}{C\341lculo del criterio de Gini.}{section.3.4}% 33
+\BOOKMARK [2][-]{subsection.3.4.5}{Reorganizaci\363n de la listas de atributos.}{section.3.4}% 34
+\BOOKMARK [2][-]{subsection.3.4.6}{Limitaciones y uso de Spark.}{section.3.4}% 35
+\BOOKMARK [0][-]{chapter.4}{Desarrollo de pruebas y an\341lisis de resultados.}{}% 36
+\BOOKMARK [1][-]{section.4.1}{Entorno de pruebas.}{chapter.4}% 37
+\BOOKMARK [1][-]{section.4.2}{Conjuntos de datos utilizados.}{chapter.4}% 38
+\BOOKMARK [1][-]{section.4.3}{Experimentos para evaluar el mapa autoorganizado.}{chapter.4}% 39
+\BOOKMARK [2][-]{subsection.4.3.1}{Verificaci\363n de la implementaci\363n del modelo.}{section.4.3}% 40
+\BOOKMARK [2][-]{subsection.4.3.2}{Uso del modelo sobre un conjunto de datos grandes dimensiones.}{section.4.3}% 41
+\BOOKMARK [2][-]{subsection.4.3.3}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.3}% 42
+\BOOKMARK [1][-]{section.4.4}{Experimentos para evaluar el \341rbol de decisi\363n.}{chapter.4}% 43
+\BOOKMARK [2][-]{subsection.4.4.1}{Tablas de resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 44
+\BOOKMARK [2][-]{subsection.4.4.2}{An\341lisis de los resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 45
+\BOOKMARK [2][-]{subsection.4.4.3}{Tabla de resultados del random forest.}{section.4.4}% 46
+\BOOKMARK [2][-]{subsection.4.4.4}{An\341lisis de los resultados del random forest.}{section.4.4}% 47
+\BOOKMARK [2][-]{subsection.4.4.5}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.4}% 48
+\BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 49
+\BOOKMARK [0][-]{chapter*.42}{Bibliograf\355a}{}% 50

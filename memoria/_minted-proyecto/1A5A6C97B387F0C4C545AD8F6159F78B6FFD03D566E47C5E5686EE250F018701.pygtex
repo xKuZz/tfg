@@ -1,0 +1,30 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n+nd}{@cuda.jit}
+\PYG{k}{def} \PYG{n+nf}{rand\PYGZus{}weights}\PYG{p}{(}\PYG{n}{rng\PYGZus{}states}\PYG{p}{,} \PYG{n}{d\PYGZus{}weights}\PYG{p}{):}
+    \PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+\PYG{l+s+sd}{    Kernel para inicializar aleatoriamente la estructura de pesos con}
+\PYG{l+s+sd}{    valores en el intervalo [0, 1) tomados de una distribución uniforme}
+\PYG{l+s+sd}{    :param rng\PYGZus{}states Estados aleatorios.}
+\PYG{l+s+sd}{    :param d\PYGZus{}weigths Vector de filas * columnas * d valores que contendrá}
+\PYG{l+s+sd}{           los pesos asociados a las neuronas.}
+\PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{c+c1}{\PYGZsh{} La hebra coge su identificador unidimensional único.}
+    \PYG{n}{idx} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{grid}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} La hebra calcula en función del su índice}
+    \PYG{c+c1}{\PYGZsh{} y cocientes y restos de divisiones entereas}
+    \PYG{n}{n\PYGZus{}rows}\PYG{p}{,} \PYG{n}{n\PYGZus{}cols}\PYG{p}{,} \PYG{n}{d} \PYG{o}{=} \PYG{n}{d\PYGZus{}weights}\PYG{o}{.}\PYG{n}{shape}
+
+    \PYG{c+c1}{\PYGZsh{} Cálculo de la fila (eje X).}
+    \PYG{n}{row} \PYG{o}{=} \PYG{n}{idx} \PYG{o}{//} \PYG{p}{(}\PYG{n}{n\PYGZus{}cols} \PYG{o}{*} \PYG{n}{d}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Cálculo de la columna (eje Y).}
+    \PYG{n}{col\PYGZus{}d} \PYG{o}{=} \PYG{n}{idx} \PYG{o}{\PYGZpc{}} \PYG{p}{(}\PYG{n}{n\PYGZus{}cols} \PYG{o}{*} \PYG{n}{d}\PYG{p}{)}
+    \PYG{n}{col} \PYG{o}{=} \PYG{n}{col\PYGZus{}d} \PYG{o}{//} \PYG{n}{d}
+    \PYG{c+c1}{\PYGZsh{} Cálculo de la característica (eje Z).}
+    \PYG{n}{i} \PYG{o}{=} \PYG{n}{col\PYGZus{}d} \PYG{o}{\PYGZpc{}} \PYG{n}{d}
+
+    \PYG{c+c1}{\PYGZsh{} Sacamos el aleatorio correspondiente.}
+    \PYG{k}{if} \PYG{n}{idx} \PYG{o}{\PYGZlt{}} \PYG{n}{d\PYGZus{}weights}\PYG{o}{.}\PYG{n}{size}\PYG{p}{:}
+        \PYG{n}{d\PYGZus{}weights}\PYG{p}{[}\PYG{n}{row}\PYG{p}{,} \PYG{n}{col}\PYG{p}{,} \PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n}{xoroshiro128p\PYGZus{}uniform\PYGZus{}float32}\PYG{p}{(}\PYG{n}{rng\PYGZus{}states}\PYG{p}{,} \PYG{n}{idx}\PYG{p}{)}
+\end{Verbatim}
