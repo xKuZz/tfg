@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.3.15)  22 MAY 2019 18:40
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.3.15)  1 JUN 2019 12:22
 entering extended mode
 **./IMPLEMENTACION.tex
 (IMPLEMENTACION.tex
@@ -75,7 +75,7 @@ l.2 \input{capitulos/CUDA}
  
 Here is how much of TeX's memory you used:
  18 strings out of 492970
- 288 string characters out of 3135855
+ 306 string characters out of 3135855
  56558 words of memory out of 3000000
  3988 multiletter control sequences out of 15000+200000
  3640 words of font info for 14 fonts, out of 3000000 for 9000

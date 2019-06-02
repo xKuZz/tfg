@@ -1,0 +1,39 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{def} \PYG{n+nf}{gpu\PYGZus{}work\PYGZus{}iter}\PYG{p}{(}\PYG{n}{weights}\PYG{p}{,} \PYG{n}{sigma\PYGZus{}squared}\PYG{p}{):}
+    \PYG{k}{def} \PYG{n+nf}{\PYGZus{}gpu\PYGZus{}work}\PYG{p}{(}\PYG{n}{data}\PYG{p}{):}
+        \PYG{c+c1}{\PYGZsh{} 1. Procesamos el dataset}
+        \PYG{n}{inp} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{asarray}\PYG{p}{(}\PYG{n+nb}{list}\PYG{p}{(}\PYG{n}{data}\PYG{p}{),} \PYG{n}{dtype}\PYG{o}{=}\PYG{n}{np}\PYG{o}{.}\PYG{n}{float32}\PYG{p}{)}
+        \PYG{n}{rows}\PYG{p}{,} \PYG{n}{cols}\PYG{p}{,} \PYG{n}{d} \PYG{o}{=} \PYG{n}{weights}\PYG{o}{.}\PYG{n}{shape}
+        \PYG{n}{nneurons} \PYG{o}{=} \PYG{n}{rows} \PYG{o}{*} \PYG{n}{cols}
+
+        \PYG{c+c1}{\PYGZsh{} 2. Pasamos los datos a las memorias del dispositivo}
+        \PYG{n}{d\PYGZus{}samples} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{to\PYGZus{}device}\PYG{p}{(}\PYG{n}{inp}\PYG{p}{)}
+        \PYG{n}{d\PYGZus{}weights} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{to\PYGZus{}device}\PYG{p}{(}\PYG{n}{weights}\PYG{p}{)}
+        \PYG{n}{nums} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{zeros}\PYG{p}{(}\PYG{n}{rows} \PYG{o}{*} \PYG{n}{cols} \PYG{o}{*} \PYG{n}{d}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{float32}\PYG{p}{)}
+        \PYG{n}{denums} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{zeros}\PYG{p}{(}\PYG{n}{rows} \PYG{o}{*} \PYG{n}{cols}\PYG{p}{,} \PYG{n}{np}\PYG{o}{.}\PYG{n}{float32}\PYG{p}{)}
+        \PYG{n}{d\PYGZus{}nums} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{to\PYGZus{}device}\PYG{p}{(}\PYG{n}{nums}\PYG{p}{)}
+        \PYG{n}{d\PYGZus{}denums} \PYG{o}{=} \PYG{n}{cuda}\PYG{o}{.}\PYG{n}{to\PYGZus{}device}\PYG{p}{(}\PYG{n}{denums}\PYG{p}{)}
+
+        \PYG{c+c1}{\PYGZsh{} 3. Tomamos el número de hebras por bloque}
+        \PYG{k}{if} \PYG{n}{nneurons} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{1024}\PYG{p}{:}
+            \PYG{k}{raise} \PYG{n+ne}{Exception}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Número de neuronas superior al límite\PYGZsq{}}\PYG{p}{)}
+        \PYG{k}{elif} \PYG{l+m+mi}{512} \PYG{o}{\PYGZlt{}} \PYG{n}{nneurons} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mi}{1024}\PYG{p}{:}
+            \PYG{n}{tpb} \PYG{o}{=} \PYG{l+m+mi}{1024}
+        \PYG{k}{elif} \PYG{l+m+mi}{256} \PYG{o}{\PYGZlt{}} \PYG{n}{nneurons} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mi}{512}\PYG{p}{:}
+            \PYG{n}{tpb} \PYG{o}{=} \PYG{l+m+mi}{512}
+        \PYG{k}{elif} \PYG{l+m+mi}{128} \PYG{o}{\PYGZlt{}} \PYG{n}{nneurons} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mi}{256}\PYG{p}{:}
+            \PYG{n}{tpb} \PYG{o}{=} \PYG{l+m+mi}{256}
+        \PYG{k}{elif} \PYG{l+m+mi}{64} \PYG{o}{\PYGZlt{}} \PYG{n}{nneurons} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mi}{128}\PYG{p}{:}
+            \PYG{n}{tpb} \PYG{o}{=} \PYG{l+m+mi}{128}
+        \PYG{k}{else}\PYG{p}{:}
+            \PYG{n}{tpb} \PYG{o}{=} \PYG{l+m+mi}{64}
+
+        \PYG{c+c1}{\PYGZsh{} 4. Lanzamos el kernel.}
+        \PYG{c+c1}{\PYGZsh{} Memoria compartida para almacenar una muestra por bloque}
+        \PYG{n}{sm\PYGZus{}size} \PYG{o}{=} \PYG{l+m+mi}{4} \PYG{o}{*} \PYG{n}{d} \PYG{c+c1}{\PYGZsh{}}
+        \PYG{n}{som\PYGZus{}iter}\PYG{p}{[}\PYG{n}{N}\PYG{p}{,} \PYG{n}{tpb}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{sm\PYGZus{}size}\PYG{p}{](}\PYG{n}{d\PYGZus{}samples}\PYG{p}{,} \PYG{n}{d\PYGZus{}weights}\PYG{p}{,} \PYG{n}{d\PYGZus{}nums}\PYG{p}{,} \PYG{n}{d\PYGZus{}denums}\PYG{p}{,}
+                                     \PYG{n}{sigma\PYGZus{}squared}\PYG{p}{)}
+
+        \PYG{k}{return} \PYG{n}{d\PYGZus{}nums}\PYG{o}{.}\PYG{n}{copy\PYGZus{}to\PYGZus{}host}\PYG{p}{(),} \PYG{n}{d\PYGZus{}denums}\PYG{o}{.}\PYG{n}{copy\PYGZus{}to\PYGZus{}host}\PYG{p}{()}
+    \PYG{k}{return} \PYG{n}{\PYGZus{}gpu\PYGZus{}work}
+\end{Verbatim}

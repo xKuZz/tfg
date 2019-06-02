@@ -25,14 +25,17 @@ def train_tree(dataset, max_depth=6, min_samples_per_node=1):
     # 1. Generar listas de atributos
     N,d = dataset.shape
     d -= 1
-    a = cp.empty((d, 3, N), dtype=np.float32)
+    a = cp.empty((d, 3, N), dtype=cp.float32)
+    arbol = np.empty(2*(2**max_depth), dtype=cp.float32)
+
+    #streams = [cp.stream.Stream]
     for i in range(d):
         # El primer campo es el índice de la muestra
-        a[i,0] = cp.arange(N)
+        a[i,0] = cp.arange(N, dtype=cp.float32)
         # El segundo los valores para cada atributo
-        a[i,1] = cp.array(dataset[:,i], dtype=np.float32)
+        a[i,1] = cp.array(dataset[:,i], dtype=cp.float32)
         # El tercero las etiquetas
-        a[i,2] = cp.array(dataset[:,-1], dtype=np.float32)
+        a[i,2] = cp.array(dataset[:,-1], dtype=cp.float32)
         order = cp.argsort(a[i,1])
         
         # Ordenamos la lista de atributos
@@ -41,27 +44,31 @@ def train_tree(dataset, max_depth=6, min_samples_per_node=1):
         a[i,2] = a[i,2,order]
         
     # 2. Evaluar nodos.
-    outputs = []
     ActiveNode = collections.namedtuple('ActiveNode', 'idx start end')
     start_node = ActiveNode(idx=0, start=0, end=N)
     active_list = [start_node]
     
     # Inicio del nivel
     for current_depth in range(max_depth+1):
-        level = {}
         next_active_list = []
         best_flag = cp.ones(N, dtype=np.bool)
-        
+        if current_depth == 0:
+            level_offset = 0 
+        else:
+            level_offset += 2* (2**(current_depth-1))
+
         # Recorremos los nodos activos
         for node in active_list:
             n = node.end-node.start
             if n == 1:
-                level[node.idx] = (False, int(a[0,2,node.start].get()))
+                arbol[level_offset+2*node.idx] = -1
+                arbol[level_offset+2*node.idx+1] = a[0,2,node.start]
                 continue
             elif n <= min_samples_per_node or current_depth == max_depth - 1:
-                total = cp.sum(a[0,2,node.start:node.end].get())
+                total = cp.sum(a[0,2,node.start:node.end])
                 label = 0 if total/n <= 0.5 else 1
-                level[node.idx] = (False, label)
+                arbol[level_offset+2*node.idx] = -1
+                arbol[level_offset+2*node.idx+1] = label
                 continue
             else:
                 # Cálculo del criterio de Gini
@@ -77,24 +84,27 @@ def train_tree(dataset, max_depth=6, min_samples_per_node=1):
                 criteria[cp.isnan(criteria)] = n
                 
                 # Encontrar mejor punto de corte.
-                split_point=cp.argmin(criteria).get()
+                split_point=cp.argmin(criteria)
                 my_list = split_point // n
                 my_index = split_point % n
-                my_criteria = criteria[my_list, my_index].get()
+                my_criteria = criteria[my_list, my_index]
                 
-                value = (a[my_list, 1, node.start+my_index].get() + a[my_list, 1, node.start+my_index + 1].get()) / 2
                 if my_criteria == 0:
                     if scans[0,-1] == 0:
-                        level[node.idx] = (False, 0)
+                        arbol[level_offset+2*node.idx] = -1
+                        arbol[level_offset+2*node.idx+1] = 0
                         continue
                     elif scans[0,-1] == n:
-                        level[node.idx] = (False, 1)
+                        arbol[level_offset+2*node.idx] = -1
+                        arbol[level_offset+2*node.idx+1] = 1
                         continue
                         
                 # Añadimos el nodo de decisión al árbol.
-                level[node.idx] = (True, my_list, my_index, value)
-                
+                value = (a[my_list, 1, node.start+my_index] + a[my_list, 1, node.start+my_index + 1])/ 2
+                arbol[level_offset+2*node.idx] = my_list
+                arbol[level_offset+2*node.idx+1] = value
                 # Añadimos a la lista de pendientes los nuevos nodos generados.
+                my_index = my_index.get()
                 left_node = ActiveNode(idx=2*node.idx, start=node.start, end=node.start+my_index+1)
                 right_node = ActiveNode(idx=2*node.idx+1, start=node.start+my_index+1, end=node.end)
                 
@@ -104,17 +114,15 @@ def train_tree(dataset, max_depth=6, min_samples_per_node=1):
                 # Ponemos a False (0) en Best Flag los atributos que quedan reorganizados a la izquierda.
                 best_flag[cp.array(a[my_list,0,node.start:node.start+my_index+1], dtype=cp.int32)] = 0
         
-        # Añadimos nivel a la salida
-        outputs.append(level)
-        
     
         if current_depth == max_depth - 1 or len(next_active_list) == 0:
-            return outputs
+            return arbol
         
-        # Reorganizar listas de atributos
+        # Reorganizar listas de atributos [Una vez por nivel de profundidad]
         my_flag = best_flag[cp.array(a[:,0], dtype=cp.int32)]
         buffer = cp.logical_not(my_flag)
         address = cp.tile(cp.arange(N),d).reshape(d,N)
+
         for node in active_list:
             s = node.start
             e = node.end
@@ -128,34 +136,38 @@ def train_tree(dataset, max_depth=6, min_samples_per_node=1):
             
         for i in range(d):
             aux = cp.copy(a[i,0])
-            aux_2 = cp.copy(a[i,1])
-            aux_3 = cp.copy(a[i,2])
             a[i,0, address[i]] = aux
-            a[i,1, address[i]] = aux_2
-            a[i,2, address[i]] = aux_3
+            aux = cp.copy(a[i,1])
+            a[i,1, address[i]] = aux
+            aux = cp.copy(a[i,2])
+            a[i,2, address[i]] = aux
+            
+            
         active_list = next_active_list
         
-    return outputs
 
 
 def predict(sample, tree):
     # 1. Empiezo en el nodo raíz del arbol
     depth = 0
     i = 0
-    my_tuple = tree[depth][i]
+    my_attr = tree[0]
+    level_offset = 0
     # 2. Me muevo por el árbol mientras que esté en un nodo de decisión
-    while my_tuple[0]: 
+    while my_attr != -1: 
+        value = tree[level_offset+2*i+1]
         # Evalúo la condición
-        if sample[my_tuple[1]] <= my_tuple[-1]:
-            # En este caso en el siguiente nivel voy al nodo de la izquierda
+        if sample[int(my_attr)] <= value:
+        # En este caso en el siguiente nivel voy al nodo de la izquierda
             i = 2 * i
         else:
             # En el otro caso me voy al nodo de la derecha
             i = 2 * i + 1
         depth += 1
-        my_tuple = tree[depth][i]
+        level_offset += 2* (2**(depth-1))
+        my_attr = tree[level_offset+2*i]
         
-    return my_tuple[1]
+    return int(tree[level_offset+2*i+1])
 
 
 def evaluar(dataset, modelo):
@@ -167,7 +179,8 @@ def evaluar(dataset, modelo):
         
     return aciertos / dataset.shape[0]
 
-def validacion_cruzada(dataset, k=10, depth=5, my_min=1):
+def validacion_cruzada(dataset, k=10, depth=5, my_min=1, seed=None):
+    np.random.seed(seed)
     n = dataset.shape[0]
     tam = n // k
     samples_test = []
@@ -193,7 +206,7 @@ def validacion_cruzada(dataset, k=10, depth=5, my_min=1):
     return [np.mean(accuracy), np.mean(times)]
 
 
-def np_train_tree(dataset, max_depth=6, min_samples_per_node=1):
+def train_tree_np(dataset, max_depth=6, min_samples_per_node=1):
     """
     Entrena un árbol con nuestro algoritmo pero para CPU.
     :param dataset Conjunto de datos con el que entrenar el árbol.
@@ -210,6 +223,7 @@ def np_train_tree(dataset, max_depth=6, min_samples_per_node=1):
     N,d = dataset.shape
     d -= 1
     a = np.empty((d, 3, N), dtype=np.float32)
+    arbol = np.empty((2*(2**max_depth)), dtype=np.float32)
     for i in range(d):
         # El primer campo es el índice de la muestra
         a[i,0] = np.arange(N)
@@ -225,27 +239,32 @@ def np_train_tree(dataset, max_depth=6, min_samples_per_node=1):
         a[i,2] = a[i,2,order]
         
     # 2. Evaluar nodos.
-    outputs = []
     ActiveNode = collections.namedtuple('ActiveNode', 'idx start end')
     start_node = ActiveNode(idx=0, start=0, end=N)
     active_list = [start_node]
     
     # Inicio del nivel
     for current_depth in range(max_depth+1):
-        level = {}
         next_active_list = []
         best_flag = np.ones(N, dtype=np.bool)
+        if current_depth == 0:
+            level_offset = 0 
+        else:
+            level_offset += 2* (2**(current_depth-1))
         
+        inicio = time.time()
         # Recorremos los nodos activos
         for node in active_list:
             n = node.end-node.start
             if n == 1:
-                level[node.idx] = (False, int(a[0,2,node.start]))
+                arbol[level_offset+2*node.idx] = -1
+                arbol[level_offset+2*node.idx+1] = a[0,2,node.start]
                 continue
             elif n <= min_samples_per_node or current_depth == max_depth - 1:
                 total = np.sum(a[0,2,node.start:node.end])
                 label = 0 if total/n <= 0.5 else 1
-                level[node.idx] = (False, label)
+                arbol[level_offset+2*node.idx] = -1
+                arbol[level_offset+2*node.idx+1] = label
                 continue
             else:
                 # Cálculo del criterio de Gini
@@ -269,14 +288,17 @@ def np_train_tree(dataset, max_depth=6, min_samples_per_node=1):
                 value = (a[my_list, 1, node.start+my_index] + a[my_list, 1, node.start+my_index + 1]) / 2
                 if my_criteria == 0:
                     if scans[0,-1] == 0:
-                        level[node.idx] = (False, 0)
+                        arbol[level_offset+2*node.idx] = -1
+                        arbol[level_offset+2*node.idx+1] = 0
                         continue
                     elif scans[0,-1] == n:
-                        level[node.idx] = (False, 1)
+                        arbol[level_offset+2*node.idx] = -1
+                        arbol[level_offset+2*node.idx+1] = 1
                         continue
                         
                 # Añadimos el nodo de decisión al árbol.
-                level[node.idx] = (True, my_list, my_index, value)
+                arbol[level_offset+2*node.idx] = my_list
+                arbol[level_offset+2*node.idx+1] = value
                 
                 # Añadimos a la lista de pendientes los nuevos nodos generados.
                 left_node = ActiveNode(idx=2*node.idx, start=node.start, end=node.start+my_index+1)
@@ -288,12 +310,9 @@ def np_train_tree(dataset, max_depth=6, min_samples_per_node=1):
                 # Ponemos a False (0) en Best Flag los atributos que quedan reorganizados a la izquierda.
                 best_flag[np.array(a[my_list,0,node.start:node.start+my_index+1], dtype=np.int32)] = 0
         
-        # Añadimos nivel a la salida
-        outputs.append(level)
-        
-    
+        fin = time.time()
         if current_depth == max_depth - 1 or len(next_active_list) == 0:
-            return outputs
+            return arbol
         
         # Reorganizar listas de atributos
         my_flag = best_flag[np.array(a[:,0], dtype=np.int32)]
@@ -319,10 +338,11 @@ def np_train_tree(dataset, max_depth=6, min_samples_per_node=1):
             a[i,2, address[i]] = aux_3
         active_list = next_active_list
         
-    return outputs
+    return arbol
 
 
-def validacion_cruzada_np(dataset, k=10, depth=5, my_min=1):
+def validacion_cruzada_np(dataset, k=10, depth=5, my_min=1, seed=None):
+    np.random.seed(seed)
     n = dataset.shape[0]
     tam = n // k
     samples_test = []
@@ -337,7 +357,7 @@ def validacion_cruzada_np(dataset, k=10, depth=5, my_min=1):
     for i in range(k):
         samples_train = np.delete(all_indexes, samples_test[i])
         inicio = time.time()
-        model = np_train_tree(dataset[samples_train], depth, my_min)
+        model = train_tree_np(dataset[samples_train], depth, my_min)
         fin = time.time()
         times[i] = fin-inicio
         accuracy[i] = evaluar(dataset[samples_test[i]], model)
@@ -345,8 +365,5 @@ def validacion_cruzada_np(dataset, k=10, depth=5, my_min=1):
     return [np.mean(accuracy), np.mean(times)]
 
 if __name__ == '__main__':
-    magic = np.genfromtxt('../datasets/spambase.data', delimiter=',', dtype=np.float32)
-    magic = magic[np.random.randint(magic.shape[0], size=100000),:]
-    depth = 10
-    print(validacion_cruzada(magic, depth))
-    print(validacion_cruzada_np(magic, depth))
+    magic = np.genfromtxt('../datasets/magic04.data', delimiter=',', dtype=np.float32)
+    arbol = train_tree(magic,9)

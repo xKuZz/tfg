@@ -172,7 +172,64 @@ Al lanzar este kernel, se utilizan tantas hebras como números aleatorios (tabla
 \label{tab:randkernel}
 \end{table}
 
+\subsubsection{Cálculo de los numeradores y denominadores parciales.}
+Una vez obtenidos los pesos iniciales de una iteración, el siguiente paso es utilizar \textit{mapPartitions} para obtener los pesos parciales de cada partición del \textit{RDD}, como veíamos en el código fuente \ref{code:somspark}. La función utilizada en cada partición se denomina \textit{gpu\_som\_iter} y encapsula el lanzamiento del kernel \textit{som\_iter} y las transferencias de memoria entre host y dispositivo en cada iteración.
 
+\begin{code}
+\begin{minted}[fontsize=\footnotesize]{python}
+def gpu_work_iter(weights, sigma_squared):
+    def _gpu_work(data):
+        # 1. Procesamos el dataset
+        inp = np.asarray(list(data), dtype=np.float32)
+        rows, cols, d = weights.shape
+        nneurons = rows * cols
+        
+        # 2. Pasamos los datos a las memorias del dispositivo
+        d_samples = cuda.to_device(inp)
+        d_weights = cuda.to_device(weights)
+        nums = np.zeros(rows * cols * d, np.float32)
+        denums = np.zeros(rows * cols, np.float32)
+        d_nums = cuda.to_device(nums)
+        d_denums = cuda.to_device(denums)
+        
+        # 3. Tomamos el número de hebras por bloque
+        if nneurons > 1024:
+            raise Exception('Número de neuronas superior al límite')
+        elif 512 < nneurons <= 1024:
+            tpb = 1024
+        elif 256 < nneurons <= 512:
+            tpb = 512
+        elif 128 < nneurons <= 256:
+            tpb = 256
+        elif 64 < nneurons <= 128:
+            tpb = 128
+        else:
+            tpb = 64
+            
+        # 4. Lanzamos el kernel.
+        # Memoria compartida para almacenar una muestra por bloque
+        sm_size = 4 * d # 
+        som_iter[N, tpb, 0, sm_size](d_samples, d_weights, d_nums, d_denums,
+                                     sigma_squared)
+        
+        return d_nums.copy_to_host(), d_denums.copy_to_host()
+    return _gpu_work
+\end{minted}
+\captionof{listing}{Función a ejecutar con mapPartitions.\\}
+\label{code:somencapsulado}
+\end{code}
+
+El código fuente \ref{code:somencapsulado} nos muestra dicha función. En primer lugar, se realiza la transferencia del conjunto de muestras, de la matriz de pesos y dos arrays unidimensionales inicializados a 0 para almacenar los numeradores y denominadores de la actualización de pesos. A continuación, se determina el número de hebras por bloque a usar en función del número total de neuronas en el mapa. Si el número es una potencia de 2 se matiene y, si no, se coge la siguiente potencia de dos como número de hebras por bloque (esto es necesario para poder realizar la reducción, que es la parte del código del kernel que calculará el mínimo, independientemente del número de neuronas). Por último, se lanza el kernel \textit{som\_iter}, con ese número de hebras por bloque y tantos bloques como muestras haya y, una vez finaliza la ejecución del kernel, se transfieren de vuelta los numeradores y denominadores parciales al host para que \textit{Spark} pueda combinarlos en un nodo del clúster de \textit{Spark} y obtener los pesos finales de la iteración. 
+
+\begin{table}[ht]
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Kernel}        & \textbf{Nº de Bloques}                                 & \textbf{Nº de hebras por bloque}                                                                       \\ \midrule
+\textbf{som\_iter} &   Nº de muestras & Siguiente potencia de 2 a (Nº de neuronas - 1) \\ \bottomrule
+\end{tabular}
+\end{table}
+
+La versión que hemos implementado nos permite realizar todos los cálculos de una partición en un único \textit{kernel} a cambio de limitar el número de neuronas al máximo de elemntos que nos caben en un bloque (1024) para obtener el mejor en rendimiento. A continuación, vamos a explicar en profundidad el kernel implementado.
 
 \subsubsection{Cálculo de las distancias euclídeas entre todas las muestras y los pesos.}
 El cálculo de la distancia euclídea es una operación masiva uno a uno realizada con todas las muestras de entrada con cada uno de los vectores que representa los pesos de las neuronas del mapa. Para optimizar este operación en \textit{CUDA} hemos realizados dos optimizaciones. Por un lado, puesto que nuestro objetivo final es encontrar la posición de la combinación muestra-neurona con la distancia mínima podemos eliminar el cálculo de la raíz cuadrada de la fórmula de la distancia euclídea pues es una operación costosa y no altera la relación de orden generada. Por otro lado, utilizamos la memoria compartida para asegurarnos de que algunos elementos que son ampliamente utilizados en el bloque permanezca en esa caché de acceso más rápido que la memoria global. En concreto, en este caso, lanzamos una malla bidimenisonal de bloques con tantas filas como número de neuronas y columnas como el número de muestras dividido por el tamaño de un bloque más una. Dada esta distribución, en el mismo bloque estamos calculando la distancia entre la neurona con el asociado a la fila en la malla y el subcojunto de muestras asociada a la columna de la malla. Puesto que los pesos de la neurona son utilizados en todo su bloque, éstos son cargados en la memoria compartida del bloque.
