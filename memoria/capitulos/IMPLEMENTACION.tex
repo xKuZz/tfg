@@ -9,19 +9,18 @@ Para realizar la implementación de cada algoritmo hemos realizado un proceso c�
 	\item \textbf{Profiling} - Utilizar el profiler de NVIDIA, \textit{Nsight}, sobre un ejemplo razonable para evaluar el rendimiento del algoritmo.
 \end{itemize}
 
-En este capítulo, explicaremos las soluciones finales a las que hemos llegado y destacaremos algunas de las decisiones tomadas y el razonamiento para haberlas seleccionado. Para facilitar la comprensión y tener en cuenta las dependencias de datos de los algoritmos durante el proceso de desarrollo hemos utilizado diagramas de flujo adaptados que nos permitan tener una visión general de las dependencias existentes entre los procesos y datos de una manera esquemática para cada uno de los modelos. 
-
 \section{Desarrollo del mapa autoorganizado de Kohonen.}
-Para implementar los mapas autoorganizados de Kohonen, primero consideramos la versión tradicional \textit{online} y, posteriormente, tras ver las limitaciones de la primera, evaluamos la versión computada en \textit{batchs}. Ambas implemntaciones ha sido realizadas tanto para CPU como para CUDA. El código desarrollado en la versión para CPU ha sido realizado en \textit{Python} usando \textit{NumPy} conforme a lo explicado al presentar el modelo. En este capítulo, nos centramos en la implementación realizada en \textit{CUDA}.
+Para implementar los mapas autoorganizados de Kohonen, primero consideramos la versión tradicional \textit{online} y, posteriormente, tras ver las limitaciones de la primera, evaluamos la versión computada en \textit{batchs}, que ha sido implementada tanto para CPU, usando \textit{NumPy}, como para CUDA, usando \textit{Numba}.
 
 \subsection{Limitaciones del mapa autoorganizado online.}
 Mientras que la implementación del mapa autoorganizado \textit{online} fue el punto de partida para la realización de este trabajo tuvimos que descartar esta versión del algoritmo, ya que, el objetivo de este trabjo es resolver problemas con un gran número de muestras utilizando \textit{CUDA} y \textit{Spark}.\\
 
 En esta versión, en cada iteración, se selecciona una única muestra del conjunto de datos y ésta es evaluada para actualizar los pesos de las neuronas, que serán el punto de partida de la siguiente iteración, limitando a una el número de muestras que pueden procesarse a la vez y, por tanto, secuencializando el proceso.\\
 
-La opción más apropiada para paralelizar este algoritmo, sería procesar una única muestra usando tantas hebras como neuronas tenga el mapa de salida. En ese caso, en cada iteración, cada hebra podría calcular su distancia euclídea de la muestra con los pesos de la neurona asociada a la hebra, usaríamos el algoritmo de la reducción (que explicaremos posteriormente) para encontrar la BMU y, cada hebra, realizaría la actualización de los pesos de su neurona, si procediera. Sin embargo, este procedimiento sólo conseguiría ganancias significativas con respecto a su versión para CPU con un mapa de neuronas considerablemente grande, factor que no parece razonable en un algoritmo cuyo principal uso es el \textit{clustering}.\\
+La opción más apropiada para paralelizar este versión del algoritmo sería procesar una única muestra usando tantas hebras como neuronas tenga el mapa de salida. En ese caso, en cada iteración, cada hebra podría calcular su distancia euclídea de la muestra con los pesos de la neurona asociada a la hebra, usaríamos el algoritmo de la reducción, que explicaremos posteriormente, para encontrar la BMU y, cada hebra, realizaría la actualización de los pesos de su neurona, si procediera. Sin embargo, este procedimiento sólo conseguiría ganancias significativas con respecto a su versión para CPU con un mapa de neuronas considerablemente grande, factor que no parece razonable en un algoritmo cuyo principal uso es el \textit{clustering}.\\
 
-Determinadas estas limitaciones y, dado que nuestro objetivo es evaluar un conjunto con un número de muestras elevado, optamos por implementar la versión del mapa autoorganizado que nos permite evaluar múltiples muestras simultáneamente, el mapa autoorganizado \textit{batch}.
+Determinadas estas limitaciones y, dado que nuestro objetivo es evaluar un conjunto con un número de muestras elevado, optamos por implementar la versión del mapa autoorganizado que nos permite evaluar múltiples muestras simultáneamente, el mapa autoorganizado \textit{batch}.\\
+
 
 Para el desarrollo de esta versión del algoritmo hemos combinado el uso de \textit{CUDA} mediante \textit{Numba} y \textit{Spark}. En primer lugar, vamos a ver un esquema general del uso de \textit{Spark} para afrontar nuestro algoritmo iterativo y, a continuación, explicaremos en detalle la implementación de los \textit{kernels} para \textit{CUDA}.
 
@@ -35,19 +34,31 @@ Utilizar \textit{Spark} para implementar este algoritmo nos permite tanto afront
 \label{image:flujosparksom}
 \end{figure}
 
-El algoritmo empieza en un único nodo de \textit{Spark} utilizando el primer kernel desarrollado, \textit{rand\_weights}, para inicializar de manera pseudoaleatoria los valores de la estructura de pesos en función de una semilla proporcionada por el usuario. Con esta estructura ya generada, empieza el proceso iterativo en el que:
+El algoritmo empieza en un único nodo de \textit{Spark} utilizando el primer kernel desarrollado, \textit{rand\_weights}, para inicializar de manera pseudoaleatoria los valores de la estructura de pesos, en función de una semilla proporcionada por el usuario. Con esta estructura ya generada, empieza el proceso iterativo en el que:
 \begin{itemize}
-    \item 1) Calculamos el párámetro de control $\sigma$ para la iteración en función de las ecuaciones correspondientes.
-    \item 2) Utilizando la función \textit{mapPartitions}, a cada partición del \textit{RDD} le aplicamos una función que encapsula otro \textit{kernel} desarrollado, \textit{som\_iter}, que se encarga de evaluar la suma parcial de los numeradores y denominadoresde la actualización de pesos para cada neurona en función de las muestras asociadas a la partición del \textit{RDD}.
-    \item 3) Para finalizar la iteración, \textit{Spark} reúne mediante \textit{collect} las sumas parciales obtenidas y, usando el último \textit{kernel} implementado, \textit{finish\_update} obtiene los pesos finales de la iteración.
+    \item 1) Calculamos el párámetro de control $\sigma$ para la iteración en función de las ecuación correspondiente.
+
+$$\sigma(t) = \left\{
+\begin{array}{ll}
+\sigma_0e^{-\frac{t}{\tau}} & si \;\;t < z\\
+\sigma_f & si  \;\; t\geq z
+\end{array}
+\right.
+$$\\
+    \item 2) Utilizando la función \textit{mapPartitions}, a cada partición del \textit{RDD} le aplicamos una función que encapsula otro \textit{kernel} desarrollado, \textit{som\_iter}, que se encarga de evaluar los pesos parciales para cada neurona en función de las muestras asociadas a la partición del \textit{RDD}. Puesto que la ecuación de la actualización de pesos esa el cociente entre la sumatoria de vectores del tamaño de una muestra y una sumatoria de números reales, el objetivo de cada partición será calcular esos numeradores y denominadores, a los que nos referiremos habitualmente como numeradores y denominadores parciales.
+    $$
+ W_{i, j} = \frac{\sum_{k=0}^{f} \delta_f(c, [i,j]) \cdot  X(T_k) }{\sum_{k=0}^{f} \delta_f(c, [i,j])}
+$$
+    \item 3) Para finalizar la iteración, \textit{Spark} reúne mediante \textit{collect} las sumas parciales obtenidas y, usando el último \textit{kernel} implementado, \textit{finish\_update} obtiene los pesos finales de la iteración.\\
 \end{itemize}
 
-Este proceso, que contiene 3 fases, es realizado hasta alcanzar el número máximo de iteraciones. Hemos de destacar que, puesto que todas las particiones han de partir de la mismos pesos de las neuronas en cada iteración. Por ello, al incicio de la iteración, es necesario distribuir la matriz de pesos a cada nodo de \textit{Spark} que realiza los cálculos de una partición y, al final de la iteración, reunir todos los pesos parciales en un único nodo, permitiéndonos obtener los pesos finales de la iteración. \\
+Este proceso, que costa de 3 fases, es realizado hasta alcanzar el número máximo de iteraciones. Hemos de destacar que todas las particiones han de partir de la mismos pesos en cada iteración para realizar los cálculos. Por ello, al inicio de la iteración, es necesario distribuir la matriz de pesos a cada nodo de \textit{Spark} que realiza esos cálculos y, al final de la iteración, reunir todos los pesos parciales en un único nodo, permitiéndonos obtener los pesos finales de la iteración. \\
 
-Sin embargo, para que \textit{Spark} pueda realizar esa distribución a lo largo del clúster es necesario que, al final de la iteración, se haga la transferencia de memoria de dispositivo a \textit{host} de los pesos parciales y, al inicio de la iteración, se haga la transferencia de \textit{host} a dispositivo de la pesos de las neuronas correspondientes a esa iteración.
+Para que \textit{Spark} pueda realizar esa distribución a lo largo del clúster es necesario que, al final de la iteración, se haga la transferencia de memoria de dispositivo a \textit{host} de los pesos parciales y, al inicio de la iteración, se haga la transferencia de \textit{host} a dispositivo de la pesos de las neuronas correspondientes a esa iteración.
 
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
+
 def spark_gpu_batch_som(rdd_data, d, max_iters, rows, cols, smooth_iters=None,
                         sigma_0=10, sigma_f=0.1, tau=400, seed=None, tpb=1024):
     """
@@ -65,7 +76,6 @@ def spark_gpu_batch_som(rdd_data, d, max_iters, rows, cols, smooth_iters=None,
     :param tpb Número de hebras por bloque para la inicialización de pesos y
            la actualización final de los pesos.
     """
-    
     # 1. Declaramos la estructura de los pesos.
     d_weights = cuda.device_array((rows, cols ,d), np.float32)
 
@@ -86,18 +96,13 @@ def spark_gpu_batch_som(rdd_data, d, max_iters, rows, cols, smooth_iters=None,
             
         sigma_squared = sigma * sigma
         
-        # 2.b Cada nodo del clúster de spark trabajará con un subconjunto
-        # de las muestras del RDD para encontrar la BMU y realizar la suma
-        # parcial de su ecucación de actualización de pesos.
+        # 2.b Cálculos parciales con mapPartitions en cada nodo.
         out = rdd_data.mapPartitions(gpu_work_iter(weights, sigma_squared))
         
-        # 2.c En un único nodo usamos la GPU para juntar todas las sumas 
-        #     parciales obtenidas y realizar la división
+        # 2.c En un único nodo calculamos las sumas parciales.
         out = out.collect()
-        numParts = len(out) // 2
-
-        partials = np.concatenate(out)
-        finish_update[rows * cols // tpb + 1, tpb](weights, partials, numParts)
+        finish_update[rows*cols//tpb + 1, tpb](weights, np.concatenate(out), 
+                                               len(out) // 2)
        
     # 3. Devolvemos los pesos obtenidos
     return weights
@@ -107,7 +112,7 @@ def spark_gpu_batch_som(rdd_data, d, max_iters, rows, cols, smooth_iters=None,
 \end{code}
 
 \subsection{Representación de la estructura de pesos de las neuronas.}
-La estructura que contiene los pesos de las neuronas se corresponde a un array tridimensional. El primer eje indica la fila que ocupa la neurona en el mapa, el segundo eje indica la columna que ocupa la neurona en el mapa y el último eje la característica del problema a la que queremos acceder.\\
+La estructura que contiene los pesos de las neuronas, que se encontrará almacenado en la memoria global del dispositivo durante la ejecución de los \textit{kernels}, se corresponde a un array tridimensional. El primer eje indica la fila que ocupa la neurona en el mapa, el segundo eje indica la columna que ocupa la neurona en el mapa y el último eje la característica del problema a la que queremos acceder.\\
 
 Mientras que nosotros podemos hacer uso de esta abstracción para acceder de manera tridimensional gracias a Numba, en realidad, en el dispositivo CUDA se trata de un array unidimensional \textit{row-major}.
 
@@ -120,7 +125,7 @@ Mientras que nosotros podemos hacer uso de esta abstracción para acceder de man
 \end{figure}
 
 \subsection{Kernels implementados.}
-\subsubsection{Inicialización pseudoaleatoria de matriz de pesos.}
+\subsubsection{Generación pseudoaleatoria de pesos de neuronas.}
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
 @cuda.jit
@@ -153,7 +158,7 @@ def rand_weights(rng_states, d_weights):
         d_weights[row, col, i] = xoroshiro128p_uniform_float32(rng_states, idx)
 
 \end{minted}
-\captionof{listing}{Inicialización aleatoria de la matriz de pesos.\\}
+\captionof{listing}{Inicialización pseudoaleatoria de los pesos de las neuronas.\\}
 \label{code:numbainitweights}
 \end{code}
 
@@ -163,7 +168,7 @@ Al lanzar este kernel, se utilizan tantas hebras como números aleatorios (tabla
 \begin{table}[ht]
 \begin{tabular}{@{}lll@{}}
 \toprule
-\textbf{Kernel}        & \textbf{Nº de Bloques}                                 & \textbf{Nº de hebras por bloque}                                                                       \\ \midrule
+\textbf{Kernel}        & \textbf{Bloques}                                 & \textbf{Hebras por bloque}                                                                       \\ \midrule
 \textbf{rand\_weights} & ($filas$ $\cdot$ $columnas$ $\cdot$ $d$) $//$ $tpb$ + 1 & $tpb$ \\ \bottomrule
 \end{tabular}
 
@@ -173,7 +178,7 @@ Al lanzar este kernel, se utilizan tantas hebras como números aleatorios (tabla
 \end{table}
 
 \subsubsection{Cálculo de los numeradores y denominadores parciales.}
-Una vez obtenidos los pesos iniciales de una iteración, el siguiente paso es utilizar \textit{mapPartitions} para obtener los pesos parciales de cada partición del \textit{RDD}, como veíamos en el código fuente \ref{code:somspark}. La función utilizada en cada partición se denomina \textit{gpu\_som\_iter} y encapsula el lanzamiento del kernel \textit{som\_iter} y las transferencias de memoria entre host y dispositivo en cada iteración.
+Una vez obtenidos los pesos iniciales de una iteración, el siguiente paso es utilizar \textit{mapPartitions} para obtener los pesos parciales de cada partición del \textit{RDD}, como veíamos en el código fuente \ref{code:somspark}. La función utilizada en cada partición se denomina \textit{gpu\_som\_iter} y encapsula el lanzamiento del kernel \textit{som\_iter} y las transferencias de memoria entre host y dispositivo en cada iteración.\\
 
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
@@ -195,20 +200,11 @@ def gpu_work_iter(weights, sigma_squared):
         # 3. Tomamos el número de hebras por bloque
         if nneurons > 1024:
             raise Exception('Número de neuronas superior al límite')
-        elif 512 < nneurons <= 1024:
-            tpb = 1024
-        elif 256 < nneurons <= 512:
-            tpb = 512
-        elif 128 < nneurons <= 256:
-            tpb = 256
-        elif 64 < nneurons <= 128:
-            tpb = 128
-        else:
-            tpb = 64
-            
+        # Número de hebras necesario para que funcione la reducción.
+        tpb = max(64,2**(math.ceil(math.log2(nneurons))))
         # 4. Lanzamos el kernel.
         # Memoria compartida para almacenar una muestra por bloque
-        sm_size = 4 * d # 
+        sm_size = 4 * d
         som_iter[N, tpb, 0, sm_size](d_samples, d_weights, d_nums, d_denums,
                                      sigma_squared)
         
@@ -219,57 +215,86 @@ def gpu_work_iter(weights, sigma_squared):
 \label{code:somencapsulado}
 \end{code}
 
-El código fuente \ref{code:somencapsulado} nos muestra dicha función. En primer lugar, se realiza la transferencia del conjunto de muestras, de la matriz de pesos y dos arrays unidimensionales inicializados a 0 para almacenar los numeradores y denominadores de la actualización de pesos. A continuación, se determina el número de hebras por bloque a usar en función del número total de neuronas en el mapa. Si el número es una potencia de 2 se matiene y, si no, se coge la siguiente potencia de dos como número de hebras por bloque (esto es necesario para poder realizar la reducción, que es la parte del código del kernel que calculará el mínimo, independientemente del número de neuronas). Por último, se lanza el kernel \textit{som\_iter}, con ese número de hebras por bloque y tantos bloques como muestras haya y, una vez finaliza la ejecución del kernel, se transfieren de vuelta los numeradores y denominadores parciales al host para que \textit{Spark} pueda combinarlos en un nodo del clúster de \textit{Spark} y obtener los pesos finales de la iteración. 
+El \textit{kernel som\_iter} es la parte más importante de la implementación del algoritmo y se encarga de calcular las distancias euclídeas entre todas las muestras de la partición y los pesos de las neuronas del mapa, encontrar la BMU de cada muestra y realizar el cálculo parcial de los pesos de la iteración. El \textit{kernel} es lanzado con la distribución de bloques mostrada a continuación.
 
 \begin{table}[ht]
 \begin{tabular}{@{}lll@{}}
 \toprule
-\textbf{Kernel}        & \textbf{Nº de Bloques}                                 & \textbf{Nº de hebras por bloque}                                                                       \\ \midrule
-\textbf{som\_iter} &   Nº de muestras & Siguiente potencia de 2 a (Nº de neuronas - 1) \\ \bottomrule
+\textbf{Kernel}        & \textbf{Bloques}                                 & \textbf{Hebras por bloque}                                                                       \\ \midrule
+\textbf{som\_iter} &   Nº de muestras. & $max(64,2^{techo(\log_2{Nº neuronas})})$ \\ \bottomrule
 \end{tabular}
 \end{table}
 
-La versión que hemos implementado nos permite realizar todos los cálculos de una partición en un único \textit{kernel} a cambio de limitar el número de neuronas al máximo de elemntos que nos caben en un bloque (1024) para obtener el mejor en rendimiento. A continuación, vamos a explicar en profundidad el kernel implementado.
 
-\subsubsection{Cálculo de las distancias euclídeas entre todas las muestras y los pesos.}
-El cálculo de la distancia euclídea es una operación masiva uno a uno realizada con todas las muestras de entrada con cada uno de los vectores que representa los pesos de las neuronas del mapa. Para optimizar este operación en \textit{CUDA} hemos realizados dos optimizaciones. Por un lado, puesto que nuestro objetivo final es encontrar la posición de la combinación muestra-neurona con la distancia mínima podemos eliminar el cálculo de la raíz cuadrada de la fórmula de la distancia euclídea pues es una operación costosa y no altera la relación de orden generada. Por otro lado, utilizamos la memoria compartida para asegurarnos de que algunos elementos que son ampliamente utilizados en el bloque permanezca en esa caché de acceso más rápido que la memoria global. En concreto, en este caso, lanzamos una malla bidimenisonal de bloques con tantas filas como número de neuronas y columnas como el número de muestras dividido por el tamaño de un bloque más una. Dada esta distribución, en el mismo bloque estamos calculando la distancia entre la neurona con el asociado a la fila en la malla y el subcojunto de muestras asociada a la columna de la malla. Puesto que los pesos de la neurona son utilizados en todo su bloque, éstos son cargados en la memoria compartida del bloque.
-
+El kernel comienza con la declaración e inicialización de la memoria compartida. En primer lugar, cada hebra constribuye a cargar características la muestra a evaluar por el bloque hasta que se encuentre la muestra completa en memoria compartida. En segundo lugar, generamos dos arrays adicionales en memoria compartida, que serán utilizados posteriormente para calcular la BMU. Puesto que hemos limitado nuestra implementación a funcionar con un máximo de 1024 neuronas, estos dos arrays serán siempre de esta dimensión. Uno de ellos, que será de \textit{floats} de 32 bits, contendrá las distancias entre la muestra que cargamos en memoria compartida y los pesos de cada neurona del mapa. El segundo, que será de enteros de 32 \textit{bits}, será inicializados con los índices de cada neurona. Para realizar el cálculo de la distancia euclídea, cada hebra calculará su distancia con la neurona que le corresponde y la muestra cargada en memoria compartida. Si hubiese más hebras en el bloque que neuronas en el mapa, el resto de distancias son inicializadas a infinito.\\
 
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
 @cuda.jit
-def euclidean_distance(samples, weights, distances, nsamples, d):
-    # 1. Tomamos los índices que nos correspoden
-    neuron_idx = cuda.blockIdx.x
-    samples_idx = cuda.blockIdx.y * cuda.blockDim.x + cuda.threadIdx.x
+def som_iter(d_samples, d_weights, d_nums, d_denums, sigma_squared):
+    """
+    :param d_samples Conjunto de todas las muestras a evaluar.
+    :param d_weigths Vector de filas * columnas * d valores que contendrá 
+           los pesos asociados a las neuronas.
+    :param d_nums Vector con los numeradores para el cálculo de la fórmula.
+    :param d_denums Vector con los denominadores para el cálculo de la fórmula.
+    :param sigma_squared Valor de sigma al cuadrado para el cáculo del vecindario.
+    """
+    # 0. Índices
+    nrows, ncols, d = d_weights.shape
+    nneurons = nrows * ncols
     
+    sample_idx = cuda.blockIdx.x
+    neuron_idx = cuda.threadIdx.x
+    neuron_row = neuron_idx // ncols
+    neuron_col = neuron_idx % ncols
+    blockSize = cuda.blockDim.x
+       
+    # 0. Declaramos la memoria compartida
+    shared_sample = cuda.shared.array(shape=0, dtype=numba.float32)
+    shared_distances = cuda.shared.array(shape=1024, dtype=numba.float32)
+    shared_idx = cuda.shared.array(shape=1024, dtype=numba.int32)
     
-    # 2. Ponemos los pesos de la neurona en memoria compartida
-    shared_weights = cuda.shared.array(shape=0, dtype=numba.float32)
-    for i in range(d // cuda.blockDim.x + 1):
-        i_stride = i * cuda.blockDim.x
+    # 1.a Cargamos la muestra del bloque en memoria compartida 
+    # El bucle for permite realizar esto si la dimensión del problema fuese
+    # superior al número de neuronas.
+    for i in range(d // nneurons + 1):
+        i_stride = i * nneurons
         my_pos = i_stride + cuda.threadIdx.x
-        if my_pos < d:
-            shared_weights[my_pos] = weights[neuron_idx * d + my_pos]
-            
+        # Si la posición que corresponde a la hebra no supera el
+        # tamaño de la muestra a cargar.
+        if my_pos < d: 
+            shared_sample[my_pos] = d_samples[sample_idx, my_pos]
+    # Todas las hebras del bloque se sincronizan para asegurar que
+    # la muestra esté en memoria compartida
     cuda.syncthreads()
     
-    # 3. Procedemos a realizar el cálculo de la distancia si procede
-    if samples_idx < nsamples:
-        distance = 0.0
+    # 1.b Calculamos las distancias euclídeas que nos corresponden.
+    if neuron_idx < nneurons:
+        shared_distances[neuron_idx] = 0.0
         for i in range(d):
-            i_distance = samples[samples_idx * d + i] - shared_weights[i]
-            distance += i_distance * i_distance
-            
-        distances[samples_idx, neuron_idx] = distance
+            i_distance = shared_sample[i] - d_weights[neuron_row, neuron_col, i]
+            shared_distances[neuron_idx] += i_distance * i_distance
+    # Si hay más hebras que neuronas inicializamos a infinito para la reducción.
+    else: 
+        shared_distances[neuron_idx] = np.inf
+    
+    # 1.c Inicializamos el array de índices para la reducción.
+    shared_idx[neuron_idx] = neuron_idx
+    # Sincronizamos para asegurar que shared_idx y shared_distances 
+    # han sido inicializados.
+    cuda.syncthreads()    
 \end{minted}
-\captionof{listing}{Cálculo de la distancia euclídea.\\}
-\label{code:euclideandistance}
+\captionof{listing}{Primer fragmento del kernel som\_iter.\\}
+\label{code:somiter1}
 \end{code}
 
-\subsubsection{Encontrar la BMU para cada muestra.}
-Todas las distancias del subproblema anterior fueron guardadas en una matriz bidimensional donde la fila representa a la muestra y la columna a la neurona. Por tanto, hemos de encontrar el valor en mínimo en cada fila. \\
+   
+Una vez las distancias del bloque han sido calculadas, nuestro objetivo es encontrar la BMU de la muestra, es decir la neurona con menor distancia. Para ello, utilizamos un algoritmo frecuentemente utilizando en la GPU: \textbf{la reducción}. \\
 
+La reducción puede utilizarse para obtener el resultado de aplicar un operador binario a lo largo de un array, si dicho operador cumple la propiedad asociativa. En nuestro caso, dicho operador es el mínimo entre dos elementos. Para realizar esta operación de manera eficiente dentro de un bloque, se simula un recorrido hacia arriba sobre un árbol binario balanceado, en el que vamos aplicando la operación sobre los dos hijos y guardando el resultado en el nodo padre, tomando los distancias cargadas en memoria compartida como las hojas y alcanzado el resultado final en la raíz. Por ello, era necesario que el número de hebras por bloque fuese potencia de 2, si teníamos más hebras que neuronas completábamos las distancias con infinito, que actúa como elemento neutro de la operación mínimo y añadíamos un array extra con los índices para propagar la posición con el mejor índice mientras hacemos el recorrido.\\
+
+En la figura \ref{image:cudareduction} podemos ver un esquema de cómo funcionaría la reducción para una sumatoria de 8 elementos. Podemos consultar con más detalle cómo realizar una implementación de una reducción de alto rendimiento en \textit{CUDA} en la referencia bibliográfica \cite{reduction}.\\
 
 \begin{figure}[ht]
 \centering
@@ -278,113 +303,137 @@ Todas las distancias del subproblema anterior fueron guardadas en una matriz bid
 \label{image:cudareduction}
 \end{figure}
 
-Para encontrar el mínimo en un \textit{array} utilizamos un algoritmo frecuentemente utilizando en la GPU: \textbf{la reducción}. Si los elementos de la reducción, caben en un bloque, los mismos son puestos en la memoria compartida del bloque y se simula un recorrido sobre un árbol binario balanceado hacia arriba, tomando los elementos cargadas en memoria compartida como las hojas y alcanzado el resultado final en la raíz. Para que el algoritmo funcione, la operación en cuestión ha de cumplir la propiedad asociativa. Mientras que el uso más habitual de este algoritmo es para realizar la sumatoria nosotros la utilizamos para encontrar el mínimo manteniendo también control del índice que le corresponde. Si todos los datos no caben en un bloque, se lanzan tantos bloques como sean necesarios y este proceso es repetido hasta que queda un único resultado. \\
-
-Puesto que nosotros queremos realizar el proceso para múltiples filas con las mismas dimensiones. Si necesitamos $P$ bloques para resolver la reducción de una fila lanzamos los $N \cdot P$ correspondientes a la vez para obtener la máxima ganancia. Podemos consultar con más detalle cómo realizar una implementación de una reducción de alto rendimiento en \textit{CUDA} en la referencia bibliográfica \cite{reduction}.
-
-\subsubsection{Actualizar la matriz de pesos.}
-La fórmula para actualizar cada vector de pesos del mapa depende de dos sumatorias, una en el numerador y otra en el denominador.\\
-$$
- W_{i, j} = \frac{\sum_{k=0}^{f} \delta_f(c, [i,j]) \cdot  X(T_k) }{\sum_{k=0}^{f} \delta_f(c, [i,j])}
-$$\\
-
-Para utilizar los múltiples nodos ejecutores de \textit{Spark} y sacar el máximo rendimiento, cada nodo realiza la sumatoria de sus muestras guardando el numerador y denominador parciales que les corresponden a sus particiones para, a continuación, ser combinados en el nodo de \textit{Spark} que dirige la ejecución del algoritmo.\\
-
-El cálculo parcial de los numeradores y denominadores parciales se realiza utilizando \textbf{operaciones atómicas}, en concreto, la suma atómica. Las operaciones atómicas son operaciones que sufren de una mayor latencia que su correpondiente operación normal pero evitan condiciones de carrera si múltiples hebras intentan modificar la misma posición de memoria pues realizan la lectura y la actualización del dato en una única operación. La necesidad de utilizar este tipo de operaciones radica en la posibilidad que existe de que la BMU de varias muestras sean la misma neurona y, por tanto, varias hebras intenten modificar la sumatoria de numerador o denominador de la misma neurona al mismo tiempo. Además de esta alternativa, que es por la que hemos optado para realizar el desarrollo de esta parte del algoritmo, podríamos haber generado una estructura auxiliar que para cada neurona contenga $N \cdot d$ entradas para la sumatoria del numerador y otras $N$ para la sumatoria del denominador y posteriormente realizar una reducción con la operación de suma para obtener los resultados deseados. Sin embargo, esta alternativa, como podemos observar, sufriría de una gran complejidad espacial a la hora de afrontar problemas de \textit{Big Data}, limitando la escalabilidad de la solución propuesta a la hora de afrontar problemas de mayor número de muestras o mapas de neuronas más grandes.
-
-Para lanzar nuestro kernel aprovechando la memoria compartida usamos una malla de tantas filas como números de muestras y tantas columnas como 
-números de neuronas haya en el mapa divido entre el tamaño del bloque más una. Puesto que los bloques de cada fila de la malla, comprueban si la muestra de la fila está en el rango de actualización de la neuronas que le corresponde a cada bloque mantenemos los datos de la muestra en memoria compartida para asegurarnos de un acceso rápido a los mismos.
-
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
-@cuda.jit
-def prepare_update(bmu, samples, num, den, 
-    nrows, ncols, d, sigma_squared):
-    # 1. Tomamos los índices que correspondan
-    sample_idx = cuda.blockIdx.x
-    neuron_idx = cuda.blockIdx.y * cuda.blockDim.x + cuda.threadIdx.x
-   
-    # 2. Metemos en memoria compartida la muestra que se lee en todo el bloque
-    shared_sample = cuda.shared.array(shape=0, dtype=numba.float32)
-    for i in range(d // cuda.blockDim.x + 1):
-        i_stride = i * cuda.blockDim.x
-        my_pos = i_stride + cuda.threadIdx.x
-        if my_pos < d:
-            shared_sample[my_pos] = samples[sample_idx * d + my_pos]
+    # Recorrido de árbol de hojas raíz (posición 0)
+    if blockSize >= 1024 and neuron_idx < 512:
+        if shared_distances[neuron_idx + 512] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 512]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 512]
     cuda.syncthreads()
     
-    # 3. Si procede realizar cálculos los hacemos
-    if neuron_idx < nrows * ncols:
-        bmu_row = bmu[sample_idx] // ncols
-        bmu_col = bmu[sample_idx] % ncols
-        neuron_row = neuron_idx // ncols
-        neuron_col = neuron_idx % ncols
-        
-        dist = (neuron_row - bmu_row) * (neuron_row - bmu_row) + \
-               (neuron_col - bmu_col) * (neuron_col - bmu_col)
-        
-        if dist <= sigma_squared:
-            hck = math.exp(-dist/(2 * sigma_squared))
-            # Guardamos sumatoria del denominador
-            cuda.atomic.add(den, neuron_row * ncols + neuron_col, hck)
-            # Guardamos sumatoria del numerador
-            for i in range(d):
-                cuda.atomic.add(num, neuron_row*ncols*d + neuron_col*d+i
-                                hck * shared_sample[i])
+    if blockSize >= 512 and neuron_idx < 256:
+        if shared_distances[neuron_idx + 256] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 256]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 256]
+    cuda.syncthreads()
+    
+    if blockSize >= 256 and neuron_idx < 128:
+        if shared_distances[neuron_idx + 128] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 128]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 128]
+    cuda.syncthreads()
+    
+    if blockSize >= 128 and neuron_idx < 64:
+        if shared_distances[neuron_idx + 64] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 64]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 64]
+    cuda.syncthreads()
+    
+    # Unroll de warp
+    if neuron_idx < 32:
+        if shared_distances[neuron_idx + 32] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 32]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 32]
+        if shared_distances[neuron_idx + 16] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 16]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 16]
+        if shared_distances[neuron_idx + 8] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 8]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 8]
+        if shared_distances[neuron_idx + 4] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 4]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 4]
+        if shared_distances[neuron_idx + 2] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 2]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 2]
+        if shared_distances[neuron_idx + 1] < shared_distances[neuron_idx]:
+            shared_distances[neuron_idx] = shared_distances[neuron_idx + 1]
+            shared_idx[neuron_idx] = shared_idx[neuron_idx + 1]
+    cuda.syncthreads()
+    
+    # La mejor neurona se encuentra en la posición 0 del array.
+    bmu = shared_idx[0]
+    bmu_row = bmu // ncols
+    bmu_col = bmu % ncols
+    cuda.syncthreads()
 \end{minted}
-\captionof{listing}{Cálculo de numeradores y denominadores parciales.\\}
-\label{code:partials}
+\captionof{listing}{Segundo fragmento del kernel som\_iter.\\}
+\label{code:somiter2}
 \end{code}
 
-Una vez todos los resultados han sido recopilados, lanzamos un último kernel que juntará los resultados parciales obtenidos y realizará la división, actualizando los pesos si la neurona en cuestión ha sido BMU de alguna muestra o dejando los pesos de la iteración anterior en caso contrario. En este caso lanzamos una malla unidimensional de tantos bloques como número de neuronas haya entre el tamaño de un bloque más uno. Cada hebra se encarga de realizar las sumas parciales de su neurona asociada y realizar la actualización de su vector de pesos en la matriz si procede.
+Para finalizar el \textit{kernel}, se realiza el cálculo de los numeradores y denominadores parciales. Para ello cada hebra del bloque se corresponde con una neurona y mide la distancia euclídea que existe entre la posición de la BMU y la posición de la neurona en el mapa. Si esa distancia es menor o igual que el parámetro de control $\sigma^2$, se realiza la suma del vector del numerador con el producto de esa distancia y la muestra guardada en la memoria compartida del bloque y sólo la distancia con el denominador. \\
+
+Puesto que múltiples hebras pueden tener la misma BMU y, por tanto, estar actualizando las mismas posiciones en memoria a la vez se utilizan \textbf{operaciones atómicas}, que evitan las condiciones de carrera que pueda surgir a cambio de una mayor latencia en la operación. Hemos de indicar que, para las operaciones atómicas, necesitamos trabajar con arrays unidimensionales, por lo que hemos de hacer los cálculos necesarios para acceder a las posiciones de memoria deseadas.\\
+\begin{code}
+\begin{minted}[fontsize=\footnotesize]{python}
+# 3. Realizamos la actualización de los pesos.
+    if neuron_idx < nneurons:
+        dist = (neuron_row - bmu_row) * (neuron_row - bmu_row) + \
+               (neuron_col - bmu_col) * (neuron_col - bmu_col)
+        # Si estamos dentro del rango de actualización.
+        if dist <= sigma_squared:
+            hck = math.exp(-dist/(2 * sigma_squared))
+            # Guardamos sumatoria del denominador.
+            cuda.atomic.add(d_denums, neuron_row * ncols + neuron_col, hck)
+            # Guardamos sumatoria del numerador.
+            for i in range(d):
+                cuda.atomic.add(d_nums, neuron_row*ncols*d + neuron_col*d+i,
+                                hck * shared_sample[i])
+\end{minted}
+\captionof{listing}{Tercer y último fragmento del kernel som\_iter.\\}
+\label{code:somiter3}
+\end{code}
+
+
+\subsubsection{Cálculo de los pesos finales de la iteración.}
+Una vez todos los resultados han sido recopilados en un nodo de \textit{Spark}, lanzamos que realizará la sumatoria de los numeradores parciales y de los denominadores parciales para cada neurona así como la división entre ambos. Si ninguna muestra activó la neurona en cuestión, es decir, la suma de todos los denominadores es 0, se mantendrán los pesos de la iteración anterior. En caso contrario, el vector obtenido en la división será los pesos de la neurona para la siguiente iteración. Para lanzar este \textit{kernel} se utilizan tantas hebras como neuronas hay en el mapa, divididas en bloque de \textit{tpb} hebras. Por tanto, cada hebra realizará los cálculos asociados a una neurona. \\
+
+\begin{table}[ht]
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Kernel}        & \textbf{Bloques}                                 & \textbf{Hebras por bloque}                                                                       \\ \midrule
+\textbf{finish\_update} & (Nº de neuronas // $tpb$ + 1) & $tpb$ \\ \bottomrule
+\end{tabular}
+\end{table}
 
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
 @cuda.jit
-def finish_update(weights, partials, numParts, nrows, ncols, d):
-     idx = cuda.grid(1)
+def finish_update(d_weights, partials, numParts):
+    """
+    :param d_weights Array de pesos de neuronas.
+    :param partials Array con sumas parciales.
+    :param numParts Número de resultados parciales a procesar.
+    """
+    idx = cuda.grid(1)
+    nrows, ncols, d = d_weights.shape
     if idx < nrows * ncols:
         row = idx // ncols
         col = idx % ncols
         
-        
-        # a) Sumamos todos los parciales en el primer array
+        # a) Sumamos todos los parciales en el primer array.
         numsize = nrows * ncols * d
         densize = nrows * ncols
         fullsize = numsize + densize
         for i in range(numParts - 1):
-            # Suma de numeradores
+            # Suma de numeradores.
             for k in range(d):
                 pos = fullsize * i + row * ncols * d + col * d + k
                 partials[row * ncols * d + col * d + k] += partials[pos]
-            # Suma de denominadores
+            # Suma de denominadores.
             pos = fullsize * i + numsize + row * ncols + col
             partials[numsize + row * ncols + col] += partials[pos]
-            
-    cuda.syncthreads()
     
-    if idx < nrows * ncols:
-        # b) Si no es 0 el denominador realizamos el cambio
+        # b) Si no es 0 el denominador realizamos la división y cambiamos pesos.
         if partials[numsize + row * ncols + col] != 0:
             for k in range(d):
-                mypos = row * ncols * d + col * d + k
-                denpos = numsize + row * ncols + col
-                weights[mypos] =  partials[mypos] / partials[denpos]
+                d_weights[row, col, k] = partials[row*ncols*d + col*d +k] / \
+                                         partials[numsize + row * ncols + col]
 \end{minted}
 \captionof{listing}{Actualización final de la matriz de pesos.\\}
 \label{code:ending}
 \end{code}
-
-\subsubsection{Actualizar los parámetros de control.}
-Los parámetros de control $\eta$ y $\sigma$ son sólo dos parámetros a modificar por iteración y cuyo cálculo se corresponde a una única operación, por lo que nos es susceptible a ser paralelizado en la GPU y será realizado en el nodo de Spark que dirige la ejecución del clúster si todavía no se ha alcanzado el máximo de iteraciones.
-Si se ha alcanzado el máximo de iteraciones el algoritmo termina y la matriz de vectores de pesos de las neuronas de esa última iteración es la solución obtenida.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[scale=0.35]{imagenes/flujosombatch.png}
-\caption{Diagrama de flujo para el mapa autoorganizado batch.}
-\label{img:sombatch}
-\end{figure}
 
 \newpage
 \section{Desarrollo de un modelo de árbol de decisión.}

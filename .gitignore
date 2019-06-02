@@ -1,0 +1,10 @@
+
+datasets/SUSY.csv
+codigo/.ipynb_checkpoints/experimento_un_arbol-checkpoint.ipynb
+codigo/.ipynb_checkpoints/mapa_autoorganizado-checkpoint.ipynb
+*.pyc
+memoria/_minted-proyecto/C441D581EAB05ADBABABD049D0D188E96FFD03D566E47C5E5686EE250F018701.pygtex
+*.pygtex
+*.pygtex
+*.aux
+memoria/proyecto.synctex.gz
