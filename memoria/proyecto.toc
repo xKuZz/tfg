@@ -25,10 +25,10 @@
 \contentsline {section}{\numberline {3.3}Desarrollo del mapa autoorganizado de Kohonen.}{20}{section.3.3}
 \contentsline {subsection}{\numberline {3.3.1}Limitaciones del mapa autoorganizado online.}{20}{subsection.3.3.1}
 \contentsline {subsection}{\numberline {3.3.2}Uso de Spark.}{21}{subsection.3.3.2}
-\contentsline {subsection}{\numberline {3.3.3}Representaci\IeC {\'o}n de la estructura de pesos de las neuronas.}{23}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.3}Representaci\IeC {\'o}n de la estructura de pesos de las neuronas.}{24}{subsection.3.3.3}
 \contentsline {subsection}{\numberline {3.3.4}Kernels implementados.}{24}{subsection.3.3.4}
 \contentsline {subsubsection}{\numberline {3.3.4.1}Generaci\IeC {\'o}n pseudoaleatoria de pesos de neuronas.}{24}{subsubsection.3.3.4.1}
-\contentsline {subsubsection}{\numberline {3.3.4.2}C\IeC {\'a}lculo de los numeradores y denominadores parciales.}{25}{subsubsection.3.3.4.2}
+\contentsline {subsubsection}{\numberline {3.3.4.2}C\IeC {\'a}lculo de los numeradores y denominadores parciales.}{26}{subsubsection.3.3.4.2}
 \contentsline {subsubsection}{\numberline {3.3.4.3}C\IeC {\'a}lculo de los pesos finales de la iteraci\IeC {\'o}n.}{31}{subsubsection.3.3.4.3}
 \contentsline {section}{\numberline {3.4}Desarrollo de un modelo de \IeC {\'a}rbol de decisi\IeC {\'o}n.}{32}{section.3.4}
 \contentsline {subsection}{\numberline {3.4.1}Lista de atributos.}{32}{subsection.3.4.1}
@@ -42,13 +42,13 @@
 \contentsline {section}{\numberline {4.2}Conjuntos de datos utilizados.}{39}{section.4.2}
 \contentsline {section}{\numberline {4.3}Experimentos para evaluar el mapa autoorganizado.}{40}{section.4.3}
 \contentsline {subsection}{\numberline {4.3.1}Verificaci\IeC {\'o}n de la implementaci\IeC {\'o}n del modelo.}{40}{subsection.4.3.1}
-\contentsline {subsection}{\numberline {4.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{42}{subsection.4.3.2}
-\contentsline {subsection}{\numberline {4.3.3}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{44}{subsection.4.3.3}
-\contentsline {section}{\numberline {4.4}Experimentos para evaluar el \IeC {\'a}rbol de decisi\IeC {\'o}n.}{46}{section.4.4}
-\contentsline {subsection}{\numberline {4.4.1}Tablas de resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{47}{subsection.4.4.1}
-\contentsline {subsection}{\numberline {4.4.2}An\IeC {\'a}lisis de los resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{48}{subsection.4.4.2}
-\contentsline {subsection}{\numberline {4.4.3}Tabla de resultados del random forest.}{52}{subsection.4.4.3}
-\contentsline {subsection}{\numberline {4.4.4}An\IeC {\'a}lisis de los resultados del random forest.}{53}{subsection.4.4.4}
-\contentsline {subsection}{\numberline {4.4.5}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{54}{subsection.4.4.5}
-\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{56}{chapter.5}
-\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{58}{chapter*.45}
+\contentsline {subsection}{\numberline {4.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{41}{subsection.4.3.2}
+\contentsline {subsection}{\numberline {4.3.3}Resultados de Nsight sobre la versi\IeC {\'o}n final del algoritmo.}{43}{subsection.4.3.3}
+\contentsline {section}{\numberline {4.4}Experimentos para evaluar el \IeC {\'a}rbol de decisi\IeC {\'o}n.}{44}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Tablas de resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{45}{subsection.4.4.1}
+\contentsline {subsection}{\numberline {4.4.2}An\IeC {\'a}lisis de los resultados para la generaci\IeC {\'o}n de un \IeC {\'u}nico \IeC {\'a}rbol.}{46}{subsection.4.4.2}
+\contentsline {subsection}{\numberline {4.4.3}Tabla de resultados del random forest.}{50}{subsection.4.4.3}
+\contentsline {subsection}{\numberline {4.4.4}An\IeC {\'a}lisis de los resultados del random forest.}{51}{subsection.4.4.4}
+\contentsline {subsection}{\numberline {4.4.5}Resultados de nvprof sobre la versi\IeC {\'o}n final del algoritmo.}{52}{subsection.4.4.5}
+\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{54}{chapter.5}
+\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{56}{chapter*.44}

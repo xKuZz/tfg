@@ -39,7 +39,7 @@
 \BOOKMARK [1][-]{section.4.3}{Experimentos para evaluar el mapa autoorganizado.}{chapter.4}% 39
 \BOOKMARK [2][-]{subsection.4.3.1}{Verificaci\363n de la implementaci\363n del modelo.}{section.4.3}% 40
 \BOOKMARK [2][-]{subsection.4.3.2}{Uso del modelo sobre un conjunto de datos grandes dimensiones.}{section.4.3}% 41
-\BOOKMARK [2][-]{subsection.4.3.3}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.3}% 42
+\BOOKMARK [2][-]{subsection.4.3.3}{Resultados de Nsight sobre la versi\363n final del algoritmo.}{section.4.3}% 42
 \BOOKMARK [1][-]{section.4.4}{Experimentos para evaluar el \341rbol de decisi\363n.}{chapter.4}% 43
 \BOOKMARK [2][-]{subsection.4.4.1}{Tablas de resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 44
 \BOOKMARK [2][-]{subsection.4.4.2}{An\341lisis de los resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 45
@@ -47,4 +47,4 @@
 \BOOKMARK [2][-]{subsection.4.4.4}{An\341lisis de los resultados del random forest.}{section.4.4}% 47
 \BOOKMARK [2][-]{subsection.4.4.5}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.4}% 48
 \BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 49
-\BOOKMARK [0][-]{chapter*.45}{Bibliograf\355a}{}% 50
+\BOOKMARK [0][-]{chapter*.44}{Bibliograf\355a}{}% 50
