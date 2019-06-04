@@ -1,22 +1,24 @@
 \babel@toc {spanish}{}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Esquema de una red neuronal de Kohonen.\relax }}{5}{figure.caption.8}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Esquema de una red neuronal de Kohonen.\relax }}{6}{figure.caption.8}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Diagrama de flujo del mapa autoorganizado desarrollado.\relax }}{21}{figure.caption.13}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Representaci\IeC {\'o}n de un array 3D como un array 1D row-major.\relax }}{24}{figure.caption.15}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Una reducci\IeC {\'o}n paralela de una sumatoria en CUDA.\relax }}{28}{figure.caption.21}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Diagrama de flujo de la implementaci\IeC {\'o}n del \IeC {\'a}rbol de decisi\IeC {\'o}n.\relax }}{33}{figure.caption.27}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Fase up-sweep del scan.\relax }}{35}{figure.caption.28}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Fase down-sweep del scan.\relax }}{36}{figure.caption.29}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Diagrama de flujo del mapa autoorganizado desarrollado.\relax }}{22}{figure.caption.13}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Representaci\IeC {\'o}n de un array 3D como un array 1D row-major.\relax }}{25}{figure.caption.15}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Una reducci\IeC {\'o}n paralela de una sumatoria en CUDA.\relax }}{29}{figure.caption.21}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Diagrama de flujo de la implementaci\IeC {\'o}n del \IeC {\'a}rbol de decisi\IeC {\'o}n.\relax }}{34}{figure.caption.27}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Fase up-sweep del scan.\relax }}{36}{figure.caption.28}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Fase down-sweep del scan.\relax }}{37}{figure.caption.29}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Imagen obtenida en el experimento para CPU del mapa autoorganizado.\relax }}{41}{figure.caption.30}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Imagen obtenida en el experimento para GPU del mapa autoorganizado.\relax }}{42}{figure.caption.31}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Gr\IeC {\'a}fica con tiempos promedios y ganancias para SUSY.\relax }}{43}{figure.caption.33}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Tiempo de entrenamiento y ganacia seg\IeC {\'u}n profundidad en Spambase.\relax }}{46}{figure.caption.36}
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Tiempo de entrenamiento y ganacia seg\IeC {\'u}n profundidad en MAGIC.\relax }}{47}{figure.caption.37}
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Precisi\IeC {\'o}n seg\IeC {\'u}n profundidad en SPAMBASE.\relax }}{48}{figure.caption.38}
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Precisi\IeC {\'o}n seg\IeC {\'u}n profundidad en MAGIC.\relax }}{49}{figure.caption.39}
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Diagrama de cajas y bigotes para el tiempo de entrenamiento del random forest para SUSY.\relax }}{51}{figure.caption.42}
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Diagrama de sectores de los resultados de nvprof para el \IeC {\'a}rbol de decision.\relax }}{52}{figure.caption.43}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Imagen obtenida en el experimento para CPU del mapa autoorganizado.\relax }}{42}{figure.caption.30}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Imagen obtenida en el experimento para GPU del mapa autoorganizado.\relax }}{43}{figure.caption.31}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Gr\IeC {\'a}fica con tiempos promedios y ganancias para SUSY.\relax }}{44}{figure.caption.33}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Speed of Light del kernel evaluado.\relax }}{45}{figure.caption.35}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces An\IeC {\'a}lisis de los warps del kernel.\relax }}{46}{figure.caption.36}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Tiempo de entrenamiento y ganacia seg\IeC {\'u}n profundidad en Spambase.\relax }}{49}{figure.caption.39}
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Tiempo de entrenamiento y ganacia seg\IeC {\'u}n profundidad en MAGIC.\relax }}{50}{figure.caption.40}
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Precisi\IeC {\'o}n seg\IeC {\'u}n profundidad en SPAMBASE.\relax }}{51}{figure.caption.41}
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Precisi\IeC {\'o}n seg\IeC {\'u}n profundidad en MAGIC.\relax }}{52}{figure.caption.42}
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Diagrama de cajas y bigotes para el tiempo de entrenamiento del random forest para SUSY.\relax }}{54}{figure.caption.45}
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Diagrama de sectores de los resultados de nvprof para el \IeC {\'a}rbol de decision.\relax }}{55}{figure.caption.46}
 \addvspace {10\p@ }

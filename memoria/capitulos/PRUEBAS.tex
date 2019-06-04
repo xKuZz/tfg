@@ -43,7 +43,7 @@ Para el desarrollo de las pruebas, mi ordenador personal ha sido utilizado. Las 
 
 \begin{itemize}
 	\item \textbf{Placa Base:} MSI B450M Bazooka.
-	\item \textbf{Sistema Operativo:} Windows 10 64 bits.
+	\item \textbf{Sistema Operativo:} Windows 10 Home 64 bits.
 	\item \textbf{CPU:} AMD Ryzen 5 2600X.
 	\item \textbf{RAM:} Kingston HyperX Fury Black DDR4 2400 MHz PC4-19200 8GB CL15.
 \end{itemize}
@@ -55,7 +55,7 @@ Durante la fase de desarrollo del árbol de decisión hemos utilizado dos conjun
 
 \textbf{Spambase} \cite{spambase} es un conjunto de 4601 muestras con 57 atributos. El objetivo en este conjunto de muestras es diferenciar correos no deseados (\textit{spam}) de correos deseados en función de los 56 atributos numéricos basados en el contenido del correo electrónico asociado a la muestra.\\
 
-\textbf{Magic Gamma Telescope} \cite{magic04} es un conjunto de 19020 muestras con 11 atributos. Los datos de este conjunto fueron obtenidos en un experimento con un telescopio especial para observar rayos gamma de alta energía. El objetivo es diferenciar imágenes tomadas por el telescopio, y preprocesadas de estas muestras generadas por rayos gamma (\textit{signal}), de las de rayos cósmicos en la capa superior de la atmósfera (\textit{background}). Los datos de este conjunto fueron generados a partir de simulaciones de Monte Carlo.\\
+\textbf{Magic Gamma Telescope} \cite{magic04} es un conjunto de 19020 muestras con 11 atributos. Los datos de este conjunto fueron obtenidos en un experimento con un telescopio especial para observar rayos gamma de alta energía. El objetivo es diferenciar imágenes tomadas por el telescopio de muestras generadas por rayos gamma (\textit{signal}) de las de rayos cósmicos en la capa superior de la atmósfera (\textit{background}). Los datos de este conjunto fueron generados a partir de simulaciones de Monte Carlo.\\
 
 Para evaluar el rendimiento de ambos modelos para conjuntos de \textit{Big Data} hemos utilizado \textbf{SUSY} \cite{susy}. Este conjunto de datos contiene 5 millones de muestras con 18 atributos, que se generó a partir de un experimento de física en el que también se intenta diferenciar un proceso que genera partículas supersimétricas (\textit{signal}) de otro proceso que no las genera (\textit{background}). En el caso del mapa autoorganizado, la clase de salida es ignorada. De manera similar al anterior, los datos del conjunto fueron generados a partir de simulaciones de Monte Carlo.
 
@@ -120,7 +120,44 @@ En la gráfica planteada vemos de manera clara cómo, al aumentar el número de 
 
 
 \subsection{Resultados de Nsight sobre la versión final del algoritmo.}
-PENDIENTE DE REDACTAR.
+Por último, analizamos en profundidad simulamos el entrenamiento del SOM durante una iteración con un ejemplo completamente aleatorio. El total de muestras a evaluar es de 1 millón, divididas en 10 particiones de 100000 muestras. El mapa de neuronas objetivo es de 10 filas por 10 columnas y la dimensión del problema a resolver es de 18 características. En la tabla \ref{tab:profsomkernels}, vemos los tiempos de ejecución de los \textit{kernels} en este experimento.\\
+
+\begin{table}[ht]
+\begin{tabular}{@{}|lc|cccc|@{}}
+\toprule
+                                 & \multicolumn{1}{l|}{}                               & \multicolumn{4}{c|}{\textit{\textbf{Tiempo}}}                                                                                         \\
+\textit{\textbf{Kernel}}         & \multicolumn{1}{l|}{\textit{\textbf{Nº usos}}} & \textit{\textbf{mínimo}} & \textit{\textbf{medio}}           & \textit{\textbf{máximo}}          & \textit{\textbf{total}}            \\ \midrule
+\textit{\textbf{rand\_weights}}  & 1                                                   & $6,62 \; \mu s$             & $6,62 \; \mu s$                      & $6,62 \;\mu s$                      & $6,62 \;\mu s$                       \\
+\textit{\textbf{som\_iter}}      & 10                                                  & $1,61 \; ms$                & $1,835 \; ms$                        & $2,17 \;ms$                         & $18,35 \;ms$                         \\
+\textit{\textbf{finish\_update}} & 1                                                   & $37,38 \; \mu s$            & \multicolumn{1}{l}{$37,38\; \mu s$} & \multicolumn{1}{l}{$37,38 \;\mu s$} & \multicolumn{1}{l|}{$37,38 \;\mu s$} \\ \bottomrule
+\end{tabular}
+\caption{Tiempos de ejecución de los kernels en el experimento de profiling}
+\label{tab:profsomkernels}
+\end{table}
+
+Como cabía esperar, la mayor parte del tiempo se corresponde a la ejecución del \textit{kernel som\_iter}, que tarda un total de $18,35 \; ms$. El kernel \textit{rand\_weigths} es el más rápido de todos y, aun así, es sólo invocado una vez en el algoritmo, independientemente del número de iteraciones, por lo que no tiene sentido centrarse en optimizarlo mientras se puedan hacer otras mejoras. El kernel \textit{finish\_update}, que será llamado tantas veces como iteraciones se realicen en el algoritmo ocupan el puesto intermedio, siendo 49 veces más rápido que una llamada al \textit{kernel som\_iter}. Además, el \textit{kernel som\_iter}, siempre será llamado las mismas veces que \textit{finish\_update} multiplicado por el número de particiones del \textit{RDD} por lo que, a ser posible, hemos de centrarnos en mejorar este \textit{kernel}.\\
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.3]{imagenes/som_sol.png}
+\caption{Speed of Light del kernel evaluado.}
+\label{img:sol}
+\end{figure}
+
+Un análisis más profundo del \textit{kernel som\_iter} con el profiler nos revela que el cuello de botella se debe a los cálculos realizados (figura \ref{img:sol}). La medida \textit{``Speed Of Light (SOL)''} nos indica lo cerca que estamos de alcanzar el rendimiento teórico máximo de unidades de \textit{hardware} durante la utilización del dispositivo CUDA en el \textit{kernel}. Podemos observar que, en nuestro caso, estamos aprovechando un 66,54 \% de la capacidad máxima de computación de nuestra GTX 1060.\\
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.3]{imagenes/som_warp_states.png}
+\caption{Análisis de los warps del kernel.}
+\label{img:warpssom}
+\end{figure}
+
+En la figura \ref{img:warpssom} vemos las dos razones principales que hacen que el \textit{kernel} no funcione más rápido. Una de ellas es los accesos a memoria dentro del dispositivo y la otra es la divergencia de las hebras, es decir, situaciones en las que las hebras quieren ejecutar diferentes instrucciones.\\
+
+ Todos los elementos dentro de un bloque que eran utilizados más de una vez fueron cargados en memoria compartida por lo que podemos intuir que este problema radica de conflictos que surjan del uso de las operaciones de suma atómica. Encontrar una alternativa mejor que la planteada para el cálculo de los pesos parciales debería de ser la prioridad a la hora de optimizar este algoritmo. \\
+
+ Por otro lado, el segundo problema que destacamos es la divergencia, que se debe principalmente a que, en este ejemplo, trabajamos con 128 hebras por bloque mientras que el número de neuronas es 100, por lo que uno de los \textit{warps} utilizará tan sólo 4 de las 32 hebras. En un caso ideal, el tamaño del mapa tendría un número de neuronas que fuese potencia de 2 (al menos 32). Si tuviésemos garantizado que esto fuese a ocurrir, podríamos eliminar gran parte de los condicionales utilizados ya que no sería necesario comprobar si hay más hebras que neuronas, ni habría que rellenar distancias extras con infinito, ni tendríamos que realizar todas las comprobaciones en la reducción para tamaños de bloque superiores al número de neuronas.
 
 \newpage
 \section{Experimentos para evaluar el árbol de decisión.}
