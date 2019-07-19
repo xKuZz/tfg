@@ -1,10 +1,10 @@
-\chapter{Mapas autoorganizados.}
+\chapter{Mapas auto-organizados.}
 \section{Definición.}
-Los mapas autoorganizados \textit{Self Organizing Map}, también llamados mapa autoorganizados de características \textit{Self Organizing Feature Map} o redes neuronales de Kohonen son un modelo neuronal de aprendizaje competitivo y no supervisado propuesto por \textit{Teuvo Kohonen} a principios de la década de 1980.\\
+Los mapas auto-organizados \textit{Self Organizing Map}, también llamados mapa auto-organizados de características \textit{Self Organizing Feature Map} o redes neuronales de Kohonen son un modelo neuronal de aprendizaje competitivo y no supervisado propuesto por \textit{Teuvo Kohonen} a principios de la década de 1980.\\
 
 Al ser un modelo de aprendizaje no supervisado, se encarga de descrubir patrones iguales en las muestras y agruparlos basandose en la información de las características. 
 
-\section{Arquitectura de una mapa autoorganizado.}
+\section{Arquitectura de una mapa auto-organizado.}
 La arquitectura de este tipo de redes neuronales está formada por dos capas totalmente interconectadas. Una capa de entrada y una capa de salida (también llamada capa de Kohonen, capa competitiva o capa de aprendizaje). \\
 
 La capa de entrada tiene el mismo número de nodos que el número de características que tiene cada muestra de entrada.\\
@@ -15,7 +15,7 @@ La capa de salida está compuesta por una estructura con $X$ neuronas, habitaulm
 \includegraphics[width=0.8\textwidth]{imagenes/arquitectura_som.png}
 \caption{Esquema de una red neuronal de Kohonen.}
 \end{figure}
-\section{Proceso de entrenamiento de un mapa autoorganizado.}
+\section{Proceso de entrenamiento de un mapa auto-organizado.}
 \textit{En la explicación de este algoritmo se asume que la capa de salida es una matriz bidimensional, como se ha comentado antes, esto no tiene que ocurrir aunque es lo más común.}\\
 
 En primer lugar, se \textbf{inicializan} \textbf{los pesos} asociados a la capa de salida. Lo más habitual, es tomar dichos pesos de una distribución aleatoria.

@@ -1,53 +1,38 @@
 \BOOKMARK [0][-]{chapter.1}{Introducci\363n y motivaci\363n.}{}% 1
-\BOOKMARK [1][-]{section.1.1}{Motivaci\363n.}{chapter.1}% 2
+\BOOKMARK [1][-]{section.1.1}{Introducci\363n y motivaci\363n.}{chapter.1}% 2
 \BOOKMARK [1][-]{section.1.2}{Estado del arte: trabajos relacionados.}{chapter.1}% 3
-\BOOKMARK [1][-]{section.1.3}{Descripci\363n del proyecto.}{chapter.1}% 4
-\BOOKMARK [1][-]{section.1.4}{Planificaci\363n de tareas.}{chapter.1}% 5
-\BOOKMARK [1][-]{section.1.5}{Requisitos de hardware y software para el proyecto.}{chapter.1}% 6
+\BOOKMARK [1][-]{section.1.3}{Descripci\363n oficial del proyecto.}{chapter.1}% 4
+\BOOKMARK [1][-]{section.1.4}{Requisitos de hardware y software para el proyecto.}{chapter.1}% 5
+\BOOKMARK [1][-]{section.1.5}{Planificaci\363n de tareas.}{chapter.1}% 6
 \BOOKMARK [1][-]{section.1.6}{Objetivos.}{chapter.1}% 7
 \BOOKMARK [1][-]{section.1.7}{Estructura del documento.}{chapter.1}% 8
 \BOOKMARK [0][-]{chapter.2}{Modelos de Soft Computing considerados.}{}% 9
-\BOOKMARK [1][-]{section.2.1}{Mapas autoorganizados \(Self Organizing Map\)}{chapter.2}% 10
+\BOOKMARK [1][-]{section.2.1}{Mapas auto-organizados \(Self Organizing Map\)}{chapter.2}% 10
 \BOOKMARK [2][-]{subsection.2.1.1}{Proceso de entrenamiento.}{section.2.1}% 11
-\BOOKMARK [2][-]{subsection.2.1.2}{Usos del mapa autoorganizado.}{section.2.1}% 12
-\BOOKMARK [2][-]{subsection.2.1.3}{Mapa autoorganizado batch.}{section.2.1}% 13
+\BOOKMARK [2][-]{subsection.2.1.2}{Usos del mapa auto-organizado.}{section.2.1}% 12
+\BOOKMARK [2][-]{subsection.2.1.3}{Mapa auto-organizado batch.}{section.2.1}% 13
 \BOOKMARK [2][-]{subsection.2.1.4}{Medidas de calidad.}{section.2.1}% 14
-\BOOKMARK [1][-]{section.2.2}{\301rboles de decisi\363n.}{chapter.2}% 15
-\BOOKMARK [2][-]{subsection.2.2.1}{Proceso de entrenamiento.}{section.2.2}% 16
-\BOOKMARK [2][-]{subsection.2.2.2}{Poda de \341rboles y criterios de terminaci\363n temprana.}{section.2.2}% 17
-\BOOKMARK [2][-]{subsection.2.2.3}{Calidad del modelo.}{section.2.2}% 18
-\BOOKMARK [2][-]{subsection.2.2.4}{Ventajas e incovenientes.}{section.2.2}% 19
-\BOOKMARK [0][-]{chapter.3}{Implementaci\363n.}{}% 20
-\BOOKMARK [1][-]{section.3.1}{Breve introducci\363n a CUDA.}{chapter.3}% 21
-\BOOKMARK [2][-]{subsection.3.1.1}{Estructura de hebras, bloques y mallas.}{section.3.1}% 22
-\BOOKMARK [2][-]{subsection.3.1.2}{La memoria compartida.}{section.3.1}% 23
-\BOOKMARK [2][-]{subsection.3.1.3}{Python: Numba y CuPy.}{section.3.1}% 24
-\BOOKMARK [2][-]{subsection.3.1.4}{Spark.}{section.3.1}% 25
-\BOOKMARK [1][-]{section.3.2}{Proceso de implementaci\363n.}{chapter.3}% 26
-\BOOKMARK [1][-]{section.3.3}{Desarrollo del mapa autoorganizado de Kohonen.}{chapter.3}% 27
-\BOOKMARK [2][-]{subsection.3.3.1}{Limitaciones del mapa autoorganizado online.}{section.3.3}% 28
-\BOOKMARK [2][-]{subsection.3.3.2}{Uso de Spark.}{section.3.3}% 29
-\BOOKMARK [2][-]{subsection.3.3.3}{Representaci\363n de la estructura de pesos de las neuronas.}{section.3.3}% 30
-\BOOKMARK [2][-]{subsection.3.3.4}{Kernels implementados.}{section.3.3}% 31
-\BOOKMARK [1][-]{section.3.4}{Desarrollo de un modelo de \341rbol de decisi\363n.}{chapter.3}% 32
-\BOOKMARK [2][-]{subsection.3.4.1}{Lista de atributos.}{section.3.4}% 33
-\BOOKMARK [2][-]{subsection.3.4.2}{Esquema general del algoritmo implementado.}{section.3.4}% 34
-\BOOKMARK [2][-]{subsection.3.4.3}{La operaci\363n de scan.}{section.3.4}% 35
-\BOOKMARK [2][-]{subsection.3.4.4}{C\341lculo del criterio de Gini.}{section.3.4}% 36
-\BOOKMARK [2][-]{subsection.3.4.5}{Reorganizaci\363n de la listas de atributos.}{section.3.4}% 37
-\BOOKMARK [2][-]{subsection.3.4.6}{Limitaciones y uso de Spark.}{section.3.4}% 38
-\BOOKMARK [0][-]{chapter.4}{Desarrollo de pruebas y an\341lisis de resultados.}{}% 39
-\BOOKMARK [1][-]{section.4.1}{Entorno de pruebas.}{chapter.4}% 40
-\BOOKMARK [1][-]{section.4.2}{Conjuntos de datos utilizados.}{chapter.4}% 41
-\BOOKMARK [1][-]{section.4.3}{Experimentos para evaluar el mapa autoorganizado.}{chapter.4}% 42
-\BOOKMARK [2][-]{subsection.4.3.1}{Verificaci\363n de la implementaci\363n del modelo.}{section.4.3}% 43
-\BOOKMARK [2][-]{subsection.4.3.2}{Uso del modelo sobre un conjunto de datos grandes dimensiones.}{section.4.3}% 44
-\BOOKMARK [2][-]{subsection.4.3.3}{Resultados de Nsight sobre la versi\363n final del algoritmo.}{section.4.3}% 45
-\BOOKMARK [1][-]{section.4.4}{Experimentos para evaluar el \341rbol de decisi\363n.}{chapter.4}% 46
-\BOOKMARK [2][-]{subsection.4.4.1}{Tablas de resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 47
-\BOOKMARK [2][-]{subsection.4.4.2}{An\341lisis de los resultados para la generaci\363n de un \372nico \341rbol.}{section.4.4}% 48
-\BOOKMARK [2][-]{subsection.4.4.3}{Tabla de resultados del random forest.}{section.4.4}% 49
-\BOOKMARK [2][-]{subsection.4.4.4}{An\341lisis de los resultados del random forest.}{section.4.4}% 50
-\BOOKMARK [2][-]{subsection.4.4.5}{Resultados de nvprof sobre la versi\363n final del algoritmo.}{section.4.4}% 51
-\BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 52
-\BOOKMARK [0][-]{chapter*.47}{Bibliograf\355a}{}% 53
+\BOOKMARK [0][-]{chapter.3}{Implementaci\363n.}{}% 15
+\BOOKMARK [1][-]{section.3.1}{CUDA.}{chapter.3}% 16
+\BOOKMARK [2][-]{subsection.3.1.1}{Python, NumPy, Numba.}{section.3.1}% 17
+\BOOKMARK [2][-]{subsection.3.1.2}{Estructura de hebras, bloques y mallas.}{section.3.1}% 18
+\BOOKMARK [2][-]{subsection.3.1.3}{Estructura de memoria y memoria compartida.}{section.3.1}% 19
+\BOOKMARK [2][-]{subsection.3.1.4}{Sincronizaci\363n y operaciones at\363micas.}{section.3.1}% 20
+\BOOKMARK [2][-]{subsection.3.1.5}{Generaci\363n de n\372meros pseudoaleatorios en la GPU.}{section.3.1}% 21
+\BOOKMARK [2][-]{subsection.3.1.6}{La reducci\363n y conflictos de bancos en memoria compartida.}{section.3.1}% 22
+\BOOKMARK [1][-]{section.3.2}{Spark.}{chapter.3}% 23
+\BOOKMARK [1][-]{section.3.3}{Proceso de implementaci\363n.}{chapter.3}% 24
+\BOOKMARK [1][-]{section.3.4}{Desarrollo del mapa auto-organizado de Kohonen.}{chapter.3}% 25
+\BOOKMARK [2][-]{subsection.3.4.1}{Limitaciones del mapa auto-organizado online.}{section.3.4}% 26
+\BOOKMARK [2][-]{subsection.3.4.2}{Uso de Spark.}{section.3.4}% 27
+\BOOKMARK [2][-]{subsection.3.4.3}{Representaci\363n de la estructura de pesos de las neuronas.}{section.3.4}% 28
+\BOOKMARK [2][-]{subsection.3.4.4}{Kernels implementados.}{section.3.4}% 29
+\BOOKMARK [0][-]{chapter.4}{Desarrollo de pruebas y an\341lisis de resultados.}{}% 30
+\BOOKMARK [1][-]{section.4.1}{Entorno de pruebas.}{chapter.4}% 31
+\BOOKMARK [1][-]{section.4.2}{Conjuntos de datos utilizados.}{chapter.4}% 32
+\BOOKMARK [1][-]{section.4.3}{Experimentos para evaluar el mapa auto-organizado.}{chapter.4}% 33
+\BOOKMARK [2][-]{subsection.4.3.1}{Verificaci\363n de la implementaci\363n del modelo.}{section.4.3}% 34
+\BOOKMARK [2][-]{subsection.4.3.2}{Uso del modelo sobre un conjunto de datos grandes dimensiones.}{section.4.3}% 35
+\BOOKMARK [2][-]{subsection.4.3.3}{Resultados de Nsight sobre la versi\363n final del algoritmo.}{section.4.3}% 36
+\BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 37
+\BOOKMARK [0][-]{chapter*.39}{Bibliograf\355a}{}% 38

@@ -3,201 +3,171 @@ from numba import cuda
 import numpy as np
 
 """
-Implementación de scan exclusivo para Numba CUDA.
-Basado en https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html
+Implementación de scan inclusivo
 """
-
-def scan(x, out, MAX_TPB=128):
-  
-    n = x.size
-    tpb = MAX_TPB 
-    # Elementos por bloque
-    epb = tpb * 2 
-    # Número de bloques completos
-    blocks = n // epb
-    # Elementos en el último bloque
-    elb = n % epb
+@cuda.jit
+def scan_block(d_data, d_scan, aux):
+    temp = cuda.shared.array(shape=32, dtype=numba.float32)
+    tid = cuda.threadIdx.x
+    idx = cuda.grid(1)
+    temp1 = d_data[tid+cuda.blockIdx.x*cuda.blockDim.x]
     
-    # Si sólo tenemos un bloque incompleto
-    if blocks == 0:
-        total_elb = 2 * 128
-        # Total de hebras por bloque
-        my_tpb = 128
-        # Memoria compartida
-        sm_size = total_elb * x.dtype.itemsize
-        
-        aux = cuda.device_array(1, x.dtype)
-        not_full_block_scan[1, my_tpb, 0, sm_size](x, out, aux, 0, elb, 0)
-        
-        return aux
-
-    else:
-        n_scans = blocks if elb == 0 else blocks + 1
-        aux = cuda.device_array(n_scans, x.dtype)
-
-        # Memoria compartida
-        sm_size = epb * x.dtype.itemsize
-
-        # Prescan de todos los bloques
-        prescan[blocks, tpb, 0, sm_size](x, out, aux)
-
-        # Prescan del último bloque, si procede
-        if elb != 0:
-            total_elb = 2 * 128
-            # Total de hebras por bloque
-            my_tpb = 128
-            # Memoria compartida
-            sm_size = total_elb * x.dtype.itemsize
-            not_full_block_scan[1, my_tpb, 0, sm_size](x, out, aux, n_scans - 1, elb, n - elb)
-
-        d_out2 = cuda.device_array(aux.shape, aux.dtype)
-        total = scan(aux, d_out2, MAX_TPB)
-
-        scan_sum[n_scans, tpb](out, d_out2)
-
-        return total
-
+    d = 1
+    while d < 32:
+        temp2 = cuda.shfl_up_sync(-1, temp1, d)
+        if tid % 32 >= d:
+            temp1 += temp2
+        d <<=1
+    if tid % 32 == 31:
+        temp[tid//32] = temp1
+    cuda.syncthreads()
+    
+    if tid < 32:
+        temp2 = 0.0
+        if tid < cuda.blockDim.x/32:
+            temp2 = temp[tid]
+            
+        d = 1
+        while d < 32:
+            temp3 = cuda.shfl_up_sync(-1, temp2, d)
+            if tid % 32 >= d:
+                temp2 += temp3
+            d<<=1
+            
+        if tid < cuda.blockDim.x//32:
+            temp[tid] = temp2
+    cuda.syncthreads()
+    
+    if tid >= 32:
+        temp1 += temp[tid//32-1]
+    cuda.syncthreads()
+    
+    if idx < d_scan.size:
+        d_scan[idx] = temp1
+    if tid == cuda.blockDim.x-1:
+        aux[cuda.blockIdx.x] = temp1
+    
 @cuda.jit
 def scan_sum(data, aux):
-    temp = cuda.shared.array(1, numba.int32)
-
     # Índices
     bidx = cuda.blockIdx.x 
-    tidx = cuda.threadIdx.x
-    eidx = cuda.grid(1) * 2
-    
-    # Si estamos en la primera hebra guardamos el
-    # auxiliar lo acumulado del bloque anteior
-    if tidx == 0:
-        temp[0] = aux[bidx]
+    idx = cuda.grid(1)
+    if cuda.blockDim.x <= idx < data.size:
+        data[idx] += aux[cuda.blockIdx.x-1]
 
-    cuda.syncthreads()
-    
-    # Sumamos lo acumulado del bloque anterior
-    if eidx <= data.size:
-        data[eidx] += aux[bidx] 
-
-        if eidx + 1 < data.size:
-            data[eidx + 1] += aux[bidx]
-
-@cuda.jit
-def prescan(data_in, data_out, aux):
-    
-    # Índices y memoria compartida
-    shared_aux = cuda.shared.array(0, numba.int32)
-    tidx = cuda.threadIdx.x 
-    idx = cuda.grid(1) 
-    bidx = cuda.blockIdx.x 
-    blockSize = cuda.blockDim.x
-    
-    # Cargamos datos en memoria compartida
-    shared_aux[2 * tidx] = data_in[2 * idx]
-    shared_aux[2 * tidx + 1] = data_in[2 * idx + 1]
-    
-    offset = 1
-
-    # Construcción del árbol up-sweepe
-    d = blockSize
-    while d > 0:
-        cuda.syncthreads()
-        
-        if tidx < d:
-            ai = offset * (2 * tidx + 1) - 1
-            bi = offset * (2 * tidx + 2) - 1
-
-            shared_aux[bi] += shared_aux[ai]
-        offset <<= 1 
-        d >>= 1 
-    
-    # Ponemos a cero el último elemento
-    if tidx == 0:
-        aux[bidx] = shared_aux[2 * blockSize - 1]
-        shared_aux[2 * blockSize - 1] = 0
-        
-    # Contrucción del árbol down-sweepe
-    b = blockSize << 1
-    d = 1
-    while d < b:
-        offset >>= 1
-        cuda.syncthreads()
-        
-        if tidx < d:
-            ai = offset * (2 * tidx + 1) - 1
-            bi = offset * (2 * tidx + 2) - 1
-            
-            t = shared_aux[ai]
-            shared_aux[ai] = shared_aux[bi]
-            shared_aux[bi] += t
-            
-        d <<= 1
-        
-    cuda.syncthreads()
-    
-    # Guardamos los resultados obtenidos
-    data_out[2 * idx] = shared_aux[2 * tidx]
-    data_out[2 * idx + 1] = shared_aux[2 * tidx + 1]
+def scan(d_x, d_scan, tpb=1024):
+    aux = np.empty(d_x.size//tpb, dtype=d_x.dtype)
+    scan_block[d_x.size//tpb+1, tpb](d_x, d_scan, aux)
+    scan_sum[d_x.size//tpb+1, tpb](d_scan, np.cumsum(aux))
 
 
 @cuda.jit
-def not_full_block_scan(data_in, data_out, aux, auxidx, elb, start_idx):
-    # Índices y memoria compartida
-    shared_aux = cuda.shared.array(0, numba.int32)
-
-    tidx = cuda.threadIdx.x 
-    blockSize =  cuda.blockDim.x
-
-    # Cargamos en memoria compartida si procede, si no ponemos 0.
-    a = 2 * tidx
-    b = 2 * tidx + 1
-
-    shared_aux[a] = data_in[start_idx + a] if a < elb else 0
-    shared_aux[b] = data_in[start_idx + b] if b < elb else 0
-    
-    offset = 1
-
-    d = blockSize
-    while d > 0:
-        cuda.syncthreads()
-        
-        if tidx < d:
-            ai = offset * (2 * tidx + 1) - 1
-            bi = offset * (2 * tidx + 2) - 1
-
-            shared_aux[bi] += shared_aux[ai]
-        offset <<= 1 
-        d >>= 1
-
-    # Poner último elemento a 0
-    if tidx == 0:
-        if auxidx != -1:
-            aux[auxidx] = shared_aux[2 * blockSize - 1]
-
-        shared_aux[2 * blockSize - 1] = 0
-        
-   
+def multi_scan_block(d_data, d_scan, aux):
+    temp = cuda.shared.array(shape=32, dtype=numba.float32)
+    tid = cuda.threadIdx.x
+    idx = tid+cuda.blockIdx.x*cuda.blockDim.x
+    if idx < d_data.shape[1]:
+        temp1 = d_data[cuda.blockIdx.y, idx]        
     d = 1
-    c = blockSize << 1
-    while d < c: 
-        offset >>= 1
-        cuda.syncthreads()
-        
-        if tidx < d:
-            ai = offset * (2 * tidx + 1) - 1
-            bi = offset * (2 * tidx + 2) - 1
-            
-            t = shared_aux[ai]
-            shared_aux[ai] = shared_aux[bi]
-            shared_aux[bi] += t
-            
-        d <<= 1
-        
+    while d < 32:
+        temp2 = cuda.shfl_up_sync(-1, temp1, d)
+        if tid % 32 >= d:
+            temp1 += temp2
+        d <<=1
+    if tid % 32 == 31:
+        temp[tid//32] = temp1
     cuda.syncthreads()
     
-    # Escribimos salida
-    if a < elb:
-        data_out[start_idx + a] = shared_aux[a]
-    if b < elb:
-        data_out[start_idx + b] = shared_aux[b]
+    if tid < 32:
+        temp2 = 0.0
+        if tid < cuda.blockDim.x/32:
+            temp2 = temp[tid]
+            
+        d = 1
+        while d < 32:
+            temp3 = cuda.shfl_up_sync(-1, temp2, d)
+            if tid % 32 >= d:
+                temp2 += temp3
+            d<<=1
+            
+        if tid < cuda.blockDim.x//32:
+            temp[tid] = temp2
+    cuda.syncthreads()
+    
+    if tid >= 32:
+        temp1 += temp[tid//32-1]
+    cuda.syncthreads()
+    
+    if idx < d_data.shape[1]:
+        d_scan[cuda.blockIdx.y, idx] = temp1
+
+    if tid == cuda.blockDim.x-1:
+        for i in range(cuda.blockIdx.x, cuda.gridDim.x):
+            cuda.atomic.add(aux, (cuda.blockIdx.y, i), temp1)
+
+
+@cuda.jit
+def multi_scan_sum(data, aux):
+    col = cuda.threadIdx.x+cuda.blockIdx.x*cuda.blockDim.x
+    if cuda.blockDim.x <= col < data.shape[1]:
+        data[cuda.blockIdx.y, col] += aux[cuda.blockIdx.y, cuda.blockIdx.x-1]
+
+@cuda.jit
+def multi_scan_sum_with_gini(data, values, aux, my_min):
+    row = cuda.blockIdx.y
+    col = cuda.threadIdx.x+cuda.blockIdx.x*cuda.blockDim.x
+
+    n = data.shape[1]
+    total_true = aux[0,aux.shape[1] - 1]
+
+    if cuda.grid(1) == 0:
+        my_min[0] = np.inf
+
+    if cuda.blockDim.x <= col < data.shape[1]:
+        data[row, col] += aux[row, cuda.blockIdx.x-1]
+
+    if col < data.shape[1]:
+        n_i = col % n + 1
+        n_d = n - n_i
+        if n_d != 0 and values[row, col] != values[row, col + 1]:
+            t_i = data[row, col]
+            t_d = total_true - t_i
+            data[row, col] = (t_i * (n_i - t_i)/(n_i)) + (t_d * (n_d - t_d)/(n_d))
+        else:
+            data[row, col] = n
+
+@cuda.jit
+def multi_scan_sum_with_addresses(data, aux, address, my_flag, my_offset):
+    row = cuda.blockIdx.y
+    col = cuda.threadIdx.x+cuda.blockIdx.x*cuda.blockDim.x
+
+    total_false = aux[0, aux.shape[1] - 1]
+
+    if cuda.blockDim.x <= col < data.shape[1]:
+        data[row, col] += aux[row, cuda.blockIdx.x-1]
+
+    if col < my_flag.shape[1]:
+        address[row, col] = col + total_false - data[row, col] if my_flag[row, col] else data[row, col] - 1
+        address[row, col] += my_offset
+
+def multi_scan(d_x, d_scan, tpb=1024, stream=0):
+    aux = cuda.device_array((d_x.shape[0], d_x.shape[1]//tpb+1), dtype=d_x.dtype, stream=stream)
+    aux[:,:] = 0
+    blocks = (d_x.shape[1]//tpb+1, d_x.shape[0])
+    multi_scan_block[blocks, tpb, stream](d_x, d_scan, aux)
+    multi_scan_sum[blocks, tpb, stream](d_scan, aux)
+
+
+def multi_scan_with_gini(d_x, d_scan, d_values, my_min, aux, tpb=1024, stream=0):
+    blocks = (d_x.shape[1]//tpb+1, d_x.shape[0])
+    multi_scan_block[blocks, tpb, stream](d_x, d_scan, aux)
+    multi_scan_sum_with_gini[blocks, tpb, stream](d_scan, d_values, aux, my_min)
+    return aux[0].copy_to_host(stream=stream)[aux.shape[1]-1]
+
+def multi_scan_with_address(d_x, d_scan, address, my_flag, aux, my_offset, tpb=1024, stream=0):
+    blocks = (d_x.shape[1]//tpb+1, d_x.shape[0])
+    multi_scan_block[blocks, tpb, stream](d_x, d_scan, aux)
+    multi_scan_sum_with_addresses[blocks, tpb, stream](d_scan, aux, address, my_flag, my_offset)
 
 """
 La implementación se corresponde a
@@ -686,3 +656,158 @@ def multi_reduce_min_index(device_array):
         return np.array([reduce_min_index(device_array[i]) for i in range(blocks)])
     
     return device_indexes
+
+
+@cuda.jit
+def min_index_reduction(my_data, my_min, my_idx, aux, lock):
+    block_mins = cuda.shared.array(shape=32, dtype=numba.float32)
+    block_mins_idx = cuda.shared.array(shape=32, dtype=numba.int32)
+    row = cuda.blockIdx.y
+    col = cuda.threadIdx.x +cuda.blockIdx.x*cuda.blockDim.x
+    if col < my_data.shape[1]:
+        data1 = my_data[row, col]
+    else:
+        data1 = np.inf
+    idx1 = col
+    
+    # 1. Reducción min_index en cada warp
+    data2 = cuda.shfl_up_sync(-1, data1, 1)
+    idx2 = cuda.shfl_up_sync(-1, idx1, 1)
+    if data2 < data1:
+        data1 = data2
+        idx1 = idx2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 2)
+    idx2 = cuda.shfl_up_sync(-1, idx1, 2)
+    if data2 < data1:
+        data1 = data2
+        idx1 = idx2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 4)
+    idx2 = cuda.shfl_up_sync(-1, idx1, 4)
+    if data2 < data1:
+        data1 = data2
+        idx1 = idx2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 8)
+    idx2 = cuda.shfl_up_sync(-1, idx1, 8)
+    if data2 < data1:
+        data1 = data2
+        idx1 = idx2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 16)
+    idx2 = cuda.shfl_up_sync(-1, idx1, 16)
+    if data2 < data1:
+        data1 = data2
+        idx1 = idx2
+    if cuda.threadIdx.x%32 == 31:
+        block_mins[cuda.threadIdx.x//32] = data1
+        block_mins_idx[cuda.threadIdx.x//32] = idx1
+        
+    cuda.syncthreads()
+    
+    # 2. Reducción del bloque completo en el primer warp
+    if cuda.threadIdx.x < 32:
+        if cuda.threadIdx.x < cuda.blockDim.x // 32:
+            data2 = block_mins[cuda.threadIdx.x]
+            idx2 = block_mins_idx[cuda.threadIdx.x]
+        else:
+            data2 = np.inf
+            idx2 = col
+        
+        data3 = cuda.shfl_up_sync(-1, data2, 1)
+        idx3 = cuda.shfl_up_sync(-1, idx2, 1)
+        if data3 < data2:
+            data2 = data3
+            idx2 = idx3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 2)
+        idx3 = cuda.shfl_up_sync(-1, idx2, 2)
+        if data3 < data2:
+            data2 = data3
+            idx2 = idx3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 4)
+        idx3 = cuda.shfl_up_sync(-1, idx2, 4)
+        if data3 < data2:
+            data2 = data3
+            idx2 = idx3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 8)
+        idx3 = cuda.shfl_up_sync(-1, idx2, 8)
+        if data3 < data2:
+            data2 = data3
+            idx2 = idx3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 16)
+        idx3 = cuda.shfl_up_sync(-1, idx2, 16)
+        if data3 < data2:
+            data2 = data3
+            idx2 = idx3
+
+    if cuda.threadIdx.x == 31:
+        aux[cuda.blockIdx.y, cuda.blockIdx.x] = 0
+        while cuda.atomic.compare_and_swap(lock, 0, 1) == 1:
+            continue
+        if data2 < my_min[0]:
+            my_min[0] = data2
+            my_idx[0] = cuda.blockIdx.y
+            my_idx[1] = idx2
+        cuda.threadfence()
+        lock[0] = 0
+
+@cuda.jit
+def warp_based_reduce_sum(my_data, my_sum):
+    block_sums = cuda.shared.array(shape=32, dtype=numba.int32)
+    col = cuda.grid(1)
+    if col < my_data.shape[0]:
+        data1 = my_data[col]
+    else:
+        data1 = 0
+
+    
+    # 1. Reducción min_index en cada warp
+    data2 = cuda.shfl_up_sync(-1, data1, 1)
+    data1 += data2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 2)
+    data1 += data2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 4)
+    data1 += data2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 8)
+    data1 += data2
+            
+    data2 = cuda.shfl_up_sync(-1, data1, 16)
+    data1 += data2
+
+    if cuda.threadIdx.x%32 == 31:
+        block_sums[cuda.threadIdx.x//32] = data1
+        
+    cuda.syncthreads()
+    
+    # 2. Reducción del bloque completo en el primer warp
+    if cuda.threadIdx.x < 32:
+        if cuda.threadIdx.x < cuda.blockDim.x // 32:
+            data2 = block_sums[cuda.threadIdx.x]
+        else:
+            data2 = 0
+        
+        data3 = cuda.shfl_up_sync(-1, data2, 1)
+        data2 += data3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 2)
+        data2 += data3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 4)
+        data2 += data3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 8)
+        data2 += data3
+                
+        data3 = cuda.shfl_up_sync(-1, data2, 16)
+        data2 += data3
+
+    if cuda.threadIdx.x == 31:
+        cuda.atomic.add(my_sum, 0, data2)

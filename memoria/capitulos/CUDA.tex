@@ -1,49 +1,27 @@
-\section{Breve introducción a CUDA.}
-Como comentábamos al principio, CUDA \textit{(Computer Unified Device Arquitecture)} \cite{cuda} es una tecnología propietaria desarrollada por \textit{NVIDIA} y lanzada en junio de 2007, que nos proporciona de un lenguaje de programación general destinado a ser ejecutado en las tarjetas gráficas de la compañia. Para los propósitos de este trabajo y, habitualmente, a la hora de trabajar con CUDA denominaremos como \textbf{\textit{host}} a la CPU que se comunica con la tarjeta gráfica y como \textbf{dispositivo} a la GPU o tarjeta gráfica utilizada. \\
+%!TEX root = ../proyecto.tex
+\section{CUDA.}
+Como comentábamos al principio, \cuda \textit{(Computer Unified Device Arquitecture)} \cite{cuda} es una tecnología propietaria desarrollada por \textit{NVIDIA} y lanzada en junio de 2007, que nos proporciona de un lenguaje de programación general destinado a ser ejecutado en las tarjetas gráficas de la compañía. Para los propósitos de este trabajo y, habitualmente, a la hora de trabajar con \cuda denominaremos como \textbf{\textit{host}} a la CPU que se comunica con la tarjeta gráfica y como \textbf{dispositivo} a la GPU o tarjeta gráfica utilizada. \\
 
-La intercomunicación entre \textit{host} y dispositivo sigue un modelo maestro-esclavo. El \textit{host} actúa como maestro y es el encargado de indicar al dispoistivo el código que ha de ejecutar y de mandarlo a la cola del dispositivo. Además, el \textit{host} tiene la posibilidad de trabajar de forma asíncrona con la GPU mientras la cola de trabajos del dispositivo no esté llena. \\
+La intercomunicación entre \textit{host} y dispositivo sigue un modelo maestro-esclavo. El \textit{host} actúa como maestro y es el encargado de indicar al dispositivo el código que ha de ejecutar y mandar el trabajo al dispositivo. Además, el \textit{host} tiene la posibilidad de trabajar de forma asíncrona con la GPU mientras la cola de trabajos del dispositivo no esté llena.\\
 
 Es de vital importancia a la hora de trabajar con la GPU de tener en cuenta que:\\
 \begin{itemize}
-    \item a) La GPU tiene muchos más núcleos \textit{(cores)} que una CPU, lo que nos permite realizar mucha más operaciones en el mismo instante. Sin embargo, esto viene a expensas de un menor número de operaciones por segundo de cada núcleo, ya que para distrutar de la cantidad masiva de núcleos que tiene una GPU es necesario que ésta opere a una frecuencia más baja.
+    \item a) La GPU tiene muchos más núcleos \textit{(cores)} que una CPU, lo que nos permite realizar mucha más operaciones en el mismo instante. Sin embargo, esto viene a expensas de un menor número de operaciones por segundo de cada núcleo, ya que para disfrutar de la cantidad masiva de núcleos que tiene una GPU es necesario que ésta opere a una frecuencia más baja.
 
-    \item b) La GPU tiene su propia estructura de memoria, que ha de usar para poder realizar operaciones. Dentro de la jerarquía de memoria encontramos memoria RAM similar a la que utiliza la CPU a través de la placa base, así como varios niveles de caché. Además, hemos de tener en cuenta que a la hora de ejecutar algo en la GPU vamos a tener un gasto extra de tiempo por el traspaso de información de CPU a GPU y viceversa. Minimizar la información que ha de traspasarse en ambos sentidos así como intentar que toda la información necesaria sea transferida a la vez para sacar máximo potencial del PCI Express y exprimir al máximo posible el uso eficiente de la memoria caché, que en CUDA es habitualmente realizado mediante el manejo de la ``memoria compartida'' es fundamental para obtener mejores resultados, especialmente, aquellos en los que el cuello de botella es la transferencia de datos.
+    \item b) La GPU tiene su propia estructura de memoria, que ha de usar para poder realizar operaciones. Dentro de la jerarquía de memoria encontramos memoria RAM similar a la que utiliza la CPU a través de la placa base, así como varios niveles de caché. Además, hemos de tener en cuenta que a la hora de ejecutar algo en la GPU vamos a tener un gasto extra de tiempo por el traspaso de información de CPU a GPU y viceversa. Minimizar la información que ha de traspasarse en ambos sentidos así como intentar que toda la información necesaria sea transferida a la vez para sacar máximo potencial del PCI Express y exprimir al máximo posible el uso eficiente de la memoria caché, que en \cuda es habitualmente realizado mediante el manejo de la ``memoria compartida'' es fundamental para obtener mejores resultados, especialmente, aquellos en los que el cuello de botella es la transferencia de datos.
 
     \item c) Como la GPU tiene su propia memoria dedicada de un tamaño limitado hemos de hacer hincapié en no utilizar soluciones que generan demasiada complejidad espacial, ya que limitan la escalabilidad de los algoritmos.
 \end{itemize}
 
+\subsection{Python, NumPy, Numba.}
+Para desarrollar el código asociado a este proyecto, hemos optado por utilizar \textbf{Python} en vez de los tradicionales C o C++. El uso de \textit{Python} nos permite un desarrollo de los algoritmos más rápido así como el acceso a abstracciones de más alto nivel mediante el uso de la librerías \textbf{\textit{Numba}} y \textbf{\textit{NumPy}},  así como una mayor facilidad para la distribución del código, si se desea, mediante el uso de \textit{PyPI(Python Package Index)}, el repositorio de paquetes para Python. \\
+
+\textbf{NumPy} \cite{numpy} es un paquete de código abierto para Python diseñado para la computación científica. El paquete proporciona una potente estructura de datos para trabajar con arrays N-dimensionales y herramientas para realizar una gran cantidad de operaciones sobre los mismos (operaciones de cálculo matricial, algoritmos de álgebra lineal y generación de números pseudoaleatorios, entre otros).\\
+
+\textbf{Numba} \cite{numba} es un paquete para Python cuyo objetivo es la aceleración compilado fragmentos de código utilizando el compilador LLVM y dando la oportunidad de paralelizar código tanto para la CPU como para la GPU. En concreto, para las GPUs CUDA, proporciona al usuario un subconjunto de las características de CUDA con un nivel de abstracción mayor. Con eso no sólo conseguimos poder trabajar con CUDA desde Python sino también evitar, si lo deseamos, manejar las transferencias de memoria entre \textit{host} y dispositivo o la necesidad de indicar todos los tipos a la hora de inicializar un \textit{kernel} entre otras ventajas.\\
+
 \subsection{Estructura de hebras, bloques y mallas.}
-El \textbf{\textit{kernel}} es un fragmento de código especial destino a ser ejecutado en el dispotivo en el que se indica lo que ha de hacer una hebra.\\
-
-Las \textbf{hebras} son la unidad mínima en la arquitectura CUDA. Cada hebra es ejecutada por un núcleo CUDA. Cada hebra es consciente en tiempo de ejecución de su identificador dentro del bloque así como del identificador del bloque en el que se encuentra y el tamaño del mismo, permitiéndonos así repartir el trabajo en función de dichos valores. El \textbf{bloque} se corresponde a un conjunto de hebras que ejecuta el mismo \textit{kernel} y que pueden cooperar entre sí y, al conjunto de esos bloques, se le denomina \textbf{``grid'' o malla}. Tanto las hebras dentro de un bloque como los bloques dentro de una malla puede tener estructuras unidimensionales, bidimensionales y tridimensionales. Las dimensiones de estas estructuras será indicada por el \textit{host} a la hora de ejecutar el \textit{kernel}.\\
-
-CUDA exige que un mínimo de 32 hebras, denominado \textit{warp}, ejecuten instrucciones a la vez, aunque se hagan cálculos innecesarios así como que todas las hebras de un bloque sean ejecutadas por el mismo \textit{Streaming MultiProcessor}, de ahora en adelante, SM, que es uno de los procesadores en el dispositivo y dispone de un número específico de núcleos CUDA, sus propios registros y su propia caché entre otros.\\
-
-Al lanzar un \textit{kernel} hemos de utilizar al menos un bloque de $N$ hebras. Además, en los casos unidimensionales el número de hebras por bloque está limitado a un máximo que depende de la tarjeta gráfica en cuestión.
-
-\subsection{La memoria compartida.}
-Dentro de la tarjeta gráfica, nos encontramos con distintos niveles de memoria. Una vez los datos necesarios han sido traspasados del \textit{host} al dispositivo a través del bus PCI Express, esos datos son almacenados en una memoria DRAM de propósito general del dispositivo. Cuando un \textit{kernel} solicita datos de esta memoria, de manera similar a como ocurre en una CPU, los datos solicitados y los colidantes en memoria son colocados a través de varios niveles de caché, que tiene tamaño más limitado que la memoria DRAM pero con un acceso de lectura y escritura mucho más rápido.\\
-
-La \textbf{memoria compartida} es una abstracción para una región especial de la caché asociada a un bloque que es explícitamente usada por el programador en el \textit{kernel}, agilizando así considerablemente las transferencias de memoria en el dispositivo. En el cuadro \ref{tab:cudamemory}, podemos ver un resumen de los tipos de memoria existentes, dónde se pueden usar y dónde se encuentran dichos datos en el dispositivo.
-
-\begin{table}[ht]
-\begin{tabular}{|c|c|c|c|}
-\hline
-\textbf{Memoria}    & \textbf{Localización}                                           & \textbf{\begin{tabular}[c]{@{}c@{}}Acceso\\ (E = Escribir)\\ (L = Leer)\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Existente\\ hasta fin\\ de\end{tabular}} \\ \hline
-\textbf{Registro}   & Caché                                                           & Kernel (E/L)                                                                          & Hebra                                                                       \\ \hline
-\textbf{Local}      & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & Kernel (E/L)                                                                          & Hebra                                                                       \\ \hline
-\textbf{Compartida} & Caché                                                           & Kernel (E/L)                                                                          & Bloque                                                                      \\ \hline
-\textbf{Global}     & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Host (E/L)\\ Kernel (E/L)\end{tabular}                     & \begin{tabular}[c]{@{}c@{}}Aplicación\\ o uso de free\end{tabular}          \\ \hline
-\textbf{Constante}  & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Host (E/L)\\ Kernel (L)\end{tabular}                       & \begin{tabular}[c]{@{}c@{}}Aplicación \\ o uso de free\end{tabular}         \\ \hline
-\end{tabular}
-\caption{Resumen de los tipos de memoria en CUDA.}
-\label{tab:cudamemory}
-\end{table}
-
-\subsection{Python: Numba y CuPy.}
-Para desarrollar el código asociado a este proyecto, hemos optado por utilizar \textbf{Python} en vez de los tradicionales C o C++. El uso de \textit{Python} nos permite un desarrollo de los algoritmos más rápido así como el acceso a abstracciones de más alto nivel mediante el uso de la librerías \textbf{\textit{Numba}} y \textbf{\textit{CuPy}},  así como una mayor facilidad para la distribución del código, si se desea, mediante el uso de \textit{PyPI(Python Package Index)}, el repositorio de paquetes para Python. \\
-
-\textbf{Numba} \cite{numba} es un paquete para Python cuyo objetivo es la aceleración compilado fragmentos de código utilizando el compilador LLVM y dando la oportunidad de paralelizar código tanto para la CPU como para la GPU. En concreto, para las GPUs CUDA, proporciona al usuario un subconjunto de las características de CUDA con un nivel de abstracción mayor. Con eso no sólo conseguimos poder trabajar con CUDA desde Python sino, también evitar, si lo deseamos, manejar los traspasos de memoria entre host y dispositivo o la necesidad de indicar todos los tipos a la hora de inicializar un \textit{kernel} entre otras ventajas.
+El \textbf{\textit{kernel}} es un fragmento de código especial, destino a ser ejecutado en el dispositivo, en el que se indica las instrucciones que ha de ejecutar una hebra.\\
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
 from numba import cuda
@@ -53,7 +31,6 @@ import numpy as np
 def aumentar_en_1(un_array):
   # Cogemos el índice de la hebra
     pos = cuda.grid(1)
-
     # Si el índice está en el rango del array
     # incrementamos su valor
     if pos < un_array.size:
@@ -62,21 +39,178 @@ def aumentar_en_1(un_array):
 if __name__ == '__main__':
   # Declaramos un array de 10000 ceros
   ejemplo = np.zeros(10000)
+  # Optamos por 128 hebras por bloque
+  tpb = 128
   # Calculamos el número de bloques necesario
-  bloques = ejemplo.size // 128 + 1
+  bloques = ejemplo.size // tpb + 1
   # Lanzamos el kernel con bloques de 128 hebras
-  aumentar_en_1[bloques, 128](ejemplo)
+  aumentar_en_1[bloques, tpb](ejemplo)
 \end{minted}
 \captionof{listing}{Kernel para incrementar en 1 los elementos de un array.\\\\}
 \label{code:numbaexample}
 \end{code}
 
-\textbf{CuPy} \cite{cupy} es otro paquete de Python que, por un lado y de manera similar a Numba, nos permite generar kernels para CUDA en este caso de manera similar a los de C/C++ así como facilidades para generar kernels en los que se implementa reducciones u operaciones elemento a elemento en un array. Por otro lado, proporciona una API similar a la de NumPy pero las operaciones están implementadas utilizando CUDA. Además, CuPy está implementado de manera que permite utilizar directamente sus estructuras de datos sobre kernels de Numba, lo que nos permite combinar elementos de ambos paquetes según nos interese.
+Las \textbf{hebras} son la unidad mínima en la arquitectura \cudanospace. Cada hebra es ejecutada por un núcleo \cuda y es consciente, en tiempo de ejecución, de su identificador dentro del bloque así como del identificador del bloque en el que se encuentra y el tamaño del mismo, permitiéndonos así repartir el trabajo en función de dichos valores.\\
 
-\subsection{Spark.}
-\textit{Apache Spark} es un \textit{framework} de código abierto y propósito general para sistemas distribuidos de computación en clúster que proporciona una API utilizable desde los lenguajes de programación en Scala, Java, Python y R. El \textit{framework} fundamenta su arquitectura en el \textit{RDD (Resilient Distributed DataSet)}, que es una estructura de datos de sólo lectura distribuida en un clúster de máquinas, mantenida durante toda la computación y con tolerancia a fallos. Además, proporciona otras herramientas de alto nivel como ML/MLib, una librería con algoritmos de \textit{machine learning}.\\
+El \textbf{bloque} se corresponde a un conjunto de hebras que ejecuta el mismo \textit{kernel} y que pueden cooperar entre sí y, al conjunto de esos bloques, se le denomina \textbf{``grid'' o malla}. \\
 
-Utilizando la API de Python, podemos combinar el uso de \textit{Spark} y \textit{Numba CUDA} para afrontar problemas de grandes dimensiones, ya que el \textit{RDD} nos permite trabajar con subconjuntos de esos datos posibilitando incluso llevar las implementaciones realizadas a un clúster con múltiples sistemas con dispositivos GPU \textit{CUDA} cont todas las dependencias necesarias instaladas. \\
+Tanto las hebras dentro de un bloque como los bloques dentro de una malla puede tener estructuras unidimensionales, bidimensionales y tridimensionales. Las dimensiones de estas estructuras será indicada por el \textit{host} a la hora de ejecutar el \textit{kernel}.\\
 
-La distribución de trabajo en Spark se realizará utilizando la transformación \textit{mapPartitions} del \textit{RDD} de \textit{Spark}, que generá un nuevo RDD a partir de los resultados obtenidos al aplicar la función pasada a \textit{mapPartitions} como parámetro a cada una de las funciones.
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Variable}                            & \textbf{Significado}                        \\ \midrule
+\textit{\textbf{cuda.threadIdx.{[}x\textbar y\textbar z{]}}} & Índice de la hebra dentro del bloque        \\
+\textit{\textbf{cuda.blockDim.{[}x\textbar y\textbar z{]}}} & Número de hebras en el bloque.              \\
+\textit{\textbf{cuda.blockIdx.{[}x\textbar y\textbar z{]}}}  & Índice del bloque dentro del grid.          \\
+\textit{\textbf{cuda.gridDim.{[}x\textbar y\textbar z{]}}}   & Número de bloques en el grid.               \\
+\textit{\textbf{cuda.grid()}}                & Identificador único de la hebra en el grid. \\
+\textit{\textbf{cuda.gridsize()}}            & Número total de hebras que usa el grid.     \\ \bottomrule
+\end{tabular}
+\caption{Variables para indexación de hebras con Numba CUDA.}
+\label{tab:blockscuda}
+\end{table}
 
+\cuda exige que un mínimo de 32 hebras, denominado \textit{warp}, ejecuten instrucciones a la vez, aunque se hagan cálculos innecesarios así como que todas las hebras de un bloque sean ejecutadas por el mismo \textit{Streaming MultiProcessor}, de ahora en adelante, SM, que es uno de los procesadores en el dispositivo y dispone de un número específico de núcleos \cudanospace, sus propios registros y su propia caché, entre otros.\\
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=1.0]{imagenes/blocks.png}
+\caption{Distribución de bloques de un kernel en SMs.}
+\label{img:cudablocks}
+\end{figure}
+
+Al lanzar un \textit{kernel} hemos de utilizar al menos un bloque de $N$ hebras. Además, en los casos unidimensionales, el número de hebras por bloque está limitado a un máximo que depende de la tarjeta gráfica en cuestión, habitualmente 1024 hebras. No obstante, ni el uso de un único bloque de N hebras ni N bloques de 1 hebra es recomendable, ya que estaríamos dejando gran parte de la capacidad de computación paralela del dispositivo \cuda sin ser usada. En el primer caso, al haber un único bloque, sólo estaríamos haciendo uso de uno de los múltiples SMs que nos ofrece el dispositivo CUDA; en el segundo caso, al tener cada bloque una hebra, dado que los hebras de un bloque se ejecutan en \textit{warps}, cada bloque usaría 1 de las 32 hebras disponibles. 
+
+
+\subsection{Estructura de memoria y memoria compartida.}
+Dentro de la tarjeta gráfica, nos encontramos con distintos niveles de memoria. Una vez los datos necesarios han sido traspasados del \textit{host} al dispositivo a través del bus PCI Express, esos datos son almacenados en una memoria DRAM de propósito general del dispositivo. Cuando un \textit{kernel} solicita datos de esta memoria, de manera similar a como ocurre en una CPU, los datos solicitados y los colindantes en memoria son colocados a través de varios niveles de caché, que tiene tamaño más limitado que la memoria DRAM pero con un acceso de lectura y escritura mucho más rápido.\\
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}cccc@{}}
+\toprule
+\textbf{\textbf{Memoria}} & \textbf{\textbf{Localización}}                                  & \textbf{\begin{tabular}[c]{@{}c@{}}Acceso\\ (E = Escribir)\\ (L = Leer)\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Existente\\ hasta fin\\ de\end{tabular}} \\ \midrule
+\textbf{Registro}         & Caché                                                           & Kernel (E/L)                                                                          & Hebra                                                                       \\
+\textbf{Local}            & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & Kernel (E/L)                                                                          & Hebra                                                                       \\
+\textbf{Compartida}       & Caché                                                           & Kernel (E/L)                                                                          & Bloque                                                                      \\
+\textbf{Global}           & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Host (E/L)\\ Kernel (E/L)\end{tabular}                     & \begin{tabular}[c]{@{}c@{}}Aplicación\\ o uso de free\end{tabular}          \\
+\textbf{Constante}        & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Host (E/L)\\ Kernel (L)\end{tabular}                       & \begin{tabular}[c]{@{}c@{}}Aplicación \\ o uso de free\end{tabular}         \\ \bottomrule
+\end{tabular}
+\caption{Resumen de los tipos de memoria en CUDA.}
+\label{tab:cudamemory}
+\end{table}
+
+
+La \textbf{memoria compartida} es una abstracción para una región especial de la caché asociada a un bloque que es explícitamente usada por el programador en el \textit{kernel}, agilizando así considerablemente las transferencias de memoria en el dispositivo. En el cuadro \ref{tab:cudamemory}, podemos ver un resumen de los tipos de memoria existentes, dónde se pueden usar y dónde se encuentran dichos datos en el dispositivo.
+
+
+Si utilizamos los arrays N-dimensionales de NumPy, no tenemos la necesidad de realizar las transferencias de memoria. No obstante, es recomendable manejarlas manualmente para evitar cualquier transferencia de datos entre \textit{host} y dispositivo innecesaria. 
+
+\begin{table}[ht]
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Función}                                                                                                          & \textbf{Definición}                                                                                                                                            \\ \midrule
+\textbf{\begin{tabular}[c]{@{}l@{}}cuda.device\_array(dimensiones,\\                                  tipo)\end{tabular}} & \begin{tabular}[c]{@{}l@{}}Declara un array con las dimensiones \\ y tipo de datos dados en memoria \\ global. Invocada desde \textit{host}.\end{tabular}      \\ \midrule
+\textbf{cuda.to\_device(array)}                                                                                           & \begin{tabular}[c]{@{}l@{}}Envía array de la memoria del \textit{host} \\ a la memoria global del \\ dispositivo. Invocada desde \textit{host}.\end{tabular}   \\ \midrule
+\textbf{d\_array.copy\_to\_host()}                                                                                        & \begin{tabular}[c]{@{}l@{}}Método para enviar d\_array de la \\ memoria del dispositivo a la del \\ \textit{host}. Invocada desde \textit{host}.\end{tabular}  \\ \midrule
+\textbf{\begin{tabular}[c]{@{}l@{}}cuda.local.array(dimensiones,\\                              tipo)\end{tabular}}       & \begin{tabular}[c]{@{}l@{}}Declara un array con las dimensiones\\ y tipo de datos dados en memoria \\ local. Invocada desde \textit{kernel}.\end{tabular}      \\ \midrule
+\textbf{\begin{tabular}[c]{@{}l@{}}cuda.shared.array(dimensiones,\\                                  tipo)\end{tabular}}  & \begin{tabular}[c]{@{}l@{}}Declara un array con las dimensiones\\ y tipo de datos dados en memoria \\ compartida. Invocada desde \textit{kernel}.\end{tabular} \\ \bottomrule
+\end{tabular}
+\caption{Algunas funciones para trabajar con la memoria del dispositivo en CUDA.}
+\label{tab:cudamemoryfuncs}
+\end{table}
+
+\subsection{Sincronización y operaciones atómicas.}
+Es frecuente la necesidad de que múltiples hebras cooperen usando datos en alguna región de memoria del dispositivo a la que tienen acceso de forma simultánea. En estos casos, podríamos encontrarnos ante el riesgo de una dependencia de datos de tipo \textit{RAW (Read After Write)}, es decir, una situación en la que se lee un dato antes de que los cálculos previos que necesitamos se hayan realizado. Para evitar este tipo de dependencias, \cuda proporciona varios mecanismos para sincronizar las hebras usadas, de los que vamos a destacar los dos usados en este trabajo.\\
+
+Por un lado, si no estamos utilizando los \textit{streams} de \cudanospace, característica que permite lanzar \textit{kernels} distintos de forma concurrente, tenemos garantizado que un \textit{kernel} no será ejecutado hasta que el \textit{kernel} anterior no haya terminado de procesarse. El uso de múltiples \textit{kernels} no es recomendable si no es necesario, ya que, cuando queden pocas operaciones por realizar en uno de los \textit{kernels}, parte del dispositivo podría no estar realizando cálculo alguno, y, en el lanzamiento de cada \textit{kernel}, existe un pequeño intervalo de tiempo desde que el \textit{host} invoca el \textit{kernel} y éste empieza a ser ejecutado en la GPU.\\ 
+
+Por otro lado, dentro de un bloque, podemos sincronizar todas las hebras del mismo mediante el uso de la función \textbf{\textit{cuda.syncthreads()}}. Esta función, que es invocada desde un \textit{kernel}, garantiza que todas las instrucciones hasta el punto de invocación han sido ejecutadas por todas las hebras del bloque. Para ello, las hebras que ya han realizado los cálculos se quedan esperando a que las otras terminen, por lo que sólo debe usarse cuando sea necesario.\\
+
+
+Otra forma de evitar los riesgos \textit{RAW} es el uso de operaciones atómicas. Las operaciones atómicas son instrucciones que realizan la lectura, modificación y escritura de una posición de memoria global o compartida a la vez, es decir, está garantizado que realice todas sus operaciones antes de que otra hebra trabaje sobre la misma posición de memoria. Imaginemos el caso en el que una posición de memoria tiene un valor, 0, y dos hebras, A y B, quieren sumar dos valores: 1 y 2, respectivamente. El resultado final que deberíamos obtener sería 3, sin embargo, si no usamos las operaciones atómicas podría ocurrir que: en primer lugar, las hebras A y B leen el valor 0; en segundo lugar, A suma 1 y lo escribe en la posición de memoria; por último, B suma 2 a lo que había leído (0), con lo que en la posición de memoria queda como resultado final 2. El uso de las operaciones atómicas asegura que estas situaciones no ocurran a cambio de que la operación sea más lenta que una suma tradicional, especialmente cuando muchas hebras quieren modificar la misma posición de memoria. La suma atómica es utilizada en Numba con la función \textbf{\textit{cuda.atomic.add(my\_array, posición, valor\_a\_sumar)}}.
+
+
+\subsection{Generación de números pseudoaleatorios en la GPU.}
+
+\textit{Numba} nos proporciona un generador de números pseudoaleatorios para \cudanospace, utilizando el algoritmo \textit{xoroshiro128+} \cite{xoroshiro}, para generar números de una distribución uniforme y, el método de Box-Muller, para transformar la distribución uniforme a una distribución normal.\\
+
+En la GPU, para que el generador pueda ser inicializado con una semilla, ha de generarse un estado aleatorio para cada hebra, ya que, si todas las hebras usaran el mismo, el orden en el que se ejecuten las hebras afectaría al resultado. Por ello, Numba nos proporciona la función \textbf{create\_xoroshiro128p\_states(n, seed)}, que se invoca desde el \textit{host} devuelve un array en la memoria global del dispositivo con los estados aleatorios para $n$ hebras basados en la semilla $seed$.\\
+
+La función \textbf{xoroshiro128p\_[distribución]\_[tipo](estados, id\_hebra)}, invocada desde el \textit{kernel}, nos permite obtener números pseudoaleatorios de la distribución y tipo proporcionados. La distribución puede ser: \textit{uniform}, para la distribución uniforme; y \textit{normal}, para una distribución normal. Los dos tipos de datos soportados son valores en coma flotante de 32 bits \textit{(float32)} o valores en coma flotante de 64 bits \textit{(float64)}. \\
+
+En el código fuente \ref{code:randoms}, observamos cómo se inicializa un array de valores en coma flotante de 32 bits con pseudoaleatorios en \textit{Numba CUDA}.
+
+\begin{code}
+\begin{minted}{python}
+from numba.cuda.random import create_xoroshiro128p_states
+from numba.cuda.random import xoroshiro128p_uniform_float32
+import numpy as np
+@cuda.jit
+def pseudoaleatorios(rng_states, array):
+    """
+    :param rng_states Estados aleatorios.
+    :param array Array a inicializar
+    """
+    # La hebra coge su identificador unidimensional único.
+    idx = cuda.grid(1)
+
+    # Sacamos el float32 aleatorio correspondiente.
+    if idx < array.size:
+        array[idx] = xoroshiro128p_uniform_float32(rng_states,
+                                                   idx)
+
+# Tamaño del array
+n = 10000
+# Generamos un array de flot32 sin inicializar.
+mi_array = np.empty(n, dtype=np.float32)
+# Generamos los estados aleatorio de todas las hebras para la semilla 7.
+rng_states = create_xoroshiro128p_states(n, seed=7)
+# Número de hebras por bloque
+tpb = 512
+# Invocamos el kernel para inicializar mi_array con pseudoaleatorios.
+pseudoaleatorios[mi_array.size // tpb + 1, tpb](rng_states, mi_array)
+\end{minted}
+\captionof{listing}{Inicialización pseudoaleatoria de un array.\\}
+\label{code:randoms}
+\end{code}
+
+
+\subsection{La reducción y conflictos de bancos en memoria compartida.}
+Para finalizar la sección de \cudanospace{}, hablamos de una primitiva paralela muy utilizada en el mundo de la GPU, \textbf{la reducción}. El objetivo de esta primitiva es aplicar un operador binario, que cumpla la propiedad asociativa, a los elementos de un array, siendo el ejemplo más común realizar la sumatoria de todos los elementos de un array. Mientras que cuando trabajamos con una única hebra este algoritmo se realiza en $O(n)$ pasos, al realizarlo de forma paralela sólo se requieren $O(\log_2{n})$ pasos de todas las hebras. El algoritmo de la reducción simula hacer un recorrido en un árbol binario balanceado desde las hojas hasta la raíz. Los nodos hoja del último nivel se corresponden a los valores del array y el nodo raíz acabará almacenando el resultado final. En cada paso, una hebra guarda en el nodo padre el resultado de realizar la operación binaria sobre los valores de los dos hijos. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{imagenes/parallel_reduce.png}
+\caption{Una reducción paralela de una sumatoria.}
+\label{image:reductionsuma}
+\end{figure}
+
+En la figura \ref{image:reductionsuma}, observamos cómo se aplicaría este proceso para realizar una sumatoria sobre un array de 8 elementos. En CUDA, este proceso se hace de una manera ligeramente distinta para evitar \textbf{conflictos de bancos de memoria compartida}. Un banco de memoria compartida, es una de las particiones de igual tamaño en las que se divide la memoria compartida. Habitualmente, el número de bancos es 32. Al trabajar con la memoria compartida, por defecto, palabras de 32 bits adyacentes son puestas en bancos de memoria compartida consecutivos. Por ello, las direcciones de memoria de las posiciones 0, 32, 64, etc. del array se encontrarán en el banco 0; 1, 33, 65, etc. en el banco 1; y así sucesivamente. El conflicto surge en el caso en el que múltiples hebras de un \textit{warp} intenten acceder a distintos elementos de un banco simultáneamente, ya que el acceso a memoria para cada hebra se secuencializa para cada hebra en conflicto. Si realizásemos la implementación de la forma propuesta en la figura \ref{image:reductionsuma}, la hebra 0 leería de los bancos 0 y 1, la hebra 1 de los bancos 1 y 2, pero la hebra 16 también leería de los bancos 0 y 1, la hebra 17 de los bancos 2 y 3, y así hasta la hebra 32, generando un conflicto en cada banco y haciendo que una mitad del \textit{warp} espere a la otra para realizar la siguiente operación. Para evitar esta situación, la hebra 0 trabaja con el dato en la posición 0 y la posición 512 (en el caso de trabajar con tamaños de bloque de 1024) haciendo que todos los datos de la hebra 0 se encuentren en bloque 0, la hebra 1 trabajaría con el dato de la posición 1 y el de la posición 513, que se encontraría en el bloque 1 y así para todos los bloques, evitando cualquier conflicto de bancos posible. En la figura \ref{image:realcudareductionsuma} vemos cómo se realizaría este proceso.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.43]{imagenes/parallel_reduce_cuda.png}
+\caption{Reducción paralela de una sumatoria sin conflictos.}
+\label{image:realcudareductionsuma}
+\end{figure}
+
+Por tanto, una implementación en \cuda de la reducción para un bloque haría lo siguiente:
+\begin{itemize}
+  \item 1. Se declara un array de valores en memoria compartida. Si el tamaño del array a evaluar es potencia de 2 se toma como tamaño para el array en memoria compartida, en caso contrario, se toma la siguiente potencia de 2. El tamaño del array en memoria compartida será el número de hebras por bloque $(tpb)$.
+  \item 2. Cada hebra transfiere una posición del array en memoria global al array en memoria compartida. Si hay más hebras que valores tenía el array de memoria global, el resto de posiciones de memoria compartida se inicializan con el elemento neutro de la operación binaria, en el caso de la suma, el valor 0. Tras cargar los de datos se realiza una sincronización con \textbf{cuda.syncthreads()}.
+  \item 3. Tomamos $n\_hebras = tpb / 2$. Si el índice de la hebra ($idx$) es inferior a $n\_hebras$ se realiza la operación binaria entre las posiciones de memoria compartida $idx$ e $idx+nhebras$. Tras cada paso es necesario usar \textbf{cuda.syncthreads()} para evitar riesgos de tipo \textit{RAW} y $n\_hebras$ se reduce a la mitad. Este proceso es escrito manualmente en vez de usar un bucle para obtener el mejor rendimiento posible en tiempo de ejecución.
+  \item 4. Una vez $n\_hebras$ es 32 o inferior no es necesario usar \textbf{cuda.syncthreads()} ya que, al estar todas las hebras en el mismo \textit{warp}, se realizan todas las operaciones a la vez.
+  \item 5. Cuando $n\_hebras$ es 1, en la posición de memoria compartida 0, se encuentra el resultado de la reducción sobre el bloque.
+\end{itemize}
+
+Si necesitamos trabajar con datos que no caben en un único bloque hemos de utilizar operaciones atómicas para combinar los resultados obtenidos o realizar múltiples lanzamientos del kernel desde la CPU. Podemos ver más detalles sobre cómo realizar una implementación eficiente de la reducción para CUDA en la referencia bibliográfica \cite{reduction}.
+
+\section{Spark.}
+\textbf{\textit{Apache Spark}} es un \textit{framework} de código abierto y propósito general para sistemas distribuidos de computación en clúster que proporciona una API utilizable desde los lenguajes de programación en Scala, Java, Python y R. El \textit{framework} fundamenta su arquitectura en el \textit{RDD (Resilient Distributed DataSet)}, que es una estructura de datos de sólo lectura distribuida en un clúster de máquinas, mantenida durante toda la computación y con tolerancia a fallos. Además, proporciona otras herramientas de alto nivel como ML/MLib, una librería con algoritmos de \textit{machine learning}.\\
+
+Utilizando la API de Python, podemos combinar el uso de \textit{Spark} y \textit{Numba CUDA} para afrontar problemas de grandes dimensiones, ya que el \textit{RDD} nos permite trabajar con subconjuntos de esos datos posibilitando incluso llevar las implementaciones realizadas a un clúster con múltiples sistemas con dispositivos GPU \textit{CUDA} con todas las dependencias necesarias instaladas. \\
+
+La distribución de trabajo en Spark se realizará utilizando la transformación \textit{mapPartitions} del \textit{RDD} de \textit{Spark}, que generará un nuevo RDD a partir de los resultados obtenidos al aplicar la función pasada a \textit{mapPartitions} como parámetro a cada una de las funciones.

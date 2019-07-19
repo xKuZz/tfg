@@ -28,16 +28,6 @@ NVIDIA, ``Procesamiento paralelo cuda,'' consultado el 27 de abril de 2019.
   \url{https://www.nvidia.es/object/cuda-parallel-computing-es.html}
 \BIBentrySTDinterwordspacing
 
-\bibitem{kohonensom}
-T.~Kohonen, ``The self-organizing map,'' \emph{Proceedings of the IEEE},
-  vol.~78, no.~9, pp. 1464--1480, Sep. 1990.
-
-\bibitem{arbol}
-L.~{Breiman}, J.~H. {Friedman}, R.~A. {Olshen}, and C.~J. {Stone},
-  \emph{Classification and Regression Trees}, ser. Statistics/Probability
-  Series.\hskip 1em plus 0.5em minus 0.4em\relax Belmont, California, U.S.A.:
-  Wadsworth Publishing Company, 1984.
-
 \bibitem{spark}
 \BIBentryALTinterwordspacing
 M.~Zaharia, R.~S. Xin, P.~Wendell, T.~Das, M.~Armbrust, A.~Dave, X.~Meng,
@@ -46,6 +36,10 @@ M.~Zaharia, R.~S. Xin, P.~Wendell, T.~Das, M.~Armbrust, A.~Dave, X.~Meng,
   processing,'' \emph{Commun. ACM}, vol.~59, no.~11, pp. 56--65, Oct. 2016.
   [Online]. Available: \url{http://doi.acm.org/10.1145/2934664}
 \BIBentrySTDinterwordspacing
+
+\bibitem{kohonensom}
+T.~Kohonen, ``The self-organizing map,'' \emph{Proceedings of the IEEE},
+  vol.~78, no.~9, pp. 1464--1480, Sep. 1990.
 
 \bibitem{cudasomonline}
 F.~Codevilla, S.~Botelho, N.~Duarte~Filho, and J.~Gaya, ``Parallel high
@@ -56,79 +50,34 @@ H.~Daneshpajouh, P.~Delisle, J.-C. Boisson, M.~Krajecki, and N.~Zakaria,
   \emph{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using
   CUDA}, 01 2018, pp. 87--100.
 
-\bibitem{cudt}
-W.-T. Lo, Y.-S. Chang, R.-K. Sheu, C.-C. Chiu, and S.-M. Yuan, ``Cudt: a cuda
-  based decision tree algorithm,'' \emph{TheScientificWorldJournal}, vol. 2014,
-  p. 745640, 07 2014.
-
-\bibitem{svatensson}
-\BIBentryALTinterwordspacing
-D.~Svatensson, ``Implementing streaming parallel decision trees on graphic
-  processing units,'' 06 2018. [Online]. Available:
-  \url{http://www.diva-portal.se/smash/get/diva2:1220512/FULLTEXT02.pdf}
-\BIBentrySTDinterwordspacing
-
 \bibitem{compsom}
 J.-C. Fort, P.~Letrémy, and M.~Cottrell, ``Advantages and drawbacks of the
   batch kohonen algorithm,'' 01 2002, pp. 223--230.
 
-\bibitem{impurity}
-F.~C. y. M. J. M.~B. Fernando~Berzal, Juan Carlos~Cubero, ``On the quest for
-  easy to understand splitting rules,'' \emph{Data \& Knowledge Engineering},
-  vol.~44, no.~1, pp. 31 -- 48, 2003.
-
-\bibitem{randomforest}
-\BIBentryALTinterwordspacing
-L.~Breiman, ``Random forests,'' \emph{Machine Learning}, vol.~45, no.~1, pp.
-  5--32, Oct 2001. [Online]. Available:
-  \url{https://doi.org/10.1023/A:1010933404324}
-\BIBentrySTDinterwordspacing
+\bibitem{numpy}
+T.~Oliphant, \emph{Guide to NumPy}, 01 2006.
 
 \bibitem{numba}
 S.~Kwan~Lam, A.~Pitrou, and S.~Seibert, ``Numba: a llvm-based python jit
   compiler,'' 11 2015, pp. 1--6.
 
-\bibitem{cupy}
+\bibitem{xoroshiro}
 \BIBentryALTinterwordspacing
-R.~Okuta, Y.~Unno, D.~Nishino, S.~Hido, and C.~Loomis, ``Cupy: A
-  numpy-compatible library for nvidia gpu calculations,'' in \emph{Proceedings
-  of Workshop on Machine Learning Systems (LearningSys) in The Thirty-first
-  Annual Conference on Neural Information Processing Systems (NIPS)}, 2017.
-  [Online]. Available:
-  \url{http://learningsys.org/nips17/assets/papers/paper_16.pdf}
+S.~Vigna, ``Further scramblings of marsaglia’s xorshift generators,''
+  \emph{Journal of Computational and Applied Mathematics}, vol. 315, pp. 175 --
+  181, 2017. [Online]. Available:
+  \url{http://www.sciencedirect.com/science/article/pii/S0377042716305301}
 \BIBentrySTDinterwordspacing
 
 \bibitem{reduction}
 M.~Harris, ``Optimizing parallel reduction in cuda,'' \emph{Proc. ACM SIGMOD},
   vol.~21, pp. 104--110, 01 2007.
 
-\bibitem{sprint}
-J.~Shafer, R.~Agrawal, and M.~Mehta, ``Sprint: A scalable parallel classifier
-  for data mining,'' \emph{VLDB}, 08 2000.
-
-\bibitem{scan}
-S.~Sengupta, M.~Harris, M.~Garland, and J.~Owens, \emph{Efficient Parallel Scan
-  Algorithms for GPUs}, 01 2011, pp. 413--442.
-
 \bibitem{olivetti}
 \BIBentryALTinterwordspacing
 d.~d. S.-L. AT\&T Laboratories~Cambridge, ``The olivetti faces dataset,'' 1994,
   enlace consultado el 6 de abril de 2019. [Online]. Available:
   \url{https://scikit-learn.org/0.19/datasets/olivetti_faces.html}
-\BIBentrySTDinterwordspacing
-
-\bibitem{spambase}
-\BIBentryALTinterwordspacing
-D.~Dua and C.~Graff, ``Spambase, {UCI} machine learning repository,''
-  consultado el 20 de abril de 2019. [Online]. Available:
-  \url{https://archive.ics.uci.edu/ml/datasets/spambase}
-\BIBentrySTDinterwordspacing
-
-\bibitem{magic04}
-\BIBentryALTinterwordspacing
-------, ``Magic, {UCI} machine learning repository,'' consultado el 20 de abril
-  de 2019. [Online]. Available:
-  \url{https://archive.ics.uci.edu/ml/datasets/magic+gamma+telescope}
 \BIBentrySTDinterwordspacing
 
 \bibitem{susy}
