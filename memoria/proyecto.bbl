@@ -41,6 +41,12 @@ M.~Zaharia, R.~S. Xin, P.~Wendell, T.~Das, M.~Armbrust, A.~Dave, X.~Meng,
 T.~Kohonen, ``The self-organizing map,'' \emph{Proceedings of the IEEE},
   vol.~78, no.~9, pp. 1464--1480, Sep. 1990.
 
+\bibitem{arbol}
+L.~{Breiman}, J.~H. {Friedman}, R.~A. {Olshen}, and C.~J. {Stone},
+  \emph{Classification and Regression Trees}, ser. Statistics/Probability
+  Series.\hskip 1em plus 0.5em minus 0.4em\relax Belmont, California, U.S.A.:
+  Wadsworth Publishing Company, 1984.
+
 \bibitem{cudasomonline}
 F.~Codevilla, S.~Botelho, N.~Duarte~Filho, and J.~Gaya, ``Parallel high
   dimensional self organizing maps using cuda,'' 10 2012, pp. 302--306.
@@ -50,9 +56,37 @@ H.~Daneshpajouh, P.~Delisle, J.-C. Boisson, M.~Krajecki, and N.~Zakaria,
   \emph{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using
   CUDA}, 01 2018, pp. 87--100.
 
+\bibitem{cudt}
+W.-T. Lo, Y.-S. Chang, R.-K. Sheu, C.-C. Chiu, and S.-M. Yuan, ``Cudt: a cuda
+  based decision tree algorithm,'' \emph{TheScientificWorldJournal}, vol. 2014,
+  p. 745640, 07 2014.
+
+\bibitem{svatensson}
+\BIBentryALTinterwordspacing
+D.~Svatensson, ``Implementing streaming parallel decision trees on graphic
+  processing units,'' 06 2018. [Online]. Available:
+  \url{http://www.diva-portal.se/smash/get/diva2:1220512/FULLTEXT02.pdf}
+\BIBentrySTDinterwordspacing
+
+\bibitem{spdt}
+Y.~Ben-Haim and E.~Tom-Tov, ``A streaming parallel decision tree algorithm,''
+  \emph{Journal of Machine Learning Research}, vol.~11, pp. 849--872, 02 2010.
+
 \bibitem{compsom}
 J.-C. Fort, P.~Letrémy, and M.~Cottrell, ``Advantages and drawbacks of the
   batch kohonen algorithm,'' 01 2002, pp. 223--230.
+
+\bibitem{impurity}
+F.~C. y. M. J. M.~B. Fernando~Berzal, Juan Carlos~Cubero, ``On the quest for
+  easy to understand splitting rules,'' \emph{Data \& Knowledge Engineering},
+  vol.~44, no.~1, pp. 31 -- 48, 2003.
+
+\bibitem{randomforest}
+\BIBentryALTinterwordspacing
+L.~Breiman, ``Random forests,'' \emph{Machine Learning}, vol.~45, no.~1, pp.
+  5--32, Oct 2001. [Online]. Available:
+  \url{https://doi.org/10.1023/A:1010933404324}
+\BIBentrySTDinterwordspacing
 
 \bibitem{numpy}
 T.~Oliphant, \emph{Guide to NumPy}, 01 2006.
@@ -60,6 +94,16 @@ T.~Oliphant, \emph{Guide to NumPy}, 01 2006.
 \bibitem{numba}
 S.~Kwan~Lam, A.~Pitrou, and S.~Seibert, ``Numba: a llvm-based python jit
   compiler,'' 11 2015, pp. 1--6.
+
+\bibitem{cupy}
+\BIBentryALTinterwordspacing
+R.~Okuta, Y.~Unno, D.~Nishino, S.~Hido, and C.~Loomis, ``Cupy: A
+  numpy-compatible library for nvidia gpu calculations,'' in \emph{Proceedings
+  of Workshop on Machine Learning Systems (LearningSys) in The Thirty-first
+  Annual Conference on Neural Information Processing Systems (NIPS)}, 2017.
+  [Online]. Available:
+  \url{http://learningsys.org/nips17/assets/papers/paper_16.pdf}
+\BIBentrySTDinterwordspacing
 
 \bibitem{xoroshiro}
 \BIBentryALTinterwordspacing
@@ -72,6 +116,14 @@ S.~Vigna, ``Further scramblings of marsaglia’s xorshift generators,''
 \bibitem{reduction}
 M.~Harris, ``Optimizing parallel reduction in cuda,'' \emph{Proc. ACM SIGMOD},
   vol.~21, pp. 104--110, 01 2007.
+
+\bibitem{sprint}
+J.~Shafer, R.~Agrawal, and M.~Mehta, ``Sprint: A scalable parallel classifier
+  for data mining,'' \emph{VLDB}, 08 2000.
+
+\bibitem{scan}
+S.~Sengupta, M.~Harris, M.~Garland, and J.~Owens, \emph{Efficient Parallel Scan
+  Algorithms for GPUs}, 01 2011, pp. 413--442.
 
 \bibitem{olivetti}
 \BIBentryALTinterwordspacing

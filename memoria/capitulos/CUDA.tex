@@ -13,12 +13,16 @@ Es de vital importancia a la hora de trabajar con la GPU de tener en cuenta que:
     \item c) Como la GPU tiene su propia memoria dedicada de un tamaño limitado hemos de hacer hincapié en no utilizar soluciones que generan demasiada complejidad espacial, ya que limitan la escalabilidad de los algoritmos.
 \end{itemize}
 
-\subsection{Python, NumPy, Numba.}
+\subsection{Python, NumPy, Numba y CuPy.}
 Para desarrollar el código asociado a este proyecto, hemos optado por utilizar \textbf{Python} en vez de los tradicionales C o C++. El uso de \textit{Python} nos permite un desarrollo de los algoritmos más rápido así como el acceso a abstracciones de más alto nivel mediante el uso de la librerías \textbf{\textit{Numba}} y \textbf{\textit{NumPy}},  así como una mayor facilidad para la distribución del código, si se desea, mediante el uso de \textit{PyPI(Python Package Index)}, el repositorio de paquetes para Python. \\
 
 \textbf{NumPy} \cite{numpy} es un paquete de código abierto para Python diseñado para la computación científica. El paquete proporciona una potente estructura de datos para trabajar con arrays N-dimensionales y herramientas para realizar una gran cantidad de operaciones sobre los mismos (operaciones de cálculo matricial, algoritmos de álgebra lineal y generación de números pseudoaleatorios, entre otros).\\
 
 \textbf{Numba} \cite{numba} es un paquete para Python cuyo objetivo es la aceleración compilado fragmentos de código utilizando el compilador LLVM y dando la oportunidad de paralelizar código tanto para la CPU como para la GPU. En concreto, para las GPUs CUDA, proporciona al usuario un subconjunto de las características de CUDA con un nivel de abstracción mayor. Con eso no sólo conseguimos poder trabajar con CUDA desde Python sino también evitar, si lo deseamos, manejar las transferencias de memoria entre \textit{host} y dispositivo o la necesidad de indicar todos los tipos a la hora de inicializar un \textit{kernel} entre otras ventajas.\\
+
+\textbf{CuPy} \cite{cupy} es otro paquete de Python que, por un lado y, de manera similar a Numba, nos permite generar kernels de manera similar a los de C/C++, así como facilidades para generar kernels en los que se implementa reducciones u operaciones elemento a elemento en un array. Además, CuPy está implementado de manera que permite utilizar directamente sus estructuras de datos sobre kernels de Numba, lo que nos permite combinar elementos de ambos paquetes según nos interese. \\
+
+Por otro lado, proporciona una API similar a la de NumPy pero las operaciones están implementadas utilizando CUDA y tienen algunas diferencias notables entre sí, como que: el generador de pseudoaleatorios de CuPy sólo puede usar un valor escalar y, el de NumPy, puede usar también un array con múltiples valores para generar más entropía; utilizar índices por encima del tamaño de un array genera un error en NumPy pero en CuPy vuelve a recorrer el array desde el principio; o que, mientras que en NumPy puedes utilizar objetos de Python en CuPy sólo puedes usar tipos de datos numéricos y booleanos.\\
 
 \subsection{Estructura de hebras, bloques y mallas.}
 El \textbf{\textit{kernel}} es un fragmento de código especial, destino a ser ejecutado en el dispositivo, en el que se indica las instrucciones que ha de ejecutar una hebra.\\
@@ -103,7 +107,7 @@ Dentro de la tarjeta gráfica, nos encontramos con distintos niveles de memoria.
 \end{table}
 
 
-La \textbf{memoria compartida} es una abstracción para una región especial de la caché asociada a un bloque que es explícitamente usada por el programador en el \textit{kernel}, agilizando así considerablemente las transferencias de memoria en el dispositivo. En el cuadro \ref{tab:cudamemory}, podemos ver un resumen de los tipos de memoria existentes, dónde se pueden usar y dónde se encuentran dichos datos en el dispositivo.
+La \textbf{memoria compartida} es una abstracción para una región especial de la caché asociada a un bloque que es explícitamente usada por el programador en el \textit{kernel}, agilizando así considerablemente las transferencias de memoria en el dispositivo. En el cuadro \ref{tab:cudamemory}, podemos ver un resumen de los tipos de memoria existentes, dónde se pueden usar y dónde se encuentran dichos datos en el dispositivo.\\
 
 
 Si utilizamos los arrays N-dimensionales de NumPy, no tenemos la necesidad de realizar las transferencias de memoria. No obstante, es recomendable manejarlas manualmente para evitar cualquier transferencia de datos entre \textit{host} y dispositivo innecesaria. 
@@ -141,8 +145,6 @@ En la GPU, para que el generador pueda ser inicializado con una semilla, ha de g
 
 La función \textbf{xoroshiro128p\_[distribución]\_[tipo](estados, id\_hebra)}, invocada desde el \textit{kernel}, nos permite obtener números pseudoaleatorios de la distribución y tipo proporcionados. La distribución puede ser: \textit{uniform}, para la distribución uniforme; y \textit{normal}, para una distribución normal. Los dos tipos de datos soportados son valores en coma flotante de 32 bits \textit{(float32)} o valores en coma flotante de 64 bits \textit{(float64)}. \\
 
-En el código fuente \ref{code:randoms}, observamos cómo se inicializa un array de valores en coma flotante de 32 bits con pseudoaleatorios en \textit{Numba CUDA}.
-
 \begin{code}
 \begin{minted}{python}
 from numba.cuda.random import create_xoroshiro128p_states
@@ -177,40 +179,99 @@ pseudoaleatorios[mi_array.size // tpb + 1, tpb](rng_states, mi_array)
 \label{code:randoms}
 \end{code}
 
+\subsection{Streams.}
+Un \textbf{stream} en \textit{CUDA} es una secuencia de órdenes (lanzamiento de \textit{kernels}, transferencias de memoria, etc.) enviadas desde el \textit{host} al dispositivo. Mientras que la secuencia de órdenes dentro de un \textit{stream} ha de ser ejecutada secuencialmente, las órdenes entre los \textit{streams} pueden intercalarse, potencialmente permitiendo un mejor uso de los recursos al ejecutar múltiples \textit{kernels} de forma concurrente. \\
 
-\subsection{La reducción y conflictos de bancos en memoria compartida.}
-Para finalizar la sección de \cudanospace{}, hablamos de una primitiva paralela muy utilizada en el mundo de la GPU, \textbf{la reducción}. El objetivo de esta primitiva es aplicar un operador binario, que cumpla la propiedad asociativa, a los elementos de un array, siendo el ejemplo más común realizar la sumatoria de todos los elementos de un array. Mientras que cuando trabajamos con una única hebra este algoritmo se realiza en $O(n)$ pasos, al realizarlo de forma paralela sólo se requieren $O(\log_2{n})$ pasos de todas las hebras. El algoritmo de la reducción simula hacer un recorrido en un árbol binario balanceado desde las hojas hasta la raíz. Los nodos hoja del último nivel se corresponden a los valores del array y el nodo raíz acabará almacenando el resultado final. En cada paso, una hebra guarda en el nodo padre el resultado de realizar la operación binaria sobre los valores de los dos hijos. 
+\textit{Numba} nos permite utilizar esta característica con la función \textbf{cuda.stream()} que genera un nuevo stream y nos devuelve el identificador del mismo. Para usarlo, al lanzar el kernel o hacer la transferencia de memoria hemos de pasar la variable con el identificador en el parámetro posicional ``stream'. Posteriormente, podemos sincronizar todos los \textit{streams} utilizando la función \textbf{cuda.synchronize()}. \\
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.5]{imagenes/parallel_reduce.png}
-\caption{Una reducción paralela de una sumatoria.}
-\label{image:reductionsuma}
-\end{figure}
+\begin{code}
+\begin{minted}{python}
+...
+# Generamos dos streams
+stream1 = cuda.stream()
+stream2 = cuda.stream()
 
-En la figura \ref{image:reductionsuma}, observamos cómo se aplicaría este proceso para realizar una sumatoria sobre un array de 8 elementos. En CUDA, este proceso se hace de una manera ligeramente distinta para evitar \textbf{conflictos de bancos de memoria compartida}. Un banco de memoria compartida, es una de las particiones de igual tamaño en las que se divide la memoria compartida. Habitualmente, el número de bancos es 32. Al trabajar con la memoria compartida, por defecto, palabras de 32 bits adyacentes son puestas en bancos de memoria compartida consecutivos. Por ello, las direcciones de memoria de las posiciones 0, 32, 64, etc. del array se encontrarán en el banco 0; 1, 33, 65, etc. en el banco 1; y así sucesivamente. El conflicto surge en el caso en el que múltiples hebras de un \textit{warp} intenten acceder a distintos elementos de un banco simultáneamente, ya que el acceso a memoria para cada hebra se secuencializa para cada hebra en conflicto. Si realizásemos la implementación de la forma propuesta en la figura \ref{image:reductionsuma}, la hebra 0 leería de los bancos 0 y 1, la hebra 1 de los bancos 1 y 2, pero la hebra 16 también leería de los bancos 0 y 1, la hebra 17 de los bancos 2 y 3, y así hasta la hebra 32, generando un conflicto en cada banco y haciendo que una mitad del \textit{warp} espere a la otra para realizar la siguiente operación. Para evitar esta situación, la hebra 0 trabaja con el dato en la posición 0 y la posición 512 (en el caso de trabajar con tamaños de bloque de 1024) haciendo que todos los datos de la hebra 0 se encuentren en bloque 0, la hebra 1 trabajaría con el dato de la posición 1 y el de la posición 513, que se encontraría en el bloque 1 y así para todos los bloques, evitando cualquier conflicto de bancos posible. En la figura \ref{image:realcudareductionsuma} vemos cómo se realizaría este proceso.
+# Declaramos dos arrays de 100000 elementos
+n = 100000 
+array1 = np.ones(n, dtype=np.float32)
+array2 = np.empty(n, dtype=np.float32)
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.43]{imagenes/parallel_reduce_cuda.png}
-\caption{Reducción paralela de una sumatoria sin conflictos.}
-\label{image:realcudareductionsuma}
-\end{figure}
+# Hacemos las transferencias de memoria
+d_array1 = cuda.to_device(array1, stream=stream1)
+d_array2 = cuda.to_device(array2, stream=stream2)
 
-Por tanto, una implementación en \cuda de la reducción para un bloque haría lo siguiente:
-\begin{itemize}
-  \item 1. Se declara un array de valores en memoria compartida. Si el tamaño del array a evaluar es potencia de 2 se toma como tamaño para el array en memoria compartida, en caso contrario, se toma la siguiente potencia de 2. El tamaño del array en memoria compartida será el número de hebras por bloque $(tpb)$.
-  \item 2. Cada hebra transfiere una posición del array en memoria global al array en memoria compartida. Si hay más hebras que valores tenía el array de memoria global, el resto de posiciones de memoria compartida se inicializan con el elemento neutro de la operación binaria, en el caso de la suma, el valor 0. Tras cargar los de datos se realiza una sincronización con \textbf{cuda.syncthreads()}.
-  \item 3. Tomamos $n\_hebras = tpb / 2$. Si el índice de la hebra ($idx$) es inferior a $n\_hebras$ se realiza la operación binaria entre las posiciones de memoria compartida $idx$ e $idx+nhebras$. Tras cada paso es necesario usar \textbf{cuda.syncthreads()} para evitar riesgos de tipo \textit{RAW} y $n\_hebras$ se reduce a la mitad. Este proceso es escrito manualmente en vez de usar un bucle para obtener el mejor rendimiento posible en tiempo de ejecución.
-  \item 4. Una vez $n\_hebras$ es 32 o inferior no es necesario usar \textbf{cuda.syncthreads()} ya que, al estar todas las hebras en el mismo \textit{warp}, se realizan todas las operaciones a la vez.
-  \item 5. Cuando $n\_hebras$ es 1, en la posición de memoria compartida 0, se encuentra el resultado de la reducción sobre el bloque.
-\end{itemize}
+tpb = 128
+bloques = n // tpb + 1
 
-Si necesitamos trabajar con datos que no caben en un único bloque hemos de utilizar operaciones atómicas para combinar los resultados obtenidos o realizar múltiples lanzamientos del kernel desde la CPU. Podemos ver más detalles sobre cómo realizar una implementación eficiente de la reducción para CUDA en la referencia bibliográfica \cite{reduction}.
+# Lanzamos los kernels de forma asíncrona usando
+# los straems
+aumentar_en_1[bloques, tpb, stream1](d_array1)
+rng_states = create_xoroshiro128p_states(n, seed=7)
+pseudoaleatorios[bloques, tpb, stream2](rng_states, d_array2)
+
+# Traemos de vuelta los arrays al host
+array1 = d_array1.copy_to_host(stream=stream1)
+array2 = d_array2.copy_to_host(stream=stream2)
+
+# Sincronizamos para asegurar que ambos streams han finalizado.
+cuda.synchronize()
+\end{minted}
+\captionof{listing}{Uso de streams en CUDA para ejecución concurrente.\\}
+\label{code:streams}
+\end{code}
 
 \section{Spark.}
-\textbf{\textit{Apache Spark}} es un \textit{framework} de código abierto y propósito general para sistemas distribuidos de computación en clúster que proporciona una API utilizable desde los lenguajes de programación en Scala, Java, Python y R. El \textit{framework} fundamenta su arquitectura en el \textit{RDD (Resilient Distributed DataSet)}, que es una estructura de datos de sólo lectura distribuida en un clúster de máquinas, mantenida durante toda la computación y con tolerancia a fallos. Además, proporciona otras herramientas de alto nivel como ML/MLib, una librería con algoritmos de \textit{machine learning}.\\
 
-Utilizando la API de Python, podemos combinar el uso de \textit{Spark} y \textit{Numba CUDA} para afrontar problemas de grandes dimensiones, ya que el \textit{RDD} nos permite trabajar con subconjuntos de esos datos posibilitando incluso llevar las implementaciones realizadas a un clúster con múltiples sistemas con dispositivos GPU \textit{CUDA} con todas las dependencias necesarias instaladas. \\
 
-La distribución de trabajo en Spark se realizará utilizando la transformación \textit{mapPartitions} del \textit{RDD} de \textit{Spark}, que generará un nuevo RDD a partir de los resultados obtenidos al aplicar la función pasada a \textit{mapPartitions} como parámetro a cada una de las funciones.
+
+\textbf{\textit{Apache Spark}} es un \textit{framework} de código abierto y propósito general para sistemas distribuidos de computación en clúster que proporciona una API utilizable desde los lenguajes de programación en Scala, Java, Python y R; y proporciona herramientas de alto nivel como ML/MLib, una librería con algoritmos de \textit{machine learning}. \\
+
+El \textit{framework} fundamenta su arquitectura en el \textit{RDD (Resilient Distributed DataSet)}, que es una estructura de datos de sólo lectura distribuida en un clúster de máquinas, mantenida durante toda la computación y con tolerancia a fallos. El hecho de que el RDD sea inmutable, es decir, de sólo lectura, facilita la distribución del trabajo a lo largo del clúster aunque implica que las acciones que transforman los datos, necesiten crear un nuevo \textit{RDD} para los resultados. Existen dos formas básicas de generar un \textit{RDD} en \textit{Spark}: paralelizando una colección existente en el código que controla la ejecución de \textit{Spark} o leyendo los datos de un sistema de almacenamiento. \\
+
+Al poder utilizar la \textit{API} desde \textit{Python} podemos combinar de una manera simple el uso de \textit{Spark} y \textit{CUDA}. El uso de ambas nos proporcion, entre otras, las siguientes ventajas:\\
+
+\begin{itemize}
+  \item \textit{Spark} nos proporciona herramientas para la lectura de datos desde un sistema de almacenamiento.
+  \item El código que realicemos combinando \textit{Spark} y \textit{CUDA} podría ser usado tanto en una única máquina como en un clúster.
+  \item Si trabajamos con una única máquina, podemos solucionar problemas de escalabilidad ajustando el número de particiones (subdivisiones del RDD) y el número de ejecutores (número de procesos que podrían ejecutarse simultáneamente) para, por ejemplo, evitar quedarnos sin memoria \textit{RAM} en el dispositivo.\\
+\end{itemize}
+
+La distribución de trabajo en Spark en este proyecto se realizará utilizando la transformación \textit{mapPartitions} del \textit{RDD}, que generará un nuevo RDD a partir de los resultados obtenidos al aplicar la función pasada a \textit{mapPartitions} como parámetro a cada una de las funciones. \\
+
+\begin{code}
+\begin{minted}{python}
+import numpy as np
+from pyspark.sql import SparkSession
+
+# Cogemos el contexto de Spark
+spark = SparkSession.builder.master("local").appName("ejemplo").getOrCreate()
+sc = spark.sparkContext
+
+# Generamos un array de 100000 ceros.
+mi_array = np.zeros(100000, np.float32)
+
+# Creamos un RDD a partir del array
+rdd = sc.parallelize(mi_array)
+
+# Número de hebras por bloque
+tpb = 128
+
+# Encapsulamos un kernel en una función de Python
+def gpu_work(data):
+  # Transformamos los datos a un array de NumPy
+  gpu_data = np.asarray(list(data), dtype=np.float32)
+  # Invocamos el kernel utilizado en los ejemplos previos.
+  aumentar_en_1[gpu_data.size // tpb + 1, tpb](gpu_data)
+  # Devolvemos los datos calculados
+  return gpu_data
+
+
+# Realizamos la transformación del RDD
+output = rdd.mapPartitions(gpu_work)
+
+# Recogemos los resultados en un array de NumPy
+output_np = output.collect()
+\end{minted}
+\captionof{listing}{Uso de Spark con Numba.\\}
+\label{code:spark}
+\end{code}

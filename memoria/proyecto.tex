@@ -154,25 +154,29 @@ pdfproducer = {pdflatex}
 \setlength{\parskip}{5pt}
 \chapter{Introducción y motivación.}
 \section{Introducción y motivación.}
-La tecnología propietaria \textit{CUDA (Computer Unified Device Architecture)} \cite{cuda} de NVIDIA, presentada en junio de 2007 y aplicable tanto a la arquitectura de las tarjetas gráficas de la misma marca como al modelo de programación genérico asociado, a lo largo de la última década ha supuesto un gran cambio en las implementaciones paralelas de algoritmos y, además, es muy utilizada y popular entre la comunidad científica.
+La tecnología propietaria \textit{CUDA (Computer Unified Device Architecture)} \cite{cuda} de NVIDIA, presentada en junio de 2007 y aplicable tanto a la arquitectura de las tarjetas gráficas de la misma marca como al modelo de programación genérico asociado, a lo largo de la última década, ha supuesto un gran cambio en las implementaciones paralelas de algoritmos y, además, siendo muy utilizada en la comunidad científica.\\
 
-La estructura de la GPU, utilizando un mayor número de núcleos a cambio de una velocidad de reloj más baja a la que podemos encontrar en una CPU, es de especial utilidad en operaciones masivamente paralelas, pudiendo llegar a proporcionar ganancias muy superiores con respecto al uso de la CPU.
+La estructura de la GPU, utilizando un mayor número de núcleos a cambio de una velocidad de reloj más baja a la que podemos encontrar en una CPU, es de especial utilidad en operaciones masivamente paralelas, pudiendo llegar a proporcionar tiempos de ejecución considerablemente superiores a los que podría llegar a proporcionar una CPU.\\
 
-Por otro lado, los algoritmos y técnicas de \textit{Soft Computing} se corresponde con una rama de la Inteligencia Artificial en la que no podemos calcular soluciones exactas en tiempo polinómico y/o en los que la información es incompleta, incierta o inexacta.
+Por otro lado, los algoritmos y técnicas de \textit{Soft Computing} se corresponde con una rama de la Inteligencia Artificial en la que no podemos calcular soluciones exactas en tiempo polinómico y/o en los que la información es incompleta, incierta o inexacta.\\
 
-El propósito de este trabajo de fin de grado es la implementación en CUDA de algunos de estos modelos de \textit{Soft Computing} combinando \textit{CUDA} el \textit{framework} de computación en clúster \textit{Spark} \cite{spark}. De esta manera, los algoritmos que se desarrollen podrán ser ejecutandos tanto en un único dispositivo como en un clúster con múltiples dispositivos \textit{CUDA}. Para ello, se analizarán los algoritmos y sus posibilidades de paralelización, se realizarán las implementaciones adecuadas y se evaluará el rendimiento de las mismas utilizando conjunto de datos con un número de muestras elevado.
+El propósito de este trabajo de fin de grado es la implementación en CUDA de algunos de estos modelos de \textit{Soft Computing} combinando \textit{CUDA} el \textit{framework} de computación en clúster \textit{Spark} \cite{spark}. De esta manera, los algoritmos que se desarrollen podrán ser ejecutados tanto en un único dispositivo como en un clúster con múltiples dispositivos \textit{CUDA}. Para ello, se analizarán los algoritmos y sus posibilidades de paralelización, se realizarán las implementaciones adecuadas y se evaluará el rendimiento de las mismas utilizando conjunto de datos con un número de muestras elevado.\\
 
-Tras evaluar varias opciones, se optó por desarrollar dos modelos distintos. Uno de ellos es el mapas auto-organizado de \textit{Kohonen} \cite{kohonensom}, modelo que se basa en una red neuronal artifical no supervisada que preserva propiedades topográficas y, ... . \\
+Tras evaluar varias opciones, se optó por desarrollar dos modelos distintos: los mapa auto-organizados de \textit{Kohonen} \cite{kohonensom} y los árboles de decisión \cite{arbol}.\\
 
 \section{Estado del arte: trabajos relacionados.}
-La paralelización de los mapas auto-organizados de Kohonen ha sido previamente estudiada para su paralelización en CUDA.\\
+La paralelización en CUDA de los mapas auto-organizados de Kohonen y de los árboles de decisión son problemas que han sido previamente estudiados.\\
 
-En \textbf{\textit{Parallel High Dimensional Self Organizing Maps Using CUDA}}  Codevilla, Bothelo, Filho y Gaya \cite{cudasomonline} proponen una implementación en CUDA para la formulación tradicional del mapa auto-organizado de Kohonen. En ella, proponen una versión en la que cada iteración se realiza en 3 fases. Una primera en la que con un valor \textit{p} arbitrario menor que el número de hebras por bloque que indica cuantos ``pasos'' debe realizar una hebra para el cálculo de la distancia euclídea, una reducción para encontrar la mejor distancia y una adaptación de pesos de neuronas basada en la dimensión del problema. \\
+En \textbf{\textit{Parallel High Dimensional Self Organizing Maps Using CUDA}}, Codevilla, Bothelo, Filho y Gaya \cite{cudasomonline} proponen una implementación en CUDA para la formulación tradicional del mapa auto-organizado de Kohonen. En ella, proponen una versión en la que cada iteración se realiza en 3 fases. Una primera en la que con un valor \textit{p} arbitrario menor que el número de hebras por bloque que indica cuantos ``pasos'' debe realizar una hebra para el cálculo de la distancia euclídea, una reducción para encontrar la mejor distancia y una adaptación de pesos de neuronas basada en la dimensión del problema. \\
 
-En \textbf{\textit{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using CUDA}}  Daneshpajouh, Delisle, Boisson, Krajecki y Zakaria \cite{cudasombatch} plantean una adaptación en CUDA para la versión iterativa de cómputo en \textit{batchs} del mapa auto-organizado de Kohonen. En ella aprovechan las capacidades de concurrencia disponibles en los dispositivos CUDA, paralelizando parte del algoritmo y dejando otra parte  para ser realizada en la CPU.
+En \textbf{\textit{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using CUDA}}, Daneshpajouh, Delisle, Boisson, Krajecki y Zakaria \cite{cudasombatch} plantean una adaptación en CUDA para la versión iterativa de cómputo en \textit{batchs} del mapa auto-organizado de Kohonen. En ella aprovechan las capacidades de concurrencia disponibles en los dispositivos CUDA, paralelizando parte del algoritmo y dejando otra parte  para ser realizada en la CPU.\\
 
-\section{Descripción oficial del proyecto.}
-En este proyecto se pretende que el alumno diseñe, desarrolle e Implemente modelos en pararelo asociados a tradicionales algoritmos de \textit{Soft Somputing}. Para ello se utlizará el lenguaje \textit{CUDA}, pudiendo de esta manera aprovechar las características de los dispositivos GPUs. Para probar estos modelos se escogerán problemas relacionados con Big Data y que tengan una gran carga computacional.
+Con respecto a los árboles de decisión, \textbf{\textit{CUDT: a CUDA based decision tree algorithm}}, de Lo, Chang, Sheu, Chiu y Yuan \cite{cudt}, será la base de la implementación que nosotros vamos a realizar y se basa en el uso de la operación de la suma prefija, suma acumulada o \textit{scan} para resolver un cierto tipo de árboles de decisión específicos, en concreto, los árboles de decisión cuyo objetivo es la clasificación de problemas con respuesta binaria.\\
+
+Aparte de la aproximación por especialización presentada en el trabajo anterior, otra alternativa, más frecuente y versátil, en la que contamos que diferentes tipos de problemas que se pueden resolver, se basa en la discretización de las variables utilizadas durante la construcción del árbol y el uso de histogramas para ello. Esto lo podemos ver en \textbf{\textit{Implementing Streaming Parallel Decision Trees on Graphic Processing Units}}, de Svantesson \cite{svatensson}, donde el objeto principal de su trabajo es paralelizar en CUDA los cálculos asociados a los histogramas utilizados en \textbf{\textit{Streaming Parallel Decision Trees}}, de Ben-Haim y Tom-Tov \cite{spdt}, un algoritmo para la paralelización de árboles para CPU.\\
+
+\section{Descripción del proyecto.}
+En este proyecto se pretende que el alumno diseñe, desarrolle e implemente modelos en paralelo asociados a tradicionales algoritmos de \textit{Soft Somputing}. Para ello se utlizará el lenguaje \textit{CUDA}, pudiendo de esta manera aprovechar las características de los dispositivos GPUs. Para probar estos modelos se escogerán problemas relacionados con Big Data y que tengan una gran carga computacional.
 
 \section{Requisitos de hardware y software para el proyecto.}
 \underline{Requisitos de \textit{hardware}}\\
@@ -187,7 +191,7 @@ Para las implementaciones del proyecto se han usado:
 \end{itemize}
 
 \section{Planificación de tareas.}
-
+TO-DO.
 \section{Objetivos.}
 \begin{itemize}
     \item Iniciarse, estudiar y profundizar en el desarrollo de algoritmos paralelos en \textit{CUDA}.
@@ -205,7 +209,7 @@ Para las implementaciones del proyecto se han usado:
     \item En el segundo capítulo, \textbf{Modelos de Soft Computing considerados}, explicamos los fundamentos teóricos de los algoritmos de \textit{Soft Computing} que hemos decidido paralelizar.
     \item En el tercer capítulo, \textbf{Implementación}, comentamos el proceso de desarrollo seguido así como explicamos las soluciones finales implementadas y comentamos algunas de las alternativas y problemas que surgieron durante la realización de las implementaciones.
     \item En el cuarto capítulo, \textbf{Desarrollo de pruebas y análisis de resultados}, indicamos qué pruebas se han realizado, mostramos los resultados obtenidos y analizamos en profundidad las implicaciones de los mismos.
-    \item En el último capítulo, \textbf{Conclusiones y trabajos futuros}, finalizamos el trabajo destacando las implicaciones más importantes de los resultados obtenidos y mostramos posibles alternativas para amplíar nuestro trabajo.
+    \item En el último capítulo, \textbf{Conclusiones y trabajos futuros}, finalizamos el trabajo destacando las implicaciones más importantes de los resultados obtenidos y mostramos posibles alternativas para ampliar nuestro trabajo.
 \end{itemize}
 
 %\input{capitulos/TECNOLOGIAS}

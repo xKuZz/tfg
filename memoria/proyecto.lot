@@ -2,15 +2,18 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \contentsline {table}{\numberline {2.1}{\ignorespaces Ventajas e inconvenientes de la versi\IeC {\'o}n batch.\relax }}{10}{table.caption.10}
+\contentsline {table}{\numberline {2.2}{\ignorespaces Algunas medidas de impureza.\relax }}{13}{table.caption.11}
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces Variables para indexaci\IeC {\'o}n de hebras con Numba CUDA.\relax }}{15}{table.caption.12}
-\contentsline {table}{\numberline {3.2}{\ignorespaces Resumen de los tipos de memoria en CUDA.\relax }}{16}{table.caption.14}
-\contentsline {table}{\numberline {3.3}{\ignorespaces Algunas funciones para trabajar con la memoria del dispositivo en CUDA.\relax }}{17}{table.caption.15}
-\contentsline {table}{\numberline {3.4}{\ignorespaces Par\IeC {\'a}metros para el lanzamiento del kernel rand\_weights.\relax }}{29}{table.caption.23}
-\contentsline {table}{\numberline {3.5}{\ignorespaces Par\IeC {\'a}metros para el lanzamiento del kernel som\_iter.\relax }}{30}{table.caption.25}
-\contentsline {table}{\numberline {3.6}{\ignorespaces Par\IeC {\'a}metros para el lanzamiento del kernel finish\_update.\relax }}{36}{table.caption.30}
+\contentsline {table}{\numberline {3.1}{\ignorespaces Variables para indexaci\IeC {\'o}n de hebras con Numba CUDA.\relax }}{19}{table.caption.13}
+\contentsline {table}{\numberline {3.2}{\ignorespaces Resumen de los tipos de memoria en CUDA.\relax }}{21}{table.caption.15}
+\contentsline {table}{\numberline {3.3}{\ignorespaces Algunas funciones para trabajar con la memoria del dispositivo en CUDA.\relax }}{22}{table.caption.16}
+\contentsline {table}{\numberline {3.4}{\ignorespaces Par\IeC {\'a}metros para el lanzamiento del kernel rand\_weights.\relax }}{33}{table.caption.24}
+\contentsline {table}{\numberline {3.5}{\ignorespaces Par\IeC {\'a}metros para el lanzamiento del kernel som\_iter.\relax }}{34}{table.caption.26}
+\contentsline {table}{\numberline {3.6}{\ignorespaces Par\IeC {\'a}metros para el lanzamiento del kernel finish\_update.\relax }}{38}{table.caption.31}
+\contentsline {table}{\numberline {3.7}{\ignorespaces Una lista de atributos sin ordenar.\relax }}{40}{table.caption.33}
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Caracter\IeC {\'\i }sticas de la GPU NVIDIA GeForce GTX 1060 6 GB\relax }}{38}{table.4.1}
-\contentsline {table}{\numberline {4.2}{\ignorespaces Tiempos promedios de ejecuci\IeC {\'o}n y ganancias para el experimento del mapa auto-organizado sobre SUSY.\relax }}{42}{table.caption.34}
-\contentsline {table}{\numberline {4.3}{\ignorespaces Tiempos de ejecuci\IeC {\'o}n de los kernels en el experimento de profiling\relax }}{43}{table.caption.36}
+\contentsline {table}{\numberline {4.1}{\ignorespaces Caracter\IeC {\'\i }sticas de la GPU NVIDIA GeForce GTX 1060 6 GB\relax }}{46}{table.4.1}
+\contentsline {table}{\numberline {4.2}{\ignorespaces Tiempos promedios de ejecuci\IeC {\'o}n y ganancias para el experimento del mapa auto-organizado sobre SUSY.\relax }}{50}{table.caption.39}
+\contentsline {table}{\numberline {4.3}{\ignorespaces Tiempos de ejecuci\IeC {\'o}n de los kernels en el experimento de profiling\relax }}{51}{table.caption.41}
+\contentsline {table}{\numberline {4.4}{\ignorespaces Resultados de Random Forest para SUSY con 12 \IeC {\'a}rboles\relax }}{53}{table.caption.44}
 \addvspace {10\p@ }

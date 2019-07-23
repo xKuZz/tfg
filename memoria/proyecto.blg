@@ -8,9 +8,11 @@ Warning--entry type for "olivetti" isn't style-file defined
 -- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
 Warning--empty booktitle in cudasomonline
 Warning--missing publisher in cudasombatch
+Warning--empty journal in svatensson
 Warning--empty booktitle in compsom
 Warning--missing publisher in numpy
 Warning--empty booktitle in numba
+Warning--missing publisher in scan
 
 Done.
-(There were 6 warnings)
+(There were 8 warnings)

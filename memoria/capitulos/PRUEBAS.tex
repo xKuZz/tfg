@@ -155,4 +155,22 @@ En la figura \ref{img:warpssom} vemos las dos razones principales que hacen que 
 
  Por otro lado, el segundo problema que destacamos es la divergencia, que se debe principalmente a que, en este ejemplo, trabajamos con 128 hebras por bloque mientras que el número de neuronas es 100, por lo que uno de los \textit{warps} utilizará tan sólo 4 de las 32 hebras. En un caso ideal, el tamaño del mapa tendría un número de neuronas que fuese potencia de 2 (al menos 32). Si tuviésemos garantizado que esto fuese a ocurrir, podríamos eliminar gran parte de los condicionales utilizados ya que no sería necesario comprobar si hay más hebras que neuronas, ni habría que rellenar distancias extras con infinito, ni tendríamos que realizar todas las comprobaciones en la reducción para tamaños de bloque superiores al número de neuronas.
 
-\newpage
+\section{Experimentos para evaluar el random forest.}
+\subsection{Tabla de resultados para SUSY.}
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}l|ll|c|@{}}
+\cmidrule(l){2-4}
+\textit{\textbf{}}                                  & \multicolumn{1}{l|}{\textit{\textbf{GPU}}} & \textit{\textbf{CPU}} & \multicolumn{1}{l|}{\textbf{GPU/CPU}}        \\ \midrule
+\multicolumn{1}{|l|}{\textit{\textbf{Profundidad}}} & \multicolumn{2}{l|}{\textit{\textbf{Tiempo (s)}}}                  & \multicolumn{1}{l|}{\textbf{Precisión (\%)}} \\ \midrule
+\multicolumn{1}{|l|}{4}                             & 25,58                                      & 27,64                 & 75,82                                        \\
+\multicolumn{1}{|l|}{5}                             & 26,06                                      & 31,71                 & 76,99                                        \\
+\multicolumn{1}{|l|}{6}                             & 26,20                                      & 35,30                 & 77,44                                        \\
+\multicolumn{1}{|l|}{7}                             & 26,45                                      & 38,19                 & 78,33                                        \\
+\multicolumn{1}{|l|}{8}                             & 27,34                                      & 40,87                 & 78,67                                        \\
+\multicolumn{1}{|l|}{9}                             & 29,97                                      & 45,85                 & 79,02                                        \\
+\multicolumn{1}{|l|}{10}                            & 33,63                                      & 48,66                 & 79,25                                        \\ \bottomrule
+\end{tabular}
+\caption{Resultados de Random Forest para SUSY con 12 árboles}
+\label{tab:rf}
+\end{table}

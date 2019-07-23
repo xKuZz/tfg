@@ -108,13 +108,6 @@ def train_tree(dataset, max_depth=6, min_samples_per_node=1, tpb=1024, nstreams=
          tpb ha de ser un valor válido para bloques unidimensionales de CUDA.
     """
 
-    """
-    def buffer_reorder(data, order, my_buffer, stream=0):
-    fill_idx[blocks, tpb, stream](data, order, my_buffer)
-    cuda_replace[blocks,tpb, stream](data, my_buffer)
-    return data
-    """
-
     N, d = dataset.shape
     d -= 1
     
