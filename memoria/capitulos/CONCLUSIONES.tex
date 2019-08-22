@@ -1,1 +1,17 @@
+%!TEX root = ../proyecto.tex
 \chapter{Conclusiones y trabajos futuros.}
+En este trabajo, hemos desarrollado dos algoritmos de \textit{Soft Computing}, realizado una adaptación de los mismos para dispositivos \textit{CUDA}, y evaluando los resultados obtenidos con conjuntos de datos masivos mientras utilizamos el \textit{framework Spark}.\\
+
+En el caso del mapa auto-organizado de Kohonen, la combinación de GPU y \textit{Spark} proporciona resultados significativamente mejores que la versión para CPU, llegando a ser 27 veces más rápida la primera que la segunda en el mejor de los casos probados. Sin embargo, en el caso del \textit{random forest}, la implementación utilizada, aunque proporciona ligeras mejoras en velocidad si el número de datos a procesar es lo suficientemente grande, no llega a las proporciones del primer caso. Esto se ha debido a que, en el primer caso, hemos afrontado un problema que podía ser resuelto de forma masivamente paralela mientras que, en el segundo, múltiples factores como, por ejemplo, la necesidad de procesar múltiples nodos de forma independiente, han limitado las posibilidades del dispositivo \textit{CUDA}. \\
+
+Por otro lado, el uso de \textit{Python} y \textit{Spark} ha resultado clave para poder desarrollar este proyecto de forma eficiente. \textit{Spark} nos ha proporcionado herramientas para trabajar con bases de datos masivas, integrarlo con \textit{CUDA} mediante Python y permitirnos realizar una implementación que podríamos llevar a un clúster con múltiples GPUs.\\
+
+Las pruebas han sido realizadas sobre una única máquina y, aunque, en ambas pruebas el uso de la GPU con bases de datos masivas ha resultado favorable, no podemos concluir que el uso de \textit{CUDA} sea favorable siempre, aunque si podemos decir con certeza que, si el problema es masivamente paralelizable y se usa una base de datos lo suficientemente grande, el uso de la GPU será significativamente superior a los resultados obtenidos por la CPU.\\
+
+Para terminar, vamos a comentar brevemente algunas vías de desarrollo por las que se podría ampliar el trabajo realizado: \\
+\begin{itemize}
+	\item Añadir nuevos algoritmos de \textit{Soft Computing} o más bases de datos sobre las que realizar pruebas.\\
+	\item Realizar una comparativa de los resultados obtenidos en un rango de sistemas con especificaciones técnicas diferentes al utilizado.\\
+	\item Realizar un análisis más profundo sobre las implicaciones de modificar ciertos parámetros utilizados en los algoritmos, como el número de particiones de \textit{Spark}, el tamaño del mapa de Kohonen o la profundidad de los árboles.\\
+	\item Realizar una comparativa de los resultados obtenidos entre clúster de GPU y clúster de CPU.\\
+\end{itemize} 

@@ -42,7 +42,7 @@
 \contentsline {subsection}{\numberline {3.5.3}La operaci\IeC {\'o}n de scan.}{42}{subsection.3.5.3}
 \contentsline {subsection}{\numberline {3.5.4}C\IeC {\'a}lculo del criterio de Gini.}{43}{subsection.3.5.4}
 \contentsline {subsection}{\numberline {3.5.5}Reorganizaci\IeC {\'o}n de la listas de atributos.}{44}{subsection.3.5.5}
-\contentsline {subsection}{\numberline {3.5.6}Limitaciones y uso de Spark.}{45}{subsection.3.5.6}
+\contentsline {subsection}{\numberline {3.5.6}Uso de Spark.}{45}{subsection.3.5.6}
 \contentsline {chapter}{\numberline {4}Desarrollo de pruebas y an\IeC {\'a}lisis de resultados.}{46}{chapter.4}
 \contentsline {section}{\numberline {4.1}Entorno de pruebas.}{46}{section.4.1}
 \contentsline {section}{\numberline {4.2}Conjuntos de datos utilizados.}{47}{section.4.2}
@@ -51,6 +51,6 @@
 \contentsline {subsection}{\numberline {4.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{49}{subsection.4.3.2}
 \contentsline {subsection}{\numberline {4.3.3}Resultados de Nsight sobre la versi\IeC {\'o}n final del algoritmo.}{51}{subsection.4.3.3}
 \contentsline {section}{\numberline {4.4}Experimentos para evaluar el random forest.}{53}{section.4.4}
-\contentsline {subsection}{\numberline {4.4.1}Tabla de resultados para SUSY.}{53}{subsection.4.4.1}
-\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{54}{chapter.5}
-\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{56}{chapter*.45}
+\contentsline {subsection}{\numberline {4.4.1}Resultados del uso del profiler sobre la versi\IeC {\'o}n final del algoritmo.}{56}{subsection.4.4.1}
+\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{59}{chapter.5}
+\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{62}{chapter*.44}

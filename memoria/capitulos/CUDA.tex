@@ -18,11 +18,11 @@ Para desarrollar el código asociado a este proyecto, hemos optado por utilizar 
 
 \textbf{NumPy} \cite{numpy} es un paquete de código abierto para Python diseñado para la computación científica. El paquete proporciona una potente estructura de datos para trabajar con arrays N-dimensionales y herramientas para realizar una gran cantidad de operaciones sobre los mismos (operaciones de cálculo matricial, algoritmos de álgebra lineal y generación de números pseudoaleatorios, entre otros).\\
 
-\textbf{Numba} \cite{numba} es un paquete para Python cuyo objetivo es la aceleración compilado fragmentos de código utilizando el compilador LLVM y dando la oportunidad de paralelizar código tanto para la CPU como para la GPU. En concreto, para las GPUs CUDA, proporciona al usuario un subconjunto de las características de CUDA con un nivel de abstracción mayor. Con eso no sólo conseguimos poder trabajar con CUDA desde Python sino también evitar, si lo deseamos, manejar las transferencias de memoria entre \textit{host} y dispositivo o la necesidad de indicar todos los tipos a la hora de inicializar un \textit{kernel} entre otras ventajas.\\
+\textbf{Numba} \cite{numba} es un paquete para Python, cuyo objetivo es la aceleración compilando fragmentos de código con el compilador LLVM y, dando la oportunidad de paralelizar código, tanto para la CPU como para la GPU. En concreto, para las GPUs CUDA, proporciona al usuario un subconjunto de las características de CUDA con un nivel de abstracción mayor. Con eso, no sólo conseguimos poder trabajar con CUDA desde Python sino, también evitar, si lo deseamos, manejar las transferencias de memoria entre \textit{host} y dispositivo o la necesidad de indicar todos los tipos a la hora de inicializar un \textit{kernel} entre otras ventajas.\\
 
 \textbf{CuPy} \cite{cupy} es otro paquete de Python que, por un lado y, de manera similar a Numba, nos permite generar kernels de manera similar a los de C/C++, así como facilidades para generar kernels en los que se implementa reducciones u operaciones elemento a elemento en un array. Además, CuPy está implementado de manera que permite utilizar directamente sus estructuras de datos sobre kernels de Numba, lo que nos permite combinar elementos de ambos paquetes según nos interese. \\
 
-Por otro lado, proporciona una API similar a la de NumPy pero las operaciones están implementadas utilizando CUDA y tienen algunas diferencias notables entre sí, como que: el generador de pseudoaleatorios de CuPy sólo puede usar un valor escalar y, el de NumPy, puede usar también un array con múltiples valores para generar más entropía; utilizar índices por encima del tamaño de un array genera un error en NumPy pero en CuPy vuelve a recorrer el array desde el principio; o que, mientras que en NumPy puedes utilizar objetos de Python en CuPy sólo puedes usar tipos de datos numéricos y booleanos.\\
+Por otro lado, proporciona una API similar a la de NumPy, pero las operaciones están implementadas utilizando CUDA y, tienen algunas diferencias notables entre sí, como que: el generador de pseudoaleatorios de CuPy sólo puede usar un valor escalar y, el de NumPy, puede usar también un array con múltiples valores para generar más entropía; utilizar índices por encima del tamaño de un array genera un error en NumPy pero, en CuPy, vuelve a recorrer el array desde el principio; o que, mientras que en NumPy puedes utilizar objetos de Python, en CuPy sólo puedes usar tipos de datos numéricos y booleanos.\\
 
 \subsection{Estructura de hebras, bloques y mallas.}
 El \textbf{\textit{kernel}} es un fragmento de código especial, destino a ser ejecutado en el dispositivo, en el que se indica las instrucciones que ha de ejecutar una hebra.\\
@@ -56,9 +56,9 @@ if __name__ == '__main__':
 
 Las \textbf{hebras} son la unidad mínima en la arquitectura \cudanospace. Cada hebra es ejecutada por un núcleo \cuda y es consciente, en tiempo de ejecución, de su identificador dentro del bloque así como del identificador del bloque en el que se encuentra y el tamaño del mismo, permitiéndonos así repartir el trabajo en función de dichos valores.\\
 
-El \textbf{bloque} se corresponde a un conjunto de hebras que ejecuta el mismo \textit{kernel} y que pueden cooperar entre sí y, al conjunto de esos bloques, se le denomina \textbf{``grid'' o malla}. \\
+El \textbf{bloque} se corresponde a un conjunto de hebras que ejecuta el mismo \textit{kernel} y pueden cooperar entre sí. Al conjunto de esos bloques, se le denomina \textbf{``grid'' o malla}. \\
 
-Tanto las hebras dentro de un bloque como los bloques dentro de una malla puede tener estructuras unidimensionales, bidimensionales y tridimensionales. Las dimensiones de estas estructuras será indicada por el \textit{host} a la hora de ejecutar el \textit{kernel}.\\
+Tanto las hebras dentro de un bloque, como los bloques dentro de una malla, pueden tener estructuras unidimensionales, bidimensionales y tridimensionales. Las dimensiones de estas estructuras será indicada por el \textit{host} a la hora de ejecutar el \textit{kernel}.\\
 
 \begin{table}[ht]
 \centering
@@ -127,7 +127,7 @@ Si utilizamos los arrays N-dimensionales de NumPy, no tenemos la necesidad de re
 \end{table}
 
 \subsection{Sincronización y operaciones atómicas.}
-Es frecuente la necesidad de que múltiples hebras cooperen usando datos en alguna región de memoria del dispositivo a la que tienen acceso de forma simultánea. En estos casos, podríamos encontrarnos ante el riesgo de una dependencia de datos de tipo \textit{RAW (Read After Write)}, es decir, una situación en la que se lee un dato antes de que los cálculos previos que necesitamos se hayan realizado. Para evitar este tipo de dependencias, \cuda proporciona varios mecanismos para sincronizar las hebras usadas, de los que vamos a destacar los dos usados en este trabajo.\\
+Es frecuente la necesidad de que múltiples hebras cooperen, usando datos en alguna región de memoria del dispositivo, a la que tienen acceso de forma simultánea. En estos casos, podríamos encontrarnos ante el riesgo de una dependencia de datos de tipo \textit{RAW (Read After Write)}, es decir, una situación en la que se lee un dato antes de que los cálculos previos que necesitamos se hayan realizado. Para evitar este tipo de dependencias, \cuda proporciona varios mecanismos para sincronizar las hebras usadas, de los que vamos a destacar los dos usados en este trabajo.\\
 
 Por un lado, si no estamos utilizando los \textit{streams} de \cudanospace, característica que permite lanzar \textit{kernels} distintos de forma concurrente, tenemos garantizado que un \textit{kernel} no será ejecutado hasta que el \textit{kernel} anterior no haya terminado de procesarse. El uso de múltiples \textit{kernels} no es recomendable si no es necesario, ya que, cuando queden pocas operaciones por realizar en uno de los \textit{kernels}, parte del dispositivo podría no estar realizando cálculo alguno, y, en el lanzamiento de cada \textit{kernel}, existe un pequeño intervalo de tiempo desde que el \textit{host} invoca el \textit{kernel} y éste empieza a ser ejecutado en la GPU.\\ 
 
@@ -182,7 +182,7 @@ pseudoaleatorios[mi_array.size // tpb + 1, tpb](rng_states, mi_array)
 \subsection{Streams.}
 Un \textbf{stream} en \textit{CUDA} es una secuencia de órdenes (lanzamiento de \textit{kernels}, transferencias de memoria, etc.) enviadas desde el \textit{host} al dispositivo. Mientras que la secuencia de órdenes dentro de un \textit{stream} ha de ser ejecutada secuencialmente, las órdenes entre los \textit{streams} pueden intercalarse, potencialmente permitiendo un mejor uso de los recursos al ejecutar múltiples \textit{kernels} de forma concurrente. \\
 
-\textit{Numba} nos permite utilizar esta característica con la función \textbf{cuda.stream()} que genera un nuevo stream y nos devuelve el identificador del mismo. Para usarlo, al lanzar el kernel o hacer la transferencia de memoria hemos de pasar la variable con el identificador en el parámetro posicional ``stream'. Posteriormente, podemos sincronizar todos los \textit{streams} utilizando la función \textbf{cuda.synchronize()}. \\
+\textit{Numba} nos permite utilizar esta característica con la función \textbf{cuda.stream()}, que genera un nuevo stream y nos devuelve el identificador del mismo. Para usarlo, al lanzar el kernel o hacer la transferencia de memoria hemos de pasar la variable con el identificador en el parámetro posicional ``stream'. Posteriormente, podemos sincronizar todos los \textit{streams} utilizando la función \textbf{cuda.synchronize()}. \\
 
 \begin{code}
 \begin{minted}{python}
@@ -224,7 +224,7 @@ cuda.synchronize()
 
 
 
-\textbf{\textit{Apache Spark}} es un \textit{framework} de código abierto y propósito general para sistemas distribuidos de computación en clúster que proporciona una API utilizable desde los lenguajes de programación en Scala, Java, Python y R; y proporciona herramientas de alto nivel como ML/MLib, una librería con algoritmos de \textit{machine learning}. \\
+\textbf{\textit{Apache Spark}} es un \textit{framework} de código abierto y propósito general para sistemas distribuidos de computación en clúster, que proporciona una API utilizable desde los lenguajes de programación en Scala, Java, Python y R; y proporciona herramientas de alto nivel como ML/MLib, una librería con algoritmos de \textit{machine learning}. \\
 
 El \textit{framework} fundamenta su arquitectura en el \textit{RDD (Resilient Distributed DataSet)}, que es una estructura de datos de sólo lectura distribuida en un clúster de máquinas, mantenida durante toda la computación y con tolerancia a fallos. El hecho de que el RDD sea inmutable, es decir, de sólo lectura, facilita la distribución del trabajo a lo largo del clúster aunque implica que las acciones que transforman los datos, necesiten crear un nuevo \textit{RDD} para los resultados. Existen dos formas básicas de generar un \textit{RDD} en \textit{Spark}: paralelizando una colección existente en el código que controla la ejecución de \textit{Spark} o leyendo los datos de un sistema de almacenamiento. \\
 

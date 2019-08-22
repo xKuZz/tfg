@@ -156,21 +156,70 @@ En la figura \ref{img:warpssom} vemos las dos razones principales que hacen que 
  Por otro lado, el segundo problema que destacamos es la divergencia, que se debe principalmente a que, en este ejemplo, trabajamos con 128 hebras por bloque mientras que el número de neuronas es 100, por lo que uno de los \textit{warps} utilizará tan sólo 4 de las 32 hebras. En un caso ideal, el tamaño del mapa tendría un número de neuronas que fuese potencia de 2 (al menos 32). Si tuviésemos garantizado que esto fuese a ocurrir, podríamos eliminar gran parte de los condicionales utilizados ya que no sería necesario comprobar si hay más hebras que neuronas, ni habría que rellenar distancias extras con infinito, ni tendríamos que realizar todas las comprobaciones en la reducción para tamaños de bloque superiores al número de neuronas.
 
 \section{Experimentos para evaluar el random forest.}
-\subsection{Tabla de resultados para SUSY.}
+Para la evaluación de los resultados del \textit{random forest} hemos utilizado el conjunto de datos SUSY. Para entrenar el \textit{random forest}, se ha usado validación cruzada con 10 iteraciones, es decir, el conjunto de muestras se ha dividido en 10 subconjuntos de muestras del mismo tamaño; en cada iteración, 9 de esos subconjuntos han sido utilizados para entrenar el \textit{random forest} y uno para evaluar los resultados; y, para finalizar, se ha realizado un promedio de los resultados. Para evaluar el modelo, hemos utilizado tres métricas: precisión, que indica el porcentaje de muestras que han sido correctamente clasificadas; el tiempo que tarda en entrenar el algoritmo; y la ganancia de la GPU a la CPU, o sea, cuántas veces es más rápida la tarjeta gráfica que el procesador. \\
+
+Puesto que, tanto la versión para GPU como para CPU utilizan el mismo algoritmo pero, adaptado para las correspondientes arquitecturas, la precisión es un factor relevante a la hora de comprobar si la implementación de los algoritmos es correcta, ya que, en caso de una buena implementación, independientemente de haber usado GPU o CPU, obtendríamos precisiones idénticas, y estos resultados podemos compararlos con los obtenidos en aproximaciones similares en la literatura. \\
+
+Además, durante el proceso de implementación, hemos utilizado otros conjuntos de datos, como Spambase \cite{spambase} o \textit{MAGIC} \cite{magic04}, para comprobar los resultados mientras utilizábamos un único árbol.
+
+Para la evaluación del \textit{random forest} con \textit{SUSY} hemos generado un \textit{random forest} con 12 árboles y hemos utilizado validación cruzada con 10 iteraciones sobre el total de los 5 millones de muestras disponibles en el conjunto de datos. El experimento ha sido realizado múltiples veces, variando la profundidad de 4 a 10. Además, el experimento ha sido repetido 5 veces, anotando los resultados promedios, que podemos observar en la tabla \ref{tab:rf}.\\
 \begin{table}[ht]
 \centering
-\begin{tabular}{@{}l|ll|c|@{}}
-\cmidrule(l){2-4}
-\textit{\textbf{}}                                  & \multicolumn{1}{l|}{\textit{\textbf{GPU}}} & \textit{\textbf{CPU}} & \multicolumn{1}{l|}{\textbf{GPU/CPU}}        \\ \midrule
-\multicolumn{1}{|l|}{\textit{\textbf{Profundidad}}} & \multicolumn{2}{l|}{\textit{\textbf{Tiempo (s)}}}                  & \multicolumn{1}{l|}{\textbf{Precisión (\%)}} \\ \midrule
-\multicolumn{1}{|l|}{4}                             & 25,58                                      & 27,64                 & 75,82                                        \\
-\multicolumn{1}{|l|}{5}                             & 26,06                                      & 31,71                 & 76,99                                        \\
-\multicolumn{1}{|l|}{6}                             & 26,20                                      & 35,30                 & 77,44                                        \\
-\multicolumn{1}{|l|}{7}                             & 26,45                                      & 38,19                 & 78,33                                        \\
-\multicolumn{1}{|l|}{8}                             & 27,34                                      & 40,87                 & 78,67                                        \\
-\multicolumn{1}{|l|}{9}                             & 29,97                                      & 45,85                 & 79,02                                        \\
-\multicolumn{1}{|l|}{10}                            & 33,63                                      & 48,66                 & 79,25                                        \\ \bottomrule
+\begin{tabular}{@{}l|ll|c|c|@{}}
+\cmidrule(l){2-5}
+\textit{\textbf{}}                                  & \multicolumn{1}{l|}{\textit{\textbf{GPU}}} & \textit{\textbf{CPU}} & \multicolumn{1}{l|}{\textit{\textbf{GPU vs CPU}}} & \multicolumn{1}{l|}{\textbf{GPU/CPU}} \\ \midrule
+\multicolumn{1}{|c|}{\textit{\textbf{Profundidad}}} & \multicolumn{2}{c|}{\textit{\textbf{Tiempo (s)}}}                  & \textit{\textbf{Ganancia}}                        & \textbf{Precisión (\%)}               \\ \midrule
+\multicolumn{1}{|l|}{4}                             & 25,58                                      & 27,64                 & 1,08                                              & 75,82                                 \\
+\multicolumn{1}{|l|}{5}                             & 26,06                                      & 31,71                 & 1,22                                              & 76,99                                 \\
+\multicolumn{1}{|l|}{6}                             & 26,20                                      & 35,30                 & 1,35                                              & 77,44                                 \\
+\multicolumn{1}{|l|}{7}                             & 26,45                                      & 38,19                 & 1,44                                              & 78,33                                 \\
+\multicolumn{1}{|l|}{8}                             & 27,34                                      & 40,87                 & 1,49                                              & 78,67                                 \\
+\multicolumn{1}{|l|}{9}                             & 29,97                                      & 45,85                 & 1,53                                              & 79,02                                 \\
+\multicolumn{1}{|l|}{10}                            & 33,63                                      & 48,66                 & 1,45                                              & 79,25                                 \\ \bottomrule
 \end{tabular}
 \caption{Resultados de Random Forest para SUSY con 12 árboles}
 \label{tab:rf}
 \end{table}
+
+A diferencia del mapa auto-organizado, podemos observar que, en este caso, los resultados en este modelo se encuentran mucho más ajustados. Para poder realizar una interpretación adecuada de los tiempos de ejecución y la ganancia, hemos de tener en cuenta los siguientes factores:
+
+\begin{itemize}
+	\item Dada la implementación realizada, la versión para GPU conseguirá mejores resultados conforme mayor sea el número de elementos a procesar.
+	\item El número de árboles utilizados en el \textit{random forest} va a influir en el tiempo de ejecución de la GPU. Conforme mayor sea el número de árboles utilizados, menor será el tamaño de elementos que tenemos garantizados que se procesen a la vez, si estamos usando una única GPU.
+	\item Árboles muy profundos afectan de manera negativa a la GPU, debido a que, conforme pasemos al siguiente nivel de profundidad, vamos a tener un mayor número de nodos con un menor número de muestras cada uno o incluso parte de las muestras habrían sido eliminadas en alguna poda, que, limitando la capacidad de aprovechar la máxima capacidad de paralelismo posible.
+\end{itemize}
+
+En el ejemplo mostrado en la tabla \ref{tab:rf}, observamos que la versión para GPU nos ofrece una mejora del tiempo de ejecución al usar la GPU. En la profundidad 4, obtenemos el resultado que menos mejora nos ofrece con una diferencia de tan sólo 2 segundos. Mientras que la cantidad de datos sea lo suficientemente grande, una mayor profundidad implica más procesamiento de datos y vamos a obtener una mejor ganancia hasta la profundidad 9, en la que obtenemos la mejor ganancia, siendo la versión para GPU 1,53 veces más rápida que la correspondiente para CPU dándonos una ventaja de 15,88 segundos. En la profundidad 10, observamos cómo esa ganancia empieza a decaer bajando a 1,45 veces más rápido. \\
+
+En el caso de la precisión, una mayor profundidad nos ayuda a obtener mejores resultados, partiendo de un 75,82 \% en la profundidad 4 hasta un 79,25 \% en la profundidad 10. . En comparación con otras aproximaciones de la literatura utilizadas para resolver este problema, la implementación realizada queda considerablemente por detrás del 85-87 \% obtenido utilizado otros modelos \cite{susy}. \\
+
+Para concluir este análisis, podemos determinar que varios factores van a influir en qué situaciones va a ser mejor nuestra aproximación.
+\begin{itemize}
+\item Para considerar utilizar este modelo hemos de estar trabajando con bases de datos de una combinación de número de muestras y número de atributos considerablemente grandes.
+\item El número de árboles utilizados va a influir tanto en la precisión como en el tiempo de ejecución. Por regla generar, un mayor número de árboles va a mejorar la precisión pero va a reducir la velocidad de entrenamiento si se va a utilizar una única GPU. En el caso de disponer de un clúster, tener un número de GPUs igual al número de árboles nos permitiría obtener los mejores resultados, siempre y cuando el tiempo de comunicación entre los nodos del clúster no sea demasiado alto.
+\item Dependiendo del problema a resolver podremos variar el número de árboles o la profundidad que queremos usar para entrenar. Además, mientras que en el ejemplo propuesto obtenemos una precisión por debajo de otras alternativas, en ejemplos más simples, como en \textit{Spambase} \cite{spambase} o \textit{MAGIC} \cite{magic04} obtenemos precisiones muy competentes con otros resultados encontrados en la literatura (un 91,9 \% y un 82,4 \%, respectivamente, para profundidad 10).
+\end{itemize}
+
+\subsection{Resultados del uso del profiler sobre la versión final del algoritmo.}
+En el caso del árbol de decisión desarrollado, el principal cuello de botella es la necesidad de lanzar una gran cantidad de \textit{kernels} muy rápidos que no hemos sido capaces de compactar para evitar el \textit{overhead} de cada lanzamiento de un kernel. Para evitarlo, hemos utilizado algunas técnicas para evitar este problema como el uso de \textit{streams} concurrentes o la combinación de múltiples \textit{kernels} (scan con cálculo del criterio de Gini y scan con el cálculo de las nuevas posiciones en la lista de atributos). Cabe también destacar, que otra alternativa a evaluar para solucionar este problema es el uso del paralelismo dinámico de \textit{CUDA}, que permite lanzar un kernel desde otro, sin embargo, no tenemos acceso a esa característica usando \textit{Python}.\\
+
+Puesto que hay una alta variedad de \textit{kernels} que son invocados frecuentemente vamos a observar la siguiente gráfica, en la que vemos el porcentaje del tiempo de ejecución que se dedica a cada tarea en una reproducción del experimento, con una base de datos de 100000 muestras aleatorias con 18 atributos y generando un árbol de profundidad 10.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.8]{imagenes/profiletreequesito.png}
+\caption{Análisis de los kernels ejecutados.}
+\label{img:quesito}
+\end{figure}
+
+En primer lugar, la operación que más porcentaje de tiempo lleva es la operación más costosa, la organización de la listas de atributos inicial que toma un 27 \% del tiempo total de ejecución de la GPU, correspondiente al algoritmo de ordenación de CuPy. Esta operación, que junto a la inicialización de la lista de atributos supone el inicio del algoritmo, acumulado un 29 \% del tiempo usado. Una posible vía de mejora es evaluar si una implementación propia del algoritmo de ordenación nos proporcionaría resultados mejores. En caso de realizar una implementación propia, podríamos combinar con facilidad la inicialización de las listas de atributos con el algoritmo de ordenación. \\
+
+En segundo lugar, tenemos un empate al 20 \% entre la reducción utilizada para calcular el criterio de Gini y la reorganización de la listas de atributos. La operación de reducción es invocada para todos los nodos activos mientras que la reorganización de atributos es realizada una vez por nivel de profundidad. \\
+
+La implementación de la reducción para este algoritmo sigue una estructura similar a la operación de \textit{scan}. Ésta, hace uso de operaciones intrínsecas de \textit{warps} y de operaciones atómicas para calcular el mínimo global entre los bloques. Otra alternativa probada fue el lanzamiento de otro kernel para el cálculo de los resultados globales, pero resultó ligeramente más lenta que el uso de las operaciones atómicas. Otra opción a evaluar, sería el uso del paralelismo dinámico, pero como comentamos previamente, no podemos acceder a esa característica desde \textit{Numba}.\\
+
+La reorganización de la listas de atributos es una operación de transferencia de memoria dentro del dispositivo. En primer lugar, los datos son movidos a \textit{arrays} temporales y, una vez finalizado el proceso, se sobrescriben los datos en las nuevas posiciones. Dentro del dispositivo \textit{CUDA}, estas transferencias de memoria son considerablemente rápidas, especialmente cuando los datos siguen algún patrón de adyacencia, como sucede al rellenar los arrays temporales. Sin embargo, en el caso de los accesos a memoria aleatorios, como ocurre en la fase de escritura, el tiempo de acceso va a ser mucho más lento, que queda manifestado en que, de ese 20 \%, un 5,1 \% se corresponde a la primera fase y el resto a la segunda. \\
+
+Por último, vamos a analizar las tres operaciones relacionadas con la primitiva de \textit{scan}, que son las siguientes en la gráfica. La operación de \textit{scan} es usada dos veces por nodo activo, una primera vez para calcular el criterio de Gini y, una segunda vez, para calcular qué transferencias de memoria permiten mantener el orden de los atributos sin tener que volver a usar el algoritmo de ordenación, haciendo de ella la operación que es invocada el mayor número de veces por ejecución del algoritmo. A diferencia del caso de la reducción, en vez de utilizar operaciones atómicas, usamos el lanzamiento de un nuevo \textit{kernel} para realizar el cálculo global del \textit{scan}. Este cambio se debe a que, dadas las necesidades de lanzar otros \textit{kernels} para ejecutar el algoritmo sin paralelismo dinámico hemos podido combinar el cálculo del \textit{scan} global con la operación posterior. La parte que realiza el cálculo de la primitiva \textit{scan} para cada bloque representa un 15 \% del tiempo de ejecución de la GPU mientras que el \textit{kernel} que termina la primitiva y calcula el criterio de Gini conlleva un 8 \% del tiempo y el cálculo de los nuevas posiciones para ordenar un 5 \%. Puesto que, ambos \textit{kernels} parten de la misma operación (realizar el \textit{scan} global) podemos deducir que la complejidad aritmética del cálculo del criterio de Gini es superior a la del cálculo de las nuevas posiciones.\\
+
+Aunque el análisis previo nos facilita saber qué \textit{kernel} nos interesaría optimizar primero es importante observar un resultado más genérico obtenido en el \textit{profile} nos indica que durante los 0,25 segundos que ha tardado en entrenarse el árbol sólo 0,1 segundos han sido usados para realizar los cálculos, proporcionado un porcentaje de utilización de la GPU del 40 \$. Este problema deriva principalmente del \textit{overhead} de tener que lanzar múltiples \textit{kernels}, que viene dada por la necesidad de evaluar múltiples nodos independientes, que, además, han de ser sincronizados al terminar cada nivel de profundidad para reorganizar las listas de atributos y poder pasar al siguiente nivel.

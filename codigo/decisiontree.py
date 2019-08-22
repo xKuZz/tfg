@@ -401,13 +401,13 @@ def evaluar(dataset, modelo):
 
 if __name__ == '__main__':
 
-    #dataset = np.genfromtxt('../datasets/miniboone_PID.txt', dtype=np.float32)
-    #labels = np.zeros((dataset.shape[0],1))
-    #labels[:36499] = 1
-    #magic = np.hstack((dataset,labels))
+    dataset = np.genfromtxt('../datasets/miniboone_PID.txt', dtype=np.float32)
+    labels = np.zeros((dataset.shape[0],1))
+    labels[:36499] = 1
+    magic = np.hstack((dataset,labels))
 
 
-    magic = np.genfromtxt('../datasets/magic04.data', delimiter=',', dtype=np.float32)
+   # magic = np.genfromtxt('../datasets/spambase.data', delimiter=',', dtype=np.float32)
     inicio = time.time()
     arbol = train_tree(magic)
     fin = time.time()

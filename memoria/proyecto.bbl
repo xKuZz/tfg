@@ -137,4 +137,18 @@ P.~Baldi, P.~Sadowski, and D.~Whiteson, ``Searching for exotic particles in
   high-energy physics with deep learning,'' \emph{Nature communications},
   vol.~5, p. 4308, 07 2014.
 
+\bibitem{spambase}
+\BIBentryALTinterwordspacing
+D.~Dua and C.~Graff, ``Spambase, {UCI} machine learning repository,''
+  consultado el 20 de abril de 2019. [Online]. Available:
+  \url{https://archive.ics.uci.edu/ml/datasets/spambase}
+\BIBentrySTDinterwordspacing
+
+\bibitem{magic04}
+\BIBentryALTinterwordspacing
+------, ``Magic, {UCI} machine learning repository,'' consultado el 20 de abril
+  de 2019. [Online]. Available:
+  \url{https://archive.ics.uci.edu/ml/datasets/magic+gamma+telescope}
+\BIBentrySTDinterwordspacing
+
 \end{thebibliography}

@@ -9,12 +9,11 @@
 \contentsline {figure}{\numberline {3.3}{\ignorespaces Representaci\IeC {\'o}n de un array 3D como un array 1D row-major.\relax }}{31}{figure.caption.22}
 \contentsline {figure}{\numberline {3.4}{\ignorespaces Una reducci\IeC {\'o}n paralela de una sumatoria.\relax }}{36}{figure.caption.28}
 \contentsline {figure}{\numberline {3.5}{\ignorespaces Diagrama de flujo de la implementaci\IeC {\'o}n del \IeC {\'a}rbol de decisi\IeC {\'o}n.\relax }}{41}{figure.caption.34}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Fase up-sweep del scan.\relax }}{43}{figure.caption.35}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Fase down-sweep del scan.\relax }}{44}{figure.caption.36}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Imagen obtenida en el experimento para CPU del mapa auto-organizado.\relax }}{48}{figure.caption.37}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Imagen obtenida en el experimento para GPU del mapa auto-organizado.\relax }}{49}{figure.caption.38}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Gr\IeC {\'a}fica con tiempos promedios y ganancias para SUSY.\relax }}{51}{figure.caption.40}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Speed of Light del kernel evaluado.\relax }}{52}{figure.caption.42}
-\contentsline {figure}{\numberline {4.5}{\ignorespaces An\IeC {\'a}lisis de los warps del kernel.\relax }}{52}{figure.caption.43}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Imagen obtenida en el experimento para CPU del mapa auto-organizado.\relax }}{48}{figure.caption.35}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Imagen obtenida en el experimento para GPU del mapa auto-organizado.\relax }}{49}{figure.caption.36}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Gr\IeC {\'a}fica con tiempos promedios y ganancias para SUSY.\relax }}{51}{figure.caption.38}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Speed of Light del kernel evaluado.\relax }}{52}{figure.caption.40}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces An\IeC {\'a}lisis de los warps del kernel.\relax }}{52}{figure.caption.41}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces An\IeC {\'a}lisis de los kernels ejecutados.\relax }}{56}{figure.caption.43}
 \addvspace {10\p@ }

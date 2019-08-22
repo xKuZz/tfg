@@ -54,7 +54,7 @@ $$
     \item 3) Para finalizar la iteración, \textit{Spark} reúne mediante \textit{collect} las numeradores y denominadores parciales obtenidos y, usando el último \textit{kernel} implementado, \textit{finish\_update} obtiene los pesos finales de la iteración.\\
 \end{itemize}
 
-Este proceso, que costa de 3 fases, es realizado hasta alcanzar el número máximo de iteraciones. Hemos de destacar que todas las particiones han de partir de la mismos pesos en cada iteración para realizar los cálculos. Por ello, al inicio de la iteración, es necesario distribuir la matriz de pesos a cada nodo de \textit{Spark} que realiza esos cálculos y, al final de la iteración, reunir todos los numeradores y denominadores parciales en un único nodo, permitiéndonos obtener los pesos finales de la iteración. \\
+Este proceso, que consta de 3 fases, es realizado hasta alcanzar el número máximo de iteraciones. Hemos de destacar que todas las particiones han de partir de la mismos pesos en cada iteración para realizar los cálculos. Por ello, al inicio de la iteración, es necesario distribuir la matriz de pesos a cada nodo de \textit{Spark} que realiza esos cálculos y, al final de la iteración, reunir todos los numeradores y denominadores parciales en un único nodo, permitiéndonos obtener los pesos finales de la iteración. \\
 
 Para que \textit{Spark} pueda realizar esa distribución a lo largo de un clúster es necesario que, al final de la iteración, se haga la transferencia de memoria de dispositivo a \textit{host} de los pesos parciales y, al inicio de la iteración, se haga la transferencia de \textit{host} a dispositivo de la pesos de las neuronas correspondientes a esa iteración.\\
 
@@ -458,12 +458,12 @@ Valor & Clase & ID Muestra \\ \midrule
 
 Las columnas de la tabla \ref{tab:ejlistaatributos} son:
 \begin{itemize}
-    \item \textbf{Valor}, que se corresponde al valor que toma el atributo al que correponde la tabla en la muestra representada en la fila.
-    \item \textbf{Clase}, que se correponde a la etiqueta de salida asoaciada a la muestra de la fila.
-    \item \textbf{ID Muestra}, que se correponde al identificador de la muestra. Al principio, se correponde al número de fila empezando por 0.
+    \item \textbf{Valor}, que se corresponde al valor que toma el atributo al que corresponde la tabla en la muestra representada en la fila.
+    \item \textbf{Clase}, que se corresponde a la etiqueta de salida asociada a la muestra de la fila.
+    \item \textbf{ID Muestra}, que se corresponde al identificador de la muestra. Al principio, se corresponde al número de fila empezando por 0.
 \end{itemize}
 
-Una vez esta estructura es generada para cada atributo del problema en cuestión, es ordenada por orden creciente según la columna ``Valor''.
+Una vez esta estructura es generada para cada atributo del problema en cuestión, es ordenada por orden creciente según la columna ``Valor''. En la implementación realizada, se utiliza un array para cada columna.
 
 \subsection{Esquema general del algoritmo implementado.}
 \begin{figure}[ht]
@@ -483,28 +483,24 @@ Al inicio del algoritmo, tras generar las listas de atributos, se genera un nodo
 
 
 \subsection{La operación de scan.}
-Una de las claves del uso de la lista de atributos, es que, para los problemas de \textbf{clasificación binaria}, que son los únicos que nuestro modelo es capaz de resolver, si codificamos una clase como $0$ (a partir de ahora llamada \textit{clase negativa}) y otra como $1$ (\textit{clase positiva}) si realizamos una suma acumulada sobre el subconjunto de filas de un nodo de la columna ``Clase'' podríamos tener control de cuántos elementos hay en cada clase tanto para todas las particiones. Para realizar la suma acumulada existe un algoritmo ampliamente utilizada en el mundo de la GPU denominado \textit{scan}.
+Una de las claves del uso de la lista de atributos, es que, para los problemas de \textbf{clasificación binaria}, que son los únicos que nuestro modelo es capaz de resolver, si codificamos una clase como $0$ (a partir de ahora llamada \textit{clase negativa}) y otra como $1$ (\textit{clase positiva}) si realizamos una suma acumulada sobre el subconjunto de filas de un nodo de la columna ``Clase'' podríamos tener control de cuántos elementos hay en cada clase tanto para todas las particiones. Para realizar la suma acumulada existe una primitiva ampliamente utilizada en el mundo de la GPU denominada \textit{scan}.
 
-El \textit{scan} \cite{scan}, suma acumulada o suma prefija, es una operación que utiliza un operador binario, $\oplus$, que cumpla la propiedad asociativa y utilizada sobre un \textit{array} de $n$ elementos. Existen dos formas de realizar el \textit{scan}: inclusivo y exclusivo. El scan inclusivo empieza con el primer elemento del array y va a realizando una suma acumulada. El \textit{scan} exclusivo empieza con el elemento neutro de la operación y realiza una suma acumulada de todos los elementos hasta el penúltimo. En la implementación realizada hemos utilizado una operación de \textit{scan} exclusivo que además devuelve el total de la suma del array cubriendo ambos casos. Para los propósitos de este documento, cada vez que hablemos de \textit{scan} nos estaremos refiriendo al \textit{scan exclusivo}. Por tanto la operación de \textit{scan} sobre un array nos devuelve lo siguiente:
+El \textit{scan} \cite{scan}, suma acumulada o suma prefija, es una operación que utiliza un operador binario, $\oplus$, que cumpla la propiedad asociativa y utilizada sobre un \textit{array} de $n$ elementos. Existen dos formas de realizar el \textit{scan}: inclusivo y exclusivo. El scan inclusivo empieza con el primer elemento del array y va a realizando una suma acumulada. El \textit{scan} exclusivo empieza con el elemento neutro de la operación y realiza una suma acumulada de todos los elementos hasta el penúltimo. En la implementación realizada, hemos utilizado el \textit{scan inclusivo}. Por tanto, para los propósitos de este documento, cada vez que hablemos de \textit{scan}, nos estaremos refiriendo al \textit{scan inclusivo}, que al aplicarla sobre un array, nos devuelve lo siguiente:
+$$scan([a_0, a_1, a_2, ..., a_{n-1}]) = [ a_0, (a_0 \oplus a_1), (a_0 \oplus a_1 \oplus a_2), ..., (a_0 \oplus a_1 \oplus a_2 \oplus ... \oplus a_{n})]$$
 
-$$scan([a_0, a_1, a_2, ..., a_{n-1}]) = [I, a_0, (a_0 \oplus a_1), (a_0 \oplus a_1 \oplus a_2), ..., (a_0 \oplus a_1 \oplus a_2 \oplus ... \oplus a_{n-1})]$$
+La implementación realizada utilizada operaciones directas sobre \textit{warps}, permitiendo que una ejecución más rápida al realizar todas las operaciones directamente sobre los registros del multiprocesador. De manera más específica el procedimiento realizado es el siguiente.
 
-La implementación en \textit{CUDA} de la operación se realiza, utilizando una técnica frecuente para estos dispositivos, simular el uso de un árbol binario balanceado utilizando la memoria compartida del bloque. Imaginamos que todos los elementos de un bloque son los nodos terminales de un árbol y los metemos en la memoria compartida del bloque y realizamos dos fases sobre ello. En la primera fase, \textit{up-sweep} (figura \ref{image:upsweep}), se realiza el recorrido de los nodos terminales a la raíz realizando las sumas en sus nodos padre y manteniendo las sumas paciales. En la segunda fase \textit{down-sweep} (figura \ref{image:downsweep}), se utilizan los resultados parciales obtenidos para completar los resultados en la suma acumulada. Para arrays cuya dimensión no cabe en un bloque dicho array es subdividido en múltiples subconjuntos contiguos del mismo tamaño que sí caben en un bloque (si sobran elementos en el último bloque son inicalizados con el elemento neutro de la operación) y se genera el scan sobre todos los subconjuntos así como se almacena la sumatoria (puesto en que nuestra caso la operación es la suma) de todos los elementos del bloque. Una vez finalizado, dichas sumatorias se aplican a los bloques que le preceden en posición, obtiendo el resultado final deseado.
+\begin{itemize}
+    \item 1. Se lanza un kernel con una estructura con un número de hebras por bloque predeterminado por el usuario y el mínimo número de bloques para procesar todo el array.
+    \item 2. El objetivo de cada bloque es calcular su \textit{scan} local.
+    \item 2.1 En primer lugar, cada uno de los \textit{warps} del bloque calcula su \textit{scan} local y lo almacena en un array. La operación utilizada para manejar los \textit{warps} es \textbf{shfl\_up\_sync}. Esta operación nos permite realizar una copia y desplazamiento hacia la derecha en el warp en función de una máscara, un valor y un desplazamiento. La máscara nos permite es un conjunto de 32 bits que nos permite indicar cuáles de las 32 hebras han de ser usadas. Para nuestra operación, la máscara está activa para todos las hebras. El valor indica qué valores vamos a utilizar para realizar la operación y ese valor será devuelto en caso de salirnos del rango del warp. Por último, el desplazamiento nos sirve para calcular cuántas posiciones nos hemos de desplazar hacia la derecha. Por ello, empezamos con un desplazamiento de 1 y vamos ampliando siguiendo las potencias binarias inferiores a 32. Para que los resultados ya calculados no sean modificados, nos aseguramos de trabajar sólo con las hebras dentro del warp con índice superior o igual al desplazamiento. Así, al tomar el desplazamiento 1, todos los elementos se suman a su anterior y el primero se mantiene constante. Al tomar el desplazamiento 2, sólo tenemos qué realizar la suma del que había dos posiciones antes, y así, sucesivamente, hasta llegar al último valor. Los últimos valores de cada \textit{scan} local serán guardados en un array en memoria compartida.
 
+    \item 2.2 Una vez las sumas locales de los warps han sido realizadas, hemos de añadir la suma acumulada obtenida en los \textit{warps} previos para obtener el resultado final del bloque. Para ello, se realiza un \textit{scan} de los \textit{warps} previos, obteniendo el array con las sumas acumuladas previas y estas son aplicadas a los elementos del array correspondientes.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[scale=0.6]{imagenes/upsweep.png}
-\caption{Fase up-sweep del scan.}
-\label{image:upsweep}
-\end{figure}
+    \item 2.3 Una vez tenemos el \textit{scan} de cada bloque, hemos de realizar un procedimiento similar para llevar el \textit{scan} local del bloque a todo el array. Esto ha sido realizado, o bien mediante sumas atómicas en el mismo \textit{kernel}, que son más lentas que las operaciones normales, o bien combinando el trabajo con otros \textit{kernels} que tenían que ser lanzados de forma independiente.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[scale=0.6]{imagenes/downsweep.png}
-\caption{Fase down-sweep del scan.}
-\label{image:downsweep}
-\end{figure}
+\end{itemize}
+
 
 
 \subsection{Cálculo del criterio de Gini.}
@@ -532,7 +528,19 @@ $$CRITERIO' = \Big(\frac{T_\leq(N_\leq - T_\leq)}{N_{\leq}} + \frac{T_>(N_> - T_
 El valor de $CRITERIO'$ oscilará entre 0 y $\frac{N}{2}$ y buscaremos siempre obtener el mínimo valor para este criterio. Dicha búsqueda se realizará de manera similar a la realizada para el modelo anterior con una reducción para encontrar el índice mínimo en cada nodo.
 
 \subsection{Reorganización de la listas de atributos.}
-Para finalizar la evaluación de los nodos de un nivel podemos volver a aprovechar la operación de \textit{scan} para reorganizar el orden de los elementos de la lista de atributos sin necesidad de ejecutar ningún algoritmo de ordenación. Una vez se ha seleccionado la combinación de mejor lista de atributos para un nodo y su punto de corte, puesto que esta lista ya estaba ordenada, todos los elementos hasta el punto de corte pertenecen al nodo hijo izquierdo y los posteriores al nodo hijo derecho. Además, puesto que tenemos en la lista de atributos el cammpo ``ID Muestra'', podemos generar fácilmente un array de booleanos donde cada elemento indica si la muestra con el ID asociado a su posición pertenece al hijo izquierdo o al hijo derecho. Una vez hecho esto, podemos recorrer cada nodo activo de la lista de atributos y utilizar este array auxiliar y la operación de scan para determinar la nueva posición que va a ocupar el elemento dentro del nodo. Esto se realiza, aplicando un scan sobre las posiciones de este array que le corresponden a cada muestra del nodo que va a ir a la subdivisión izquierda. De esta manera, si la muestra pertenece a la subdivisión izquierda su nueva posición será la suma acumulada de elementos de la subdivisión izquierda menos uno (porque empezamos a indexar el array en 0) y en caso de pertenecer a la subdivisión de la derecha será la posición más la diferencia del total de elementos de la subdivisión izquierda (suma acumulada total) con la suma acumulada de elementos de la subdivisión izquierda menos uno.
+Para finalizar la evaluación de los nodos de un nivel podemos volver a aprovechar la operación de \textit{scan} para reorganizar el orden de los elementos de la lista de atributos sin necesidad de ejecutar ningún algoritmo de ordenación.\\
 
-\subsection{Limitaciones y uso de Spark.}
-Como comprobaremos posteriormente, este modelo, al requerir de la evaluación independiente de múltiples nodos y no presentar técnicas de poda avanzadas no escala bien con la generación de árboles profundos o completos. Es por eso que, para afrontar problemas de mayores dimensiones, en vez de generar un único árbol, vamos a generar tantas particiones del \textit{RDD} de \textit{Spark} como árboles deseemos y montar un modelo de \textit{random forest}, en el que en cada partición tenemos un conjunto aleatorio de muestras tomadas sin reemplazo y consideramos todos los atributos para todos los árboles. La clasificación proporcionada por el modelo viene dada por el clase mayoritariamente votada por el conjunto de árboles.
+ Una vez se ha seleccionado la combinación de mejor lista de atributos para un nodo y su punto de corte, puesto que esta lista ya estaba ordenada, todos los elementos hasta el punto de corte pertenecen al nodo hijo izquierdo y los posteriores al nodo hijo derecho. Además, puesto que tenemos en la lista de atributos el campo ``ID Muestra'', podemos generar fácilmente un array de booleanos donde cada elemento indica si la muestra con el ID asociado a su posición.\\
+
+ Si aplicamos la operación de \textit{scan} sobre este array auxiliar, la suma acumulada en cada posición nos indica el número de elementos que pertenecen al nodo hijo codificado con la etiqueta positiva. Por lo que, partiendo de que previamente estaban ordenados podemos hacer la subdivisión y mantener el orden teniendo en cuenta que:\\
+
+ \begin{itemize}
+    \item 1. Si el elemento en cuestión pertenece al nodo hijo izquierda (codificado como positivo en el array auxiliar), su nueva posición en la lista de atributos sería la suma acumulada obtenida en el array auxiliar menos uno (para que el primer índice sea el 0).
+    \item 2. En caso contrario, la nueva posición es el número total de elementos en el nodo hijo izquierda (para que ambos queden separados) más la diferencia de ese total de elementos del nodo hijo izquierda con la suma acumulada del array auxiliar (que nos indicaría cuántos elementos de la clase negativa llevamos hasta el momento) menos uno (porque la indexación empieza en 0).
+ \end{itemize}
+
+
+\subsection{Uso de Spark.}
+Este modelo, al requerir la evaluación independiente de múltiples nodos, como podremos comprobar posteriormente, no escala bien con la generación de árboles profundos o completos. Es por eso que, a la hora de integrar \textit{Spark} en la solución, en vez de generar un único árbol, vamos a generar un \textit{random forest}, es decir, vamos a subdividir la muestras de entrenamiento aleatoriamente de tal manera que cada partición de \textit{Spark} entrenará un árbol y, una vez los árboles han sido entrenados, una muestra a clasificar será evaluada por todos los árboles. La clase de la muestra se corresponderá a la clase que ha sido seleccionada en el mayor número de árboles. \\
+
+Esta solución nos permite, por un lado, reducir problemas de sobreajuste y, conseguir precisiones competentes sin necesidad de generar árboles completos u otros sistemas de poda más complejos y evitar los problemas de sincronización y comunicación que generaría el entrenamiento de un único árbol como que todos los nodos de \textit{Spark} tendrían que tener una copia de las listas de atributos y, al terminar cada nivel de profundidad debería de plantearse una estrategia para reordenar las listas de atributos y volver a distribuir los cambios a todos los nodos.

@@ -38,7 +38,7 @@
 \BOOKMARK [2][-]{subsection.3.5.3}{La operaci\363n de scan.}{section.3.5}% 38
 \BOOKMARK [2][-]{subsection.3.5.4}{C\341lculo del criterio de Gini.}{section.3.5}% 39
 \BOOKMARK [2][-]{subsection.3.5.5}{Reorganizaci\363n de la listas de atributos.}{section.3.5}% 40
-\BOOKMARK [2][-]{subsection.3.5.6}{Limitaciones y uso de Spark.}{section.3.5}% 41
+\BOOKMARK [2][-]{subsection.3.5.6}{Uso de Spark.}{section.3.5}% 41
 \BOOKMARK [0][-]{chapter.4}{Desarrollo de pruebas y an\341lisis de resultados.}{}% 42
 \BOOKMARK [1][-]{section.4.1}{Entorno de pruebas.}{chapter.4}% 43
 \BOOKMARK [1][-]{section.4.2}{Conjuntos de datos utilizados.}{chapter.4}% 44
@@ -47,6 +47,6 @@
 \BOOKMARK [2][-]{subsection.4.3.2}{Uso del modelo sobre un conjunto de datos grandes dimensiones.}{section.4.3}% 47
 \BOOKMARK [2][-]{subsection.4.3.3}{Resultados de Nsight sobre la versi\363n final del algoritmo.}{section.4.3}% 48
 \BOOKMARK [1][-]{section.4.4}{Experimentos para evaluar el random forest.}{chapter.4}% 49
-\BOOKMARK [2][-]{subsection.4.4.1}{Tabla de resultados para SUSY.}{section.4.4}% 50
+\BOOKMARK [2][-]{subsection.4.4.1}{Resultados del uso del profiler sobre la versi\363n final del algoritmo.}{section.4.4}% 50
 \BOOKMARK [0][-]{chapter.5}{Conclusiones y trabajos futuros.}{}% 51
-\BOOKMARK [0][-]{chapter*.45}{Bibliograf\355a}{}% 52
+\BOOKMARK [0][-]{chapter*.44}{Bibliograf\355a}{}% 52

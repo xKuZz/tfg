@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.3.15)  23 JUL 2019 20:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.3.15)  22 AUG 2019 22:22
 entering extended mode
 **./proyecto.tex
 (proyecto.tex
@@ -912,7 +912,7 @@ l.14
       [5
 
 ]
-<imagenes/arquitectura_som.png, id=421, 417.2388pt x 253.4268pt>
+<imagenes/arquitectura_som.png, id=420, 417.2388pt x 253.4268pt>
 File: imagenes/arquitectura_som.png Graphic file (type png)
 <use imagenes/arquitectura_som.png>
 Package pdftex.def Info: imagenes/arquitectura_som.png  used on input line 22.
@@ -1026,7 +1026,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 79--80
 
  []
 
-<imagenes/somtraining.png, id=438, 1927.2pt x 519.9425pt>
+<imagenes/somtraining.png, id=437, 1927.2pt x 519.9425pt>
 File: imagenes/somtraining.png Graphic file (type png)
 <use imagenes/somtraining.png>
 Package pdftex.def Info: imagenes/somtraining.png  used on input line 83.
@@ -1279,7 +1279,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 79--80
 
  []
 
-<imagenes/blocks.png, id=507, 324.46219pt x 252.945pt>
+<imagenes/blocks.png, id=506, 324.46219pt x 252.945pt>
 File: imagenes/blocks.png Graphic file (type png)
 <use imagenes/blocks.png>
 Package pdftex.def Info: imagenes/blocks.png  used on input line 83.
@@ -1356,9 +1356,10 @@ Underfull \hbox (badness 10000) in paragraph at lines 183--184
  []
 
 
-Overfull \hbox (1.26039pt too wide) in paragraph at lines 185--186
+Overfull \hbox (4.30206pt too wide) in paragraph at lines 185--186
 []\OT1/cmr/m/it/10.95 Numba \OT1/cmr/m/n/10.95 nos per-mi-te uti-li-zar es-ta c
-a-rac-tersti-ca con la fun-cion \OT1/cmr/bx/sc/10.95 cu-da.stream()
+a-rac-tersti-ca con la fun-cion \OT1/cmr/bx/sc/10.95 cu-da.stream()\OT1/cmr/
+m/n/10.95 ,
  []
 
 
@@ -1434,7 +1435,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 23--24
 
  []
 
-<imagenes/flujosparksom.png, id=554, 596.2275pt x 734.745pt>
+<imagenes/flujosparksom.png, id=553, 596.2275pt x 734.745pt>
 File: imagenes/flujosparksom.png Graphic file (type png)
 <use imagenes/flujosparksom.png>
 Package pdftex.def Info: imagenes/flujosparksom.png  used on input line 31.
@@ -1480,7 +1481,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 117--118
 
  []
 
-<imagenes/row-major.png, id=569, 192.4791pt x 93.951pt>
+<imagenes/row-major.png, id=568, 192.4791pt x 93.951pt>
 File: imagenes/row-major.png Graphic file (type png)
 <use imagenes/row-major.png>
 Package pdftex.def Info: imagenes/row-major.png  used on input line 124.
@@ -1538,7 +1539,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 294--295
 
  []
 
-<imagenes/parallel_reduce.png, id=596, 444.66125pt x 476.78125pt>
+<imagenes/parallel_reduce.png, id=595, 444.66125pt x 476.78125pt>
 File: imagenes/parallel_reduce.png Graphic file (type png)
 <use imagenes/parallel_reduce.png>
 Package pdftex.def Info: imagenes/parallel_reduce.png  used on input line 299.
@@ -1577,7 +1578,7 @@ LaTeX Info: Redefining \% on input line 17.
 LaTeX Info: Redefining \. on input line 438.
 LaTeX Info: Redefining \% on input line 438.
  [39]
-<imagenes/esquemadtree.png, id=629, 1075.01625pt x 854.19125pt>
+<imagenes/esquemadtree.png, id=628, 1075.01625pt x 854.19125pt>
 File: imagenes/esquemadtree.png Graphic file (type png)
 <use imagenes/esquemadtree.png>
 Package pdftex.def Info: imagenes/esquemadtree.png  used on input line 471.
@@ -1598,32 +1599,22 @@ LaTeX Info: Redefining \% on input line 476.
 LaTeX Info: Redefining \. on input line 487.
 LaTeX Info: Redefining \% on input line 487.
  [41 <./imagenes/esquemadtree.png>]
-Overfull \hbox (30.6008pt too wide) detected at line 490
+Overfull \hbox (9.2002pt too wide) detected at line 489
 \OML/cmm/m/it/10.95 scan\OT1/cmr/m/n/10.95 ([\OML/cmm/m/it/10.95 a[]; a[]; a[];
- :::; a[]\OT1/cmr/m/n/10.95 ]) = [\OML/cmm/m/it/10.95 I; a[]; \OT1/cmr/m/n/10.9
-5 (\OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[]\OT1/cm
-r/m/n/10.95 )\OML/cmm/m/it/10.95 ; \OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 a[] 
-\OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/
-it/10.95 a[]\OT1/cmr/m/n/10.95 )\OML/cmm/m/it/10.95 ; :::; \OT1/cmr/m/n/10.95 (
-\OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[] \OMS/cmsy
-/m/n/10.95  \OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 
-::: \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[]\OT1/cmr/m/n/10.95 )]
+ :::; a[]\OT1/cmr/m/n/10.95 ]) = [\OML/cmm/m/it/10.95 a[]; \OT1/cmr/m/n/10.95 (
+\OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[]\OT1/cmr/m
+/n/10.95 )\OML/cmm/m/it/10.95 ; \OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 a[] \OM
+S/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/
+10.95 a[]\OT1/cmr/m/n/10.95 )\OML/cmm/m/it/10.95 ; :::; \OT1/cmr/m/n/10.95 (\OM
+L/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/
+n/10.95  \OML/cmm/m/it/10.95 a[] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 :::
+ \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 a[]\OT1/cmr/m/n/10.95 )]
  []
 
-<imagenes/upsweep.png, id=643, 535.2497pt x 274.02374pt>
-File: imagenes/upsweep.png Graphic file (type png)
-<use imagenes/upsweep.png>
-Package pdftex.def Info: imagenes/upsweep.png  used on input line 497.
-(pdftex.def)             Requested size: 321.15228pt x 164.41551pt.
-<imagenes/downsweep.png, id=644, 536.75531pt x 350.05782pt>
-File: imagenes/downsweep.png Graphic file (type png)
-<use imagenes/downsweep.png>
-Package pdftex.def Info: imagenes/downsweep.png  used on input line 504.
-(pdftex.def)             Requested size: 322.05566pt x 210.0363pt.
-LaTeX Info: Redefining \. on input line 512.
-LaTeX Info: Redefining \% on input line 512.
+LaTeX Info: Redefining \. on input line 497.
+LaTeX Info: Redefining \% on input line 497.
 [42]
-Overfull \hbox (43.81667pt too wide) detected at line 513
+Overfull \hbox (43.81667pt too wide) detected at line 509
 \OML/cmm/m/it/10.95 CRITERIO\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 A; v\OT1/cm
 r/m/n/10.95 ) = [] \OMS/cmsy/m/n/10.95  \OML/cmm/m/it/10.95 GINI\OT1/cmr/m/n/1
 0.95 (\OMS/cmsy/m/n/10.95 j\OML/cmm/m/it/10.95 i \OT1/cmr/m/n/10.95 : \OML/cmm/
@@ -1633,13 +1624,31 @@ r/m/n/10.95 (\OMS/cmsy/m/n/10.95 j\OML/cmm/m/it/10.95 i \OT1/cmr/m/n/10.95 : \O
 ML/cmm/m/it/10.95 A[] > v\OMS/cmsy/m/n/10.95 j\OT1/cmr/m/n/10.95 )
  []
 
-LaTeX Info: Redefining \. on input line 526.
-LaTeX Info: Redefining \% on input line 526.
-[43 <./imagenes/upsweep.png>]
-LaTeX Info: Redefining \. on input line 536.
-LaTeX Info: Redefining \% on input line 536.
- [44 <./imagenes/downsweep.png>])
-(capitulos/PRUEBAS.tex
+LaTeX Info: Redefining \. on input line 518.
+LaTeX Info: Redefining \% on input line 518.
+[43]
+Underfull \hbox (badness 10000) in paragraph at lines 531--532
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 533--534
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 535--536
+
+ []
+
+LaTeX Info: Redefining \. on input line 538.
+LaTeX Info: Redefining \% on input line 538.
+[44]
+Underfull \hbox (badness 10000) in paragraph at lines 544--545
+
+ []
+
+) (capitulos/PRUEBAS.tex
 LaTeX Info: Redefining \. on input line 2.
 LaTeX Info: Redefining \% on input line 2.
  [45]
@@ -1668,12 +1677,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 63--64
 
  []
 
-<imagenes/facescpu.png, id=677, 693.59125pt x 581.17125pt>
+<imagenes/facescpu.png, id=670, 693.59125pt x 581.17125pt>
 File: imagenes/facescpu.png Graphic file (type png)
 <use imagenes/facescpu.png>
 Package pdftex.def Info: imagenes/facescpu.png  used on input line 67.
 (pdftex.def)             Requested size: 208.07898pt x 174.35272pt.
-<imagenes/facesgpu.png, id=678, 693.59125pt x 581.17125pt>
+<imagenes/facesgpu.png, id=671, 693.59125pt x 581.17125pt>
 File: imagenes/facesgpu.png Graphic file (type png)
 <use imagenes/facesgpu.png>
 Package pdftex.def Info: imagenes/facesgpu.png  used on input line 74.
@@ -1703,7 +1712,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 106--107
 
  []
 
-<imagenes/susysom.png, id=693, 495.35063pt x 211.54031pt>
+<imagenes/susysom.png, id=686, 495.35063pt x 211.54031pt>
 File: imagenes/susysom.png Graphic file (type png)
 <use imagenes/susysom.png>
 Package pdftex.def Info: imagenes/susysom.png  used on input line 110.
@@ -1728,7 +1737,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 134--135
 LaTeX Info: Redefining \. on input line 135.
 LaTeX Info: Redefining \% on input line 135.
 [51 <./imagenes/susysom.png>]
-<imagenes/som_sol.png, id=705, 1235.36531pt x 485.56406pt>
+<imagenes/som_sol.png, id=698, 1235.36531pt x 485.56406pt>
 File: imagenes/som_sol.png Graphic file (type png)
 <use imagenes/som_sol.png>
 Package pdftex.def Info: imagenes/som_sol.png  used on input line 138.
@@ -1743,7 +1752,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 143--144
 
  []
 
-<imagenes/som_warp_states.png, id=707, 1233.10687pt x 508.14844pt>
+<imagenes/som_warp_states.png, id=700, 1233.10687pt x 508.14844pt>
 File: imagenes/som_warp_states.png Graphic file (type png)
 <use imagenes/som_warp_states.png>
 Package pdftex.def Info: imagenes/som_warp_states.png  used on input line 147.
@@ -1765,18 +1774,133 @@ Underfull \hbox (badness 10000) in paragraph at lines 154--155
 
  []
 
-) (capitulos/CONCLUSIONES.tex
-LaTeX Info: Redefining \. on input line 1.
-LaTeX Info: Redefining \% on input line 1.
- [53]
-Cap\'{\i }tulo 5.
-) (proyecto.bbl [54
 
-] [55
+Underfull \hbox (badness 10000) in paragraph at lines 159--160
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 161--162
+
+ []
+
+LaTeX Info: Redefining \. on input line 164.
+LaTeX Info: Redefining \% on input line 164.
+[53]
+Underfull \hbox (badness 10000) in paragraph at lines 192--193
+
+ []
+
+LaTeX Info: Redefining \. on input line 193.
+LaTeX Info: Redefining \% on input line 193.
+[54]
+Underfull \hbox (badness 10000) in paragraph at lines 194--195
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 204--205
+
+ []
+
+LaTeX Info: Redefining \. on input line 205.
+LaTeX Info: Redefining \% on input line 205.
+[55]
+<imagenes/profiletreequesito.png, id=729, 361.35pt x 332.74312pt>
+File: imagenes/profiletreequesito.png Graphic file (type png)
+<use imagenes/profiletreequesito.png>
+Package pdftex.def Info: imagenes/profiletreequesito.png  used on input line 21
+0.
+(pdftex.def)             Requested size: 289.0804pt x 266.19484pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 215--216
+
+ []
+
+LaTeX Info: Redefining \. on input line 216.
+LaTeX Info: Redefining \% on input line 216.
+[56 <./imagenes/profiletreequesito.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 217--218
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 219--220
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 221--222
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 223--224
+
+ []
+
+LaTeX Info: Redefining \. on input line 224.
+LaTeX Info: Redefining \% on input line 224.
+[57]) (capitulos/CONCLUSIONES.tex
+LaTeX Info: Redefining \. on input line 2.
+LaTeX Info: Redefining \% on input line 2.
+ [58]
+Cap\'{\i }tulo 5.
+
+Underfull \hbox (badness 10000) in paragraph at lines 3--4
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5--6
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7--8
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9--10
+
+ []
+
+[59
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 11--12
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13--14
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14--15
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15--16
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 16--17
+
+ []
+
+) (proyecto.bbl
+LaTeX Info: Redefining \. on input line 2.
+LaTeX Info: Redefining \% on input line 2.
+ [60] [61
 
 ])
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 256.
- [56]
+ [62]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 256.
  (proyecto.aux
 LaTeX Info: Redefining \. on input line 23.
@@ -1785,7 +1909,7 @@ LaTeX Info: Redefining \% on input line 23.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 256.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 256.
 Package rerunfilecheck Info: File `proyecto.out' has not changed.
-(rerunfilecheck)             Checksum: 7B4EB030C4EA625FA4BD52754A9174D5;4349.
+(rerunfilecheck)             Checksum: 7CAC5063EE39ECCD74C40D17C0FE7BB8;4376.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
@@ -1794,13 +1918,13 @@ runsystem(del proyecto.pyg)...executed.
 
  ) 
 Here is how much of TeX's memory you used:
- 13541 strings out of 492970
- 224010 string characters out of 3135855
- 378220 words of memory out of 3000000
- 16912 multiletter control sequences out of 15000+200000
+ 13545 strings out of 492970
+ 224003 string characters out of 3135855
+ 378234 words of memory out of 3000000
+ 16910 multiletter control sequences out of 15000+200000
  13044 words of font info for 46 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 39i,19n,49p,1645b,784s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 39i,19n,49p,1542b,784s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbsy10.pfb><C:/P
 rogram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Program F
 iles/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Files/MiK
@@ -1819,9 +1943,9 @@ ublic/amsfonts/cm/cmsy6.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/ams
 fonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/
 cmti10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt9.pf
 b>
-Output written on proyecto.pdf (67 pages, 1956497 bytes).
+Output written on proyecto.pdf (73 pages, 1956639 bytes).
 PDF statistics:
- 845 PDF objects out of 1000 (max. 8388607)
- 182 named destinations out of 1000 (max. 500000)
- 497 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 879 PDF objects out of 1000 (max. 8388607)
+ 189 named destinations out of 1000 (max. 500000)
+ 492 words of extra memory for PDF output out of 10000 (max. 10000000)
 
