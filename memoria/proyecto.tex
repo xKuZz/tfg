@@ -154,26 +154,27 @@ pdfproducer = {pdflatex}
 \setlength{\parskip}{5pt}
 \chapter{Introducción y motivación.}
 \section{Introducción y motivación.}
-La tecnología propietaria \textit{CUDA (Computer Unified Device Architecture)} \cite{cuda} de NVIDIA, presentada en junio de 2007 y aplicable tanto a la arquitectura de las tarjetas gráficas de la misma marca como al modelo de programación genérico asociado, a lo largo de la última década, ha supuesto un gran cambio en las implementaciones paralelas de algoritmos y, además, siendo muy utilizada en la comunidad científica.\\
 
-La estructura de la GPU, utilizando un mayor número de núcleos a cambio de una velocidad de reloj más baja a la que podemos encontrar en una CPU, es de especial utilidad en operaciones masivamente paralelas, pudiendo llegar a proporcionar tiempos de ejecución considerablemente superiores a los que podría llegar a proporcionar una CPU.\\
+La tecnología propietaria \textit{CUDA (Computer Unified Device Architecture)} \cite{cuda} de NVIDIA, presentada en junio de 2007 y aplicable tanto a la arquitectura de las tarjetas gráficas de la misma marca como al modelo de programación genérico asociado, a lo largo de la última década, ha supuesto un gran cambio en las implementaciones paralelas de algoritmos y, además, su uso es muy popular en la comunidad científica.\\
 
-Por otro lado, los algoritmos y técnicas de \textit{Soft Computing} se corresponde con una rama de la Inteligencia Artificial en la que no podemos calcular soluciones exactas en tiempo polinómico y/o en los que la información es incompleta, incierta o inexacta.\\
+La estructura de la GPU \textit{(Graphics Processing Unit)}, utilizando un mayor número de núcleos a cambio de una velocidad de reloj más baja a la que podemos encontrar en una CPU \textit{(Central Processing Unit)}, es de especial utilidad en operaciones masivamente paralelas, pudiendo llegar a proporcionar tiempos de ejecución considerablemente superiores a los que podría llegar a proporcionar una CPU.\\
 
-El propósito de este trabajo de fin de grado es la implementación en CUDA de algunos de estos modelos de \textit{Soft Computing} combinando \textit{CUDA} el \textit{framework} de computación en clúster \textit{Spark} \cite{spark}. De esta manera, los algoritmos que se desarrollen podrán ser ejecutados tanto en un único dispositivo como en un clúster con múltiples dispositivos \textit{CUDA}. Para ello, se analizarán los algoritmos y sus posibilidades de paralelización, se realizarán las implementaciones adecuadas y se evaluará el rendimiento de las mismas utilizando conjunto de datos con un número de muestras elevado.\\
+Por otro lado, los algoritmos y técnicas de \textit{Soft Computing} se corresponden con una rama de la Inteligencia Artificial en la que no podemos calcular soluciones exactas en tiempo polinómico y/o en los que la información es incompleta, incierta o inexacta.\\
 
-Tras evaluar varias opciones, se optó por desarrollar dos modelos distintos: los mapa auto-organizados de \textit{Kohonen} \cite{kohonensom} y los árboles de decisión \cite{arbol}.\\
+El propósito de este trabajo de fin de grado es la implementación en \textit{CUDA} de algunos de estos modelos de \textit{Soft Computing}, combinando \textit{CUDA} con el \textit{framework} de computación en clúster \textit{Spark} \cite{spark}. De esta manera, los algoritmos que se desarrollen podrán ser ejecutados tanto en un único dispositivo como en un clúster con múltiples dispositivos \textit{CUDA}. Para ello, se analizarán los algoritmos y sus posibilidades de paralelización, se realizarán las implementaciones adecuadas y se evaluará el rendimiento de las mismas utilizando conjunto de datos con un número de muestras elevado.\\
+
+Tras evaluar varias opciones, se optó por desarrollar dos modelos distintos: los mapa auto-organizados de Kohonen \cite{kohonensom} y los árboles de decisión \cite{arbol}.\\
 
 \section{Estado del arte: trabajos relacionados.}
-La paralelización en CUDA de los mapas auto-organizados de Kohonen y de los árboles de decisión son problemas que han sido previamente estudiados.\\
+La paralelización en \textit{CUDA} de los mapas auto-organizados de Kohonen y de los árboles de decisión son problemas que han sido previamente estudiados en la literatura.\\
 
-En \textbf{\textit{Parallel High Dimensional Self Organizing Maps Using CUDA}}, Codevilla, Bothelo, Filho y Gaya \cite{cudasomonline} proponen una implementación en CUDA para la formulación tradicional del mapa auto-organizado de Kohonen. En ella, proponen una versión en la que cada iteración se realiza en 3 fases. Una primera en la que con un valor \textit{p} arbitrario menor que el número de hebras por bloque que indica cuantos ``pasos'' debe realizar una hebra para el cálculo de la distancia euclídea, una reducción para encontrar la mejor distancia y una adaptación de pesos de neuronas basada en la dimensión del problema. \\
+En \textbf{\textit{Parallel High Dimensional Self Organizing Maps Using CUDA}}, Codevilla, Bothelo, Filho y Gaya \cite{cudasomonline} proponen una implementación en \textit{CUDA} para la formulación tradicional del mapa auto-organizado de Kohonen. En ella, proponen una versión en la que cada iteración se subdivide en 3 fases. Una primera, en la que con un valor \textit{p} arbitrario, menor que el número de hebras por bloque, que indica cuantos ``pasos'' debe realizar una hebra para el cálculo de la distancia euclídea, es decir, un reparto de los cálculos necesarios para obtener la distancia euclídea que depende de un parámetro indicado por el usuario; una reducción, para encontrar la mejor distancia entre las neuronas; y un método para la adaptación de pesos de neuronas cuyo grado de paralelismo depende de dimensión del problema (tamaño de una neurona). \\
 
-En \textbf{\textit{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using CUDA}}, Daneshpajouh, Delisle, Boisson, Krajecki y Zakaria \cite{cudasombatch} plantean una adaptación en CUDA para la versión iterativa de cómputo en \textit{batchs} del mapa auto-organizado de Kohonen. En ella aprovechan las capacidades de concurrencia disponibles en los dispositivos CUDA, paralelizando parte del algoritmo y dejando otra parte  para ser realizada en la CPU.\\
+En \textbf{\textit{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using CUDA}}, Daneshpajouh, Delisle, Boisson, Krajecki y Zakaria \cite{cudasombatch} plantean una adaptación en CUDA para la versión iterativa de cómputo en \textit{batchs} del mapa auto-organizado de Kohonen. En ella, aprovechan las capacidades de concurrencia disponibles en los dispositivos CUDA, paralelizando parte del algoritmo y dejando otra parte para ser realizada con la CPU.\\
 
-Con respecto a los árboles de decisión, \textbf{\textit{CUDT: a CUDA based decision tree algorithm}}, de Lo, Chang, Sheu, Chiu y Yuan \cite{cudt}, será la base de la implementación que nosotros vamos a realizar y se basa en el uso de la operación de la suma prefija, suma acumulada o \textit{scan} para resolver un cierto tipo de árboles de decisión específicos, en concreto, los árboles de decisión cuyo objetivo es la clasificación de problemas con respuesta binaria.\\
+Con respecto a los árboles de decisión, \textbf{\textit{CUDT: a CUDA based decision tree algorithm}}, de Lo, Chang, Sheu, Chiu y Yuan \cite{cudt}, será la base de la implementación que nosotros vamos a realizar y se basa en el uso de la operación de la suma prefija, suma acumulada o \textit{scan} para resolver árboles de decisión cuyo objetivo es la clasificación de problemas con respuesta binaria.\\
 
-Aparte de la aproximación por especialización presentada en el trabajo anterior, otra alternativa, más frecuente y versátil, en la que contamos que diferentes tipos de problemas que se pueden resolver, se basa en la discretización de las variables utilizadas durante la construcción del árbol y el uso de histogramas para ello. Esto lo podemos ver en \textbf{\textit{Implementing Streaming Parallel Decision Trees on Graphic Processing Units}}, de Svantesson \cite{svatensson}, donde el objeto principal de su trabajo es paralelizar en CUDA los cálculos asociados a los histogramas utilizados en \textbf{\textit{Streaming Parallel Decision Trees}}, de Ben-Haim y Tom-Tov \cite{spdt}, un algoritmo para la paralelización de árboles para CPU.\\
+Aparte de la aproximación por especialización presentada en el trabajo anterior, otra alternativa, más frecuente y versátil, en la que contamos que diferentes tipos de problemas que se pueden resolver, se basa en la discretización de las variables utilizadas durante la construcción del árbol y el uso de histogramas para ello. Esto lo podemos ver en \textbf{\textit{Implementing Streaming Parallel Decision Trees on Graphic Processing Units}}, de Svantesson \cite{svatensson}, donde el objeto principal de su trabajo es paralelizar en \textit{CUDA} los cálculos asociados a los histogramas utilizados en \textbf{\textit{Streaming Parallel Decision Trees}}, de Ben-Haim y Tom-Tov \cite{spdt}, un algoritmo para la paralelización de árboles para CPU.\\
 
 \section{Descripción del proyecto.}
 En este proyecto se pretende que el alumno diseñe, desarrolle e implemente modelos en paralelo asociados a tradicionales algoritmos de \textit{Soft Somputing}. Para ello se utlizará el lenguaje \textit{CUDA}, pudiendo de esta manera aprovechar las características de los dispositivos GPUs. Para probar estos modelos se escogerán problemas relacionados con Big Data y que tengan una gran carga computacional.
@@ -190,8 +191,34 @@ Para las implementaciones del proyecto se han usado:
   \item \textit{Spark} 2.4.0 con \textit{Hadoop} 2.7.3
 \end{itemize}
 
+\newpage
 \section{Planificación de tareas.}
-TO-DO.
+Este proyecto fue desarrollado mayoritariamente durante el segundo cuatrimestre del curso, precedido por el estudio de las tecnologías utilizadas (\textit{CUDA} y \textit{Spark}).\\
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textit{\textbf{Tarea}}                                                                                                                     & \textit{\textbf{Fecha finalización}} \\ \hline
+\textbf{Estudio sobre CUDA.}                                                                                                                & 15 Marzo 2019                        \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Estudio de bibliografía\\ y selección de modelo a implementar:\\ Árbol CART.\end{tabular}}               & 28 Marzo 2019                        \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Estudio de bibliografía\\ del modelo:\\ Mapa auto-organizado on-line.\end{tabular}}                      & 7 Abril 2019                         \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Estudio de bibliografía\\ y selcción de modelo a implementar:\\ Mapa auto-organizado batch\end{tabular}} & 12 Abril 2019                        \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Implementación en CUDA de mapa \\ auto-organizado batch.\end{tabular}}                                   & 17 Abril 2019                        \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Implementación en CUDA\\ de árbol de decisión CART\\ (sólo clasificación binaria).\end{tabular}}         & 23 Abril 2019                        \\ \hline
+\textbf{Estudio de Spark.}                                                                                                                  & 6 Mayo 2019                          \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Incorporación de Spark al mapa \\ auto-organizado batch\end{tabular}}                                    & 9 Mayo 2019                          \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Incorporación de Spark al \\ árbol de decisión.\end{tabular}}                                            & 14 Mayo 2019                         \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Primera fase de redacción \\ de memoria.\end{tabular}}                                                   & 25 Mayo 2019                         \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Revisión y corrección de erratas \\ en mapa auto-organizado.\end{tabular}}                               & 5 Junio 2019                         \\ \hline
+\textbf{\begin{tabular}[c]{@{}c@{}}Revisión y optimización del\\  árbol de decisión.\end{tabular}}                                          & 29 Junio 2019                        \\ \hline
+\textbf{Finalización de la memoria.}                                                                                                        & 30 Julio 2019                        \\ \hline
+\end{tabular}
+\caption{Tareas realizadas durante el desarrollo del proyecto.}
+\label{tab:tareas}
+\end{table}
+
+\newpage
 \section{Objetivos.}
 \begin{itemize}
     \item Iniciarse, estudiar y profundizar en el desarrollo de algoritmos paralelos en \textit{CUDA}.
@@ -205,7 +232,7 @@ TO-DO.
 \section{Estructura del documento.}
 
 \begin{itemize}
-    \item En el primer capítulo, \textbf{Introducción y motivación}, hemos comentado los própositos para la realización de este trabajo y el grado de consecución de los objetivos planteados.
+    \item En el primer capítulo, \textbf{Introducción y motivación}, hemos comentado los propósitos para la realización de este trabajo y el grado de consecución de los objetivos planteados.
     \item En el segundo capítulo, \textbf{Modelos de Soft Computing considerados}, explicamos los fundamentos teóricos de los algoritmos de \textit{Soft Computing} que hemos decidido paralelizar.
     \item En el tercer capítulo, \textbf{Implementación}, comentamos el proceso de desarrollo seguido así como explicamos las soluciones finales implementadas y comentamos algunas de las alternativas y problemas que surgieron durante la realización de las implementaciones.
     \item En el cuarto capítulo, \textbf{Desarrollo de pruebas y análisis de resultados}, indicamos qué pruebas se han realizado, mostramos los resultados obtenidos y analizamos en profundidad las implicaciones de los mismos.
@@ -241,7 +268,7 @@ TO-DO.
 %
 %%\nocite{*}
 %\bibliographystyle{miunsrturl} 
-\bibliographystyle{IEEEtran} 
+\bibliographystyle{proyectobibstyle} 
 \bibliography{bibliografia/bibliografia}\addcontentsline{toc}{chapter}{Bibliografía}
 %
 

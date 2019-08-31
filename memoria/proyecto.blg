@@ -1,18 +1,30 @@
 This is BibTeX, Version 0.99dThe top-level auxiliary file: proyecto.aux
-The style file: IEEEtran.bst
+The style file: proyectobibstyle.bst
 Database file #1: bibliografia/bibliografia.bib
-Warning--entry type for "olivetti" isn't style-file defined
---line 130 of file bibliografia/bibliografia.bib
--- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
--- http://www.michaelshell.org/tex/ieeetran/bibtex/
--- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
-Warning--empty booktitle in cudasomonline
-Warning--missing publisher in cudasombatch
-Warning--empty journal in svatensson
-Warning--empty booktitle in compsom
-Warning--missing publisher in numpy
-Warning--empty booktitle in numba
-Warning--missing publisher in scan
-
-Done.
-(There were 8 warnings)
+Warning--entry type for "spambase" isn't style-file defined
+--line 185 of file bibliografia/bibliografia.bib
+Warning--empty publisher in cuda
+Warning--can't use both volume and number fields in spark
+Warning--can't use both volume and number fields in kohonensom
+Warning--empty publisher in kohonensom
+Warning--empty publisher in cudasomonline
+Warning--empty publisher in cudasombatch
+Warning--empty publisher in cudt
+Warning--empty publisher in svatensson
+Warning--empty publisher in spdt
+Warning--empty publisher in compsom
+Warning--can't use both volume and number fields in impurity
+Warning--empty publisher in impurity
+Warning--can't use both volume and number fields in randomforest
+Warning--empty publisher in randomforest
+Warning--empty publisher in numpy
+Warning--empty publisher in numba
+Warning--empty publisher in cupy
+Warning--empty publisher in xoroshiro
+Warning--empty publisher in reduction
+Warning--empty publisher in sprint
+Warning--empty publisher in scan
+Warning--empty publisher in olivetti
+Warning--empty publisher in susy
+Warning--empty publisher in magic04
+(There were 25 warnings)
