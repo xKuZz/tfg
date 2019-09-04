@@ -4,13 +4,13 @@
 A principio de la década de los 80, el científico finlandés Teuvo Kohonen \cite{kohonensom}, planteó un modelo de aprendizaje automático no supervisado y competitivo basándose en el estudio del funcionamiento del córtex cerebral. El modelo planteado, denominado mapa auto-organizado, red auto-organizada o red neuronal de Kohonen, entre otros nombres similares, es una red neuronal artificial, y las principales características que la definen son las siguientes:\\
 
 \begin{itemize}
-	\item Es una \textbf{red neuronal artificial}. Esto quiere decir, a grandes rangos, que la estructura que genera el modelo está basada en una red de múltiples unidades, llamadas ``neuronas'', que se encuentran interconectadas entre sí.
+	\item Es una \textbf{red neuronal artificial}. Esto quiere decir, a grandes rasgos, que la estructura que genera el modelo está basada en una red de múltiples unidades, llamadas ``neuronas'', que se encuentran interconectadas entre sí.
 	
-	\item La red neuronal de Kohonen tiene \textbf{dos capas}. Una capa de entrada, con tantas neuronas como características tenga una muestra a ser evaluada por la red; y una capa de salida, de un tamaño a decidir por el usuario. Habitualmente, esta capa de salida, también llamada capa competitiva o capa de Kohonen, presenta una distribución bidimensional, aunque podría perfectamente usarse cualquier otro número de dimensiones.
+	\item La red neuronal de Kohonen tiene \textbf{dos capas}. Una capa de entrada, con tantas neuronas como características o atributos tenga el vector que representa a la muestra que vaya a ser evaluada por la red, es decir, tanto una muestra como la capa de entrada tendrán la misma dimensión y, una característica, podría ser, por ejemplo, la altura o el peso de una persona. La segunda capa es la capa competitiva o capa de Kohonen, de un tamaño a decidir por el usuario y una estructura habitualmente bidimensional, aunque podría perfectamente usarse cualquier otro número de dimensiones.
 
-	\item Cada neurona de la capa de entrada está asociada con todas las neuronas de la capa de salida, y, las neuronas de la capa de salida no están interconectadas entre sí. A este tipo de red neuronal, en la que no existen ciclos, se le denomina \textbf{red neuronal pre-alimentada} \textit{(feed-forward)}.
+	\item Asociado a cada neurona de la capa competitiva, tenemos un vector de referencia variable $w_i(t) \in {\rm I\!R}^n, i=1,2, ..., k$, es un decir un vector de ``referencia'' con respecto a la representación vectorial de las muestras estadísticas $\vec{X} = \vec{X}(t) \in {\rm I\!R}^n$ que se corresponden al conjunto de datos de entrada para el entrenamiento del modelo. Estos vectores también son denominados vectores de pesos y, al conjunto de ellos, se le denomina \textit{codebook}. En los casos en los que el algoritmo sea aplicado para realizar clustering, dicho vector representará el valor promedio de los vectores de características de las muestras asociadas al clúster de su neurona. 
 
-	\item Asociada a cada neurona de la capa de salida, tenemos un vector de pesos sinápticos obtenido a través de las conexiones con la capa de entrada, que es modificado durante el proceso de aprendizaje. A dicho vector de pesos se le llama vector de referencia, y representa el valor promedio de la categoría asociada a esa neurona. El conjunto de todos esos vectores de referencia es denominado \textit{codebook}.
+	\item Asociado a cada neurona de la capa competitiva, tenemos un vector de pesos sinápticos obtenido a través de las conexiones con la capa de entrada, que es modificado durante el proceso de aprendizaje. A dicho vector de pesos se le llama vector de referencia, y representa el valor promedio de la categoría asociada a esa neurona. El conjunto de todos esos vectores de referencia es denominado \textit{codebook}.
 
 	\item Es un algoritmo \textbf{no supervisado}, es decir, es capaz de encontrar patrones comunes basándose en los datos de la muestra de entrada sin necesidad de que, cuando una muestra entre a la red, se indique a qué categoría pertenece.
 
@@ -26,34 +26,27 @@ A principio de la década de los 80, el científico finlandés Teuvo Kohonen \ci
 \end{figure}
 
 \subsection{Proceso de entrenamiento.}
+\textit{Nota: Por simplicidad en la notación y en la explicación vamos a considerar que la capa competitiva es unidimensional. La explicación propuesta es extensible para un número de dimensiones arbitrario realizando los cálculos relacionados con la posición del vector de referencia dentro del codebook y la posición de la BMU utilizando vectores con un valor para cada una de las dimensiones correspondientes.\\}
 
-En primer lugar, se \textbf{inicializan} \textbf{los pesos} asociados a la capa de salida. Lo más habitual, es tomar dichos pesos de una distribución aleatoria.
-Para un correcto funcionamiento, dichos pesos deben estar normalizados entre 0 y 1. En nuestro caso, hemos tomado los pesos de una distribución aleatoria uniforme en el intervalo $[0, 1)$.\\
+Sea $\vec{X}$ un vector, que representa una secuencia de muestras estadísticas de un observable $x=x(t) \in {\rm I\!R}$, donde $t$ es el instante o iteración de la extracción de la muestra y un conjunto de vectores de referencia variables (\textit{codebook}), $w_i(t)$, que representaremos de forma abreviada como el vector $\vec{W(t)}: w_i(t) \in {\rm I\!R} \; | i: 0, 1, 2, ..., n $, donde los $w_i(0)$ están inicializados a un valor aleatorio siguiendo una distribución uniforme entre 0 y 1, se realizan los siguientes pasos, de forma iterativa, hasta alcanzar el número de iteraciones máximo $\lambda$, que determina el usuario como criterio de terminación para el proceso de entrenamiento.\\
 
-El proceso de entrenamiento \textbf{se repite hasta que se alcanza el número de iteraciones máximo}, determinado por el parámetro $\lambda$. La variable $t$ representa cada una de las iteraciones.\\
+En primer lugar, una muestra del vector $\vec{X}$ \textbf{será comparada simultáneamente con cada vector de referencia} $\vec{W(t)} = \{w_0(t), w_1(t), ..., w_i(t), ...,$ ${w_{n-1}}(t)\}$ en cada instante de tiempo $t$, utilizando para ello la distancia euclídea entre vectores, $||{X(t)w_i(t)}||_n$. Otras formulaciones para la distancia, como por ejemplo, la distancia de Mahalanobis, podrían haber sido usadas en su lugar. \\
 
-En cada iteración, para cada una de las muestras, $X$, sacadas de la distribución de muestras de forma aleatoria, se realizan los siguientes pasos: \\\\
-1 - Se \textbf{calcula la distancia euclídea} entre la muestra $X$ y cada una de las neuronas de la capa de salida. También se pueden utilizar otro tipo de distancias.\\
-$$distancia(X) = || W - X ||$$\\
-2 - Se \textbf{busca la neurona que ha obtenido una menor distancia}. Esta neurona es considerada la neurona ganadora o BMU \textit{(Best Matching Unit)}.\\
-$$BMU_X = argmin_{W_{i, j}} \; distancia(X) = argmin_{W_{i, j}} || W - X ||$$\\
+A continuación, se determina \textbf{el vector de referencia más parecido a la muestra evaluada} en el instante $t$, y, a la ubicación que ocupa dicho vector de referencia (en índices) en el $codebook$, se le denomina \textbf{BMU \textit{(Best Matching Unit)}}.
 
-La función \textit{argmin} devuelve el índice del array en el que se alcanza el valor mínimo.
+$$ BMU(X(t)) = argmin_{w \in \vec{W}}{||Xw||}_n$$
 
-3 - Se realiza un \textbf{proceso de actualización de las matrices de pesos} en base a lo obtenido anteriormente, según la siguiente fórmula.\\
-$$ W_{i, j}^{(t+1)} = W_{i, j}^{(t)} + \Delta {W_{i,j}} $$\\
+La función $argmin$ devuelve la posición del vector en la que se alcanza el valor mínimo y, a la distancia entre la muestra del instante $t$ y su mejor vector de referencia la denominaremos
 
-La actualización depende tanto de la distancia de la muestra al vector de pesos como de otros dos parámetros: la tase de aprendizaje y una función de vecindario.\\
+$$ D(X(t)) = min_{w \in \vec{W}}{||Xw||}_n$$. 
 
-$$\Delta W_{i,j} = \eta(t)\delta_f(i,j)(X-W_{i,j})$$\\
+Una vez se ha seleccionado la BMU, se inicia un proceso de \textbf{actualización de los vectores de referencia} presentes en el vector $\vec{W}$. La obtención de un mejor ajuste para la siguiente iteración se realiza mediante la actualización del conjunto de vectores de referencia en función de la distancia entre la muestra y la BMU y la posición de la BMU en el vector $\vec{W}$. Este ajuste lo vamos a reflejar añadiendo a cada vector de referencia el término $\Delta W(t)$.
 
-La función $\delta_f(i,j)$ es la función de vecindario y, en nuestra propuesta, se calcula conforme a la siguiente función gaussiana:\\
+$$\vec{W}(t+1) = \vec{W}(t) + \Delta \vec{W}(t)$$
 
-$$\delta_f(i,j) = e ^{-\frac{||BMU_X-(i,j)||^2}{2\sigma(t)^2}}. $$\\
+Durante este fase de actualización, tres parámetros de control pueden ser ajustados por el usuario. El parámetro de control $\tau$ tiene como objetivo marcar el ritmo al que los otros dos, el tamaño del vecindario y la tasa de aprendizaje, decrecen conforme avanza el tiempo siguiendo una función gaussiana. Es habitual utilizar, como $\tau$, el número de iteraciones del proceso de entrenamiento. Por las características de los otros parámetros de control, que vamos a explicar a continuación, un menor valor de $\tau$ permite que el algoritmo realice una transición más rápida de una fase de exploración brusca, en la que gran parte de los vectores de referencia son modificados, a una fase de refinamiento en los que sólo el vector de referencia de la BMU y, quizás, los vectores más próximos, son ligeramente actualizados.\\
 
-Al tratar con una potencia con exponente negativo, un mayor valor absoluto de dicho exponente nos proporciona una valor de $\delta_f(i,j)$ menor. Por eso, en el numerador, se tiene en cuenta la distancia que hay entre la mejor neurona y la neurona actual. En el denominador, se utiliza un parámetro de control $\sigma$, que nos permite controlar la distancia que estamos considerando.\\
-
-Normalmente, este parámetro, durante un primer número de iteraciones previamente proporcionado, es inicializado a un valor alto $\sigma_0$ que decrece de manera exponencial conforme a otro parámetro de control, $\tau$. Una vez ha finalizado esa primera fase (han pasado $z$ iteraciones) se van refinando los resultados con un valor fijo mucho más bajo $\sigma_f$.\\
+El tamaño del vecindario, determina un radio alrededor de la posición de la BMU en el vector $\vec{W(t)}$, en el que los vectores de referencias van a sufrir algún cambio. Si los vectores de referencia no se encuentran dentro del subconjunto $\vec{W_A} = \{w_{BMU(j)-\sigma^2}, ..., w_{BMU(j)}, ..., w_{BMU(j)+ \sigma^2} \}$ su valor para $\delta_i(t)$ será 0. El parámetro $\sigma$ es inicializado en el instante $t=0$ por el usuario y actualizado conforme a una gaussiana. Además del sistema de decrecimiento exponencial presente en la gaussiana, posibilitamos que el usuario determine un valor fijo para $\sigma$, $\sigma_t$ que puede establecerse a partir de una iteración determinada por el mismo, a la que denominamos $z$.
 
 
 $$\sigma(t) = \left\{
@@ -64,17 +57,39 @@ $$\sigma(t) = \left\{
 \right.
 $$\\
 
-Para la tasa de aprendizaje, se sigue una aproximación similar, la tasa de aprendizaje durante la primera fase está inicializada a un valor $\eta_0$ decreciendo conforme a una función gaussiana y, una vez pasado un número de iteraciones, se fija a un valor $\eta_f$. \\
-$$\sigma(t) = \left\{
+
+
+El tamaño del vecindario, $\sigma$, es utilizado para el cálculo de una función de vecindario, que en función del parámetro $\sigma$ y la distancia (en índices) entre la BMU de cada vector de referencia $\vec{W(t)}$ pondera la modificación que va a ser realizada, permitiendo mantener propiedades topográficas y haciendo que, conforme nos alejamos (en índices) de la posición de la BMU en el vector $\vec{W}$ los cambios realizados sean menores. La función de vecindario, $\delta_f$, viene dada por:
+
+$$\delta_i(t) = e ^{-\frac{||BMU(X(t))-(i)||}{2\sigma(t)^2}}. $$\\	
+
+
+En la figura \ref{img:vecindario}, podemos observar una representación gráfica del vector $\vec{W}$ en un codebook bidimensional. Cada uno de los puntos rojos se corresponde con un vector de referencia, la BMU ha sido destacada de color amarillo y la región alrededor de la BMU que va a sufrir cambios significativos, el vecindario, queda delimitada con círculo alrededor de la BMU cuyo radio es $\sigma^2$.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{imagenes/vecindario.png}
+
+\caption{Representación gráfica del vecindario para un codebook bidimensional.}
+\label{img:vecindario}
+%\textit{Autor: Damian Jankowski}
+\end{figure}
+
+
+Por otro lado, la tasa de aprendizaje, $\eta$, tiene como objetivo ponderar la actualización de los pesos haciendo que, conforme avancen las iteraciones no sólo se vaya reduciendo el número de vectores de referencia que sufren cambios significativos, sino que, además, conforme avance el número de iteraciones incluso el vector de referencia de la BMU reciba cambios más ligeros. De manera similar al tamaño del vecindario, su valor inicial, $\eta_0$ es indicado por el usuario, y se puede establecer una iteración $z$ en la que es fijado a un valor determinado.
+
+$$\eta(t) = \left\{
 \begin{array}{ll}
 \eta_0e^{-\frac{t}{\tau}} & si \;\;t < z\\
 \eta_f & si  \;\; t\geq z
 \end{array}
 \right.$$\\
 
-Así pues, este algoritmo acerca los pesos del vecindario de la BMU hacia la nueva muestra introducida, para parecerse más a la misma. Esto lo hace teniendo en cuenta un vecindario alrededor de la BMU, que decrece exponencialmente conforme pasa un número de iteraciones hasta quedarse fijo, y una tasa de aprendizaje, que también decrece exponencialmente hasta permanecer constante. \\
+Combinando la función de vecindario, la tasa de aprendizaje y la distancia entre la BMU y la muestra a ser evaluada en el instante $t$, obtenemos la fórmula que actualiza los vectores de referencia.
 
-Esto permite una primera fase de entrenamiento, con cambios más bruscos, en la que se adaptan los valores completamente aleatorios para encontrar agrupamientos razonables. Conforme avanza dicha fase, esos valores van decreciendo hasta que quedan fijados, permitiendo a la red neuronal refinar los agrupamientos obtenidos hasta ese momento.\\
+$$\Delta{w_i(t)}=\eta(t)\delta_i(t)(X(t)-w_i(t))$$
+
+
+Una vez alcanzado el número de iteraciones máximo, el vector $\vec{W}$ contiene los vectores de referencia de la solución de tal manera que si, el algoritmo estuviese siendo usado para resolver problemas de clustering, cada vector de referencia representaría un clúster.
 
 \begin{figure}[H]
 \centering
@@ -84,7 +99,7 @@ Esto permite una primera fase de entrenamiento, con cambios más bruscos, en la 
 \label{img:somtraining}
 \end{figure}
 
-La figura \ref{img:somtraining} nos muestra, a grandes rasgos, un esquema del proceso de entrenamiento del mapa auto-organizado de Kohonen.\\
+La figura \ref{img:somtraining} nos muestra, a grandes rasgos, un esquema del proceso de entrenamiento del mapa auto-organizado de Kohonen con una capa competitiva bidimensional.\\
 
 En la primera parte de la figura, observamos la selección de la BMU. Para ello, del conjunto de datos de entrenamiento (sección azul) se selecciona una muestra de forma aleatoria (círculo blanco) y se toma como mejor neurona del mapa (cada neurona es una intersección de la malla de líneas y, la mejor, es resaltada con un círculo amarillo intenso) la neurona que está más cerca de la muestra.\\
 
@@ -95,7 +110,7 @@ Por último, vemos cómo, tras un número de iteraciones, el mapa es capaz de of
 El modelo del mapa auto-organizado puede ser utilizado para diversas tareas, de entre las que destacan:\\
 
 \begin{itemize}
-	\item \textbf{Clústering} - es decir, generar agrupaciones del conjunto de datos de entrada. Por regla general, cada neurona de la capa de Kohonen representaría una posible agrupación de los datos. 
+	\item \textbf{Clustering} - es decir, generar agrupaciones del conjunto de datos de entrada. Por regla general, cada neurona de la capa de Kohonen representaría una posible agrupación de los datos. 
 
 	\item \textbf{Visualización de datos de alta dimensionalidad.} Tras finalizar el proceso de entrenamiento, podemos utilizar diferentes técnicas para obtener una representación visual de las características topológicas de la muestras. Las matrices-U, las matrices-P o los planos de componentes son algunos de los modelos utilizados para visualizar el mapa auto-organizado.
 
@@ -103,44 +118,33 @@ El modelo del mapa auto-organizado puede ser utilizado para diversas tareas, de 
 	\end{itemize}
 
 \subsection{Mapa auto-organizado batch.}
-El proceso de entrenamiento previamente mencionado se corresponde al del mapa auto-organizado tradicional u \textit{online}. En ese proceso, durante una iteración, se evalúa un subconjunto de los datos como parte de un proceso secuencial de: encontrar la BMU y actualizar los pesos correspondientes. Posteriormente, basándose en las propiedades matemáticas del mapa auto-organizado \textit{online}, se derivó una formulación para realizar el proceso de actualización de pesos, en una sola iteración, para un bloque de muestras. Esta versión del algoritmo, es denominada mapa auto-organizado \textit{batch}. \\
+El proceso de entrenamiento previamente mencionado se corresponde al del mapa auto-organizado tradicional u \textit{online}. En ese proceso, durante una iteración, se evalúa un subconjunto de los datos como parte de un proceso secuencial de: encontrar la BMU y actualizar los pesos correspondientes. Posteriormente \cite{kohonenbatch}, basándose en las propiedades matemáticas del mapa auto-organizado \textit{online}, se derivó una formulación para realizar el proceso de actualización de pesos, en una sola iteración, para un bloque de muestras. Esta versión del algoritmo, es denominada \textbf{mapa auto-organizado \textit{batch}}. \\
 
-En esta versión, la regla para la actualización de pesos implica que, durante cada iteración, los pesos de las neuronas sean actualizados con la media de las muestras que lo activan, teniendo en cuenta los parámetros de control, como el vecindario o la tasa de aprendizaje. $T_0$ representa el inicio de una época y $T_f$ el final de la misma. En cada instante $T_k$ de una época se evalúa una muestra $X(T_k) $del conjunto de datos. La nueva fórmula para la actualización de los pesos es la siguiente:\\
+En esta versión, la regla para la actualización de los vectores de referencia se procesan múltiples muestras del conjunto de datos de entrada, ya sea el conjunto de datos entero en cada iteración, como ocurre en nuestra implementación, o tomando un subconjunto aleatorio de muestras con reemplazo. Durante cada iteración, se recorren todas las muestras a ser evaluadas y, para cada una de ellas, se determina la BMU de forma similar a la versión \textit{online}. A continuación, procedemos a actualizar el conjunto de vectores de referencia de la siguiente manera:\\
 
-$$
- W_{i, j} = \frac{\sum_{k=0}^{f} \delta_f(c, [i,j]) \cdot  X(T_k) }{\sum_{k=0}^{f} \delta_f(c, [i,j])}
-$$\\
+1 - Para cada muestra, $X_j$ consideramos un subconjunto de los vectores de referencia del vector $\vec{W}$ alrededor de la BMU, al que denominamos $\vec{W_A} = \{w_{BMU(j)-\sigma^2}, ..., w_{BMU(j)}, ..., w_{BMU(j)+ \sigma^2} \}$\\
 
-donde $c$ es la unidad de activación (BMU) para la muestra $X(T_i)$ y permitiéndose obviar el parámetro $\eta(t)$, que controlaba la tasa de aprendizaje.\\
+2 - Cada vector de referencia posee dos variables que nos permitirán obtener el vector de referencia para la próxima iteración mediante la realización del cociente entre ambas. Ambas serán inicializadas a 0 y cuando el vector de referencia en cuestión se encuentre dentro del rango $W_A$ para una muestra específica x, sumaremos al numerador el producto de la función de vecindario para la muestra X, su BMU y la posición que ocupa (en índices) el vector de referencia en el vector $\vec{w}$ y, en el denominaremos, sumaremos tan sólo el valor escalar de la función de vecindario. \\
 
-El uso del modelo \textit{batch} frente al modelo tradicional conlleva un intercambio de ventajas e inconvenientes \cite {compsom}, que podemos observar en la tabla \ref{tab:somcomparative}.
+3 - El cociente entre ambas conforma el valor del vector de referencia para la próxima iteración. Por tanto, hemos calculado nuestro nuevo vector de referencia como un promedio de las muestras de las que ha sido BMU y las muestras que han sido activadas en posiciones (en índices) del vector $\vec{W}$ cercanas ponderadas en función de esa distancia, dando más relevancia a las muestra más cercanas.\\
 
-\begin{table}[H]
-\begin{tabular}{@{}l|l@{}}
-\toprule
-\multicolumn{1}{c|}{\textbf{Ventajas}}                                                                                                          & \multicolumn{1}{c}{\textbf{Incovenientes}}                                                                     \\ \midrule
-Mayores oportunidades de paralelización.                                                                                                        & \begin{tabular}[c]{@{}l@{}}Peor organización topográfica\\ y visualización.\end{tabular}                       \\ \midrule
-Converge más rápido que el tradicional                                                                                                          & \multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}Alta dependencia de la\\ inicialización de los pesos.\end{tabular}} \\ \cmidrule(r){1-1}
-El parámetro $\eta$ es opcional.                                                                                                                &                                                                                                                \\ \midrule
-\begin{tabular}[c]{@{}l@{}}Resultados deterministas, excepto la\\ inicialización de los pesos si se ha\\ realizado aleatoriamente.\end{tabular} & \begin{tabular}[c]{@{}l@{}}Pueden salir clases muy\\ desbalanceadas.\end{tabular}                              \\ \bottomrule
-\end{tabular}
-\caption{Ventajas e inconvenientes de la versión batch.}
-\label{tab:somcomparative}
-\end{table}
+El uso del modelo \textit{batch} frente al modelo tradicional nos va a permitir paralelizar el algoritmo de forma mucho más eficiente, ya que, mientras que, en la versión \textit{online}, debíamos actualizar los vectores de referencia tras cada iteración, en la versión \textit{batch} podemos evaluar un conjunto de muestras de forma simultánea y, al estar evaluando múltiples muestras y por el nuevo método de actualización de los vectores de referencia converge en un número de iteraciones considerablemente inferior al necesario en el primero. Sin embargo, como comentan \textit{Jean-Claude Fort, Patrick Letremy y Marie Cottrell} \cite{compsom}, el método de entrenamiento utilizado en la versión \textit{batch} del algoritmo presenta una mayor dependencia de la inicialización de los vectores de pesos en el instante inicial, pudiendo proporcionar clusters muy desbalanceados o una peor representación de las características topográficas que la versión \textit{online}.
+
+En el resto del documento nos referiremos a cada vector de referencia como pesos asociados a las neuronas y con estructura o ``matriz'' de pesos haremos referencia al vector $\vec{W}$
 
 
 \subsection{Medidas de calidad.}
-Para medir la calidad de un mapa auto-organizado una vez entrenado podemos utilizar dos medidas:\\
+Para medir la calidad de un mapa auto-organizado una vez entrenado podemos utilizar dos medidas sobre el conjunto de muestras usado:\\
 
 El \textbf{error medio de cuantificación} nos permite medir la precisión del mapa creado. Se calcula tomando la media de las distancias euclídeas entre cada una de las muestras y su correspondiente BMU.\\
 
 $$
-\epsilon_q = \frac{1}{N}\sum_{i=1}^{N}  || x_i - codebook[BMU(x)] ||
+\epsilon_q = \frac{1}{|X|}\sum_{x \in X}{||x-w_{BMU(x)}||}
 $$\\
 
 El \textbf{error topográfico} mide la capacidad que ha tenido el modelo de conservar las propiedades topográficas del conjunto de muestras de entrenamiento. Podemos medir dicho error como:\\
 $$
-u(x_k) = \left\{
+u(x = \left\{
 \begin{array}{ll}
 1 & si \; su \; BMU \; y \; la \; segunda \; BMU \; son \; adyacentes.\\
 0 & en \; caso \; contrario.
@@ -148,7 +152,7 @@ u(x_k) = \left\{
 \right.
 $$
 $$
-\epsilon_t =  \frac{1}{N}\sum_{i=1}^{N} u(x_k)
+\epsilon_t =  \frac{1}{|X|}\sum_{x \in \vec{X}} u(x)
 $$\\
 
 \section{Árboles de decisión.}
@@ -162,13 +166,15 @@ Un árbol de decisión \cite{arbol} es un modelo de aprendizaje automático supe
 
 \subsection{Proceso de entrenamiento.} 
 
-Obtener un árbol de decisión óptimo es un problema \textbf{NP-completo}, es decir, no se conoce una manera de resolver este problema con una complejidad de tiempo polinómico por lo que es habitual que los algoritmos que realizan el entrenamiento de este modelo sigan estrategias voraces \textit{(greedy)}. Los algoritmos más conocidos y utilizados para realizar esta tarea(ID3, CART, C4.5, C5.0) siguen un esquema de entrenamiento similar. \\
+Obtener un árbol de decisión óptimo es un problema \textbf{NP-completo}, es decir, no se conoce una manera de resolver este problema con una complejidad de tiempo polinómico por lo que es habitual que los algoritmos que realizan el entrenamiento de este modelo sigan estrategias voraces \textit{(greedy)}. Los algoritmos más conocidos y utilizados para realizar esta tarea (ID3, CART, C4.5, C5.0) siguen un esquema de entrenamiento similar. \\
 
 La idea que sigue el proceso de entrenamiento es realizar una serie de particiones binarias sobre el conjunto de datos inicial, calculando todos los posibles puntos de corte de la partición y evaluando cuál es el mejor de ellos. Este proceso es repetido hasta que se completa el árbol, es decir, todas las muestras han sido clasificadas, o, alguna de las condiciones de finalización temprana se cumpla, si es que la hubiere.\\
 
-Todas las posibles divisiones para una partición se basan en repartir todas las muestras en función de un atributo y un valor asociado a un \textbf{punto de corte}. Si, para una muestra, su valor para el atributo en cuestión es inferior al valor del punto de corte, es asignada a una de las dos subdivisiones y, en caso contrario, es asignada a la otra subdivisión. Habitualmente, los puntos de corte son la media de entre un valor y su sucesor, considerando el conjunto de los valores del atributo ordenado y único, es decir, no se puede repetir un valor.\\
+Un \textbf{punto de corte} es una combinación de un atributo del problema y un valor para el mismo con el que se va a particionar el conjunto de muestras siguiendo una relación de orden, quedando una partición para las muestras cuyo valor para el atributo sea inferior o igual al valor proporcionado y otra partición para las muestras con valores superiores (el caso de ser igual podría ser cambiado de la partición inferior a la superior siempre que se mantenga el criterio durante todo el proceso de entrenamiento y evaluación).\\
 
-Cada una de estas posibles divisiones es evaluada conforme a diferentes criterios dependiendo del algoritmo, habitualmente basados en la impureza de cada una de las dos subdivisiones obtenidas al realizar el corte. \\
+En las aproximaciones para entrenamiento de árboles de decisión en las que la evaluación de los puntos de corte se realiza de forma exhaustiva, es decir, analizando todos los posibles puntos de corte, y se trabaja sólo con atributos numéricos, los puntos de corte se calculan de la siguiente manera: para cada atributo y sus correspondientes valores proporcionados por las muestras, se ordenan los valores de forma ascendente o descendente y, si al realizar un recorrido secuencial sobre los valores el valor actual y su sucesor son diferentes, el punto medio entre ambos valores constituirá un punto de corte.
+
+La calidad de cada uno de los puntos de corte obtenidos es evaluada conforme a diferentes criterios dependiendo del algoritmo, habitualmente basados en la impureza de cada una de las dos subdivisiones obtenidas al realizar el corte. \\
 
 La \textbf{ganancia de información} es una de las posibles medidas para determinar el mejor punto de corte de todos los posibles y se basa en la siguiente fórmula:
 
@@ -176,7 +182,7 @@ $$
 GI(D,s) = Impureza(D) - \frac{|D_{izq}|}{|D|} \cdot Impureza(D_{izq}) - \frac{|D_{der}|}{|D|} \cdot Impureza(D_{der})
 $$
 
-donde $D$ es el conjunto de datos de la división actual, $s$ es el punto de corte y $D_{izq}$ y $D_{der}$ son las correspondientes subdivisiones obtenidas a partir del punto de corte.\\
+donde $D$ es el conjunto de datos de la partición actualmente considerada, $s$ es el punto de corte y $D_{izq}$ y $D_{der}$ son las subparticiones obtenidas a partir del punto de corte.\\
 
 Una medida de \textbf{impureza} \cite{impurity} es una función que, dada un conjunto de datos, mide la cantidad de clases distintas que hay en ese conjunto. Dicha medida valdrá 0 si todos los elementos pertenecen a la misma clase y 1 si cada elemento es de una clase distintas. En la tabla \ref{tab:entropy} destacamos algunas de estas medidas.\\
 
@@ -195,7 +201,7 @@ Una medida de \textbf{impureza} \cite{impurity} es una función que, dada un con
 
 donde $f_i$ es la probabilidad de pertenecer a la clase $i$ en una división, $C$ es el total de categorías únicas, $y_i$ es el valor del atributo a predecir de una instancia  y $\mu = \frac{1}{N} \sum_{i=1}^{N}y_i$ es la media de todas esos valores en una división.\\
 \subsection{Poda de árboles y criterios de terminación temprana.}
-Una de las principales cuestiones a la hora de generar un árbol de decisión en el que se intentan obtener los mejores resultados es conocer cuál ha de ser el tamaño apropiado del mismo. Un árbol muy pequeño corre el riesgo de haber generalizado más información de la cuenta, mientras que, un árbol muy grande, puede estar demasiado especializado, dejarse influir por ruido presente en las muestras y, como consecuencia, producir la situación denominada como sobreajuste, en la que, el árbol no ha sido capaz de extrapolar los datos relevantes para la clasificación y, por ello, podría colocar muestras en clases incorrectas.\\
+Una de las principales cuestiones a la hora de generar un árbol de decisión, en el que se intentan obtener los mejores resultados, es conocer cuál ha de ser el tamaño apropiado del mismo, ya que este factor va a influir considerablemente en la calidad de las predicciones proporcionadas. Un árbol muy pequeño corre el riesgo de haber generalizado más información de la cuenta, mientras que, un árbol muy grande, puede estar demasiado especializado, dejándose influir por ruido presente en las muestras y, como consecuencia, llegar a producir la situación denominada como sobreajuste, en la que, el árbol no ha sido capaz de extrapolar los datos relevantes para la clasificación y, por ello, podría colocar muestras en clases incorrectas.\\
 
 Para evitar este tipo de problemas, es común recurrir a técnicas de podado de árboles. Podemos distinguir dos tipos de técnicas de poda:\\
 
@@ -216,13 +222,13 @@ En el momento en que una de estas condiciones se cumple, dicho nodo se convierte
 
 De entre las técnicas de poda \textit{post-pruning} destacan dos:\\
 \begin{itemize}
-\item La \textbf{poda de error reducido}. Esta poda utiliza una técnica simple y rápida de computar en la que, empezando por cada una de las hojas del árbol, se va sustituyendo cada nodo por la clase más popular. Si la predicción no ha empeorado, se continúa en los siguientes niveles de profundidad del árbol asociado al nodo en cuestión y, en el momento en la que dicha predicción empeora, el procedimiento termina.\\
+\item La \textbf{poda de error reducido}. Esta poda utiliza una técnica simple y rápida de computar en la que, empezando por cada una de las hojas del árbol, se va sustituyendo cada nodo por la clase más popular. Si la predicción no ha empeorado, se continúa en los niveles de profundidad anteriores al nivel actualmente podado y, en el momento en la que dicha predicción empeora, el procedimiento termina.\\
 
 \item La \textbf{poda de coste-complejidad}. En la poda de coste-complejidad se genera una serie de árboles $T_0, T_1, T_i, ... , T_r$ donde $T_0$ es el árbol inicial y $T_r$ es sólo la raíz. En cada iteración ($i$) del proceso, se elimina un subárbol del árbol anterior ($i-1$) reemplazándolo con un nodo terminal conforme al siguiente criterio:
 
-$error(T, S)$ es el error del árbol $T$ sobre el conjunto de datos $S$. $poda(T, t)$ es el árbol obtenido de podar el subárbol $t$ del árbol $T$.\\
+$error(T, S)$ es el error del árbol $T$ sobre el conjunto de datos $S$, que viene dado por el número de muestras cuya clase de salida original no se corresponde a la que el árbol que la evalúa predice.\\ $poda(T, t)$ es el árbol obtenido de podar el subárbol $t$ del árbol $T$.\\
 
-En cada iteración, se elimina el subárbol que minimiza:
+En cada iteración, se elimina el subárbol que minimiza la diferencia entre el error obtenido de la operación aplicada al subárbol $t$ y el error al aplicarlo al conjunto total de datos, normalizado respecto de la diferencia entre el número de hojas del árbol antes y después de la poda realizada, respectivamente.
 
 $$
 \frac{error(poda(T, t), S) - error(T, S)}{|hojas(T)| - |hojas(poda(T, t))|}
@@ -239,22 +245,26 @@ $$
 Precision = \frac{1}{N}\sum_{i=1}{N}[1|f(x_i) = y_i]
 $$
 
-donde $f$ es la función que nos devuelve la clasificación proporcionada por el árbol de decisión, $x_i$ es cada una de las muestras a evaluar e $y_i$ es su correcta clasificación.
+donde $f$ es la función que nos devuelve la clasificación proporcionada por el árbol de decisión, $x_i$ es cada una de las muestras a evaluar e $y_i$ es su correcta clasificación. Para evaluar la precisión del modelo, se utiliza un conjunto reducido de datos, al que normalmente se denomina conjunto de test, que no ha sido utilizado durante el proceso de entrenamiento y del que conocemos su clase de salida de antemano.
 
-\subsection{Ventajas e inconvenientes.}
-Para finalizar, vamos a destacar algunas de las ventajas e inconvenientes que presenta este modelo con respecto al uso de otros modelos de aprendizaje supervisado.\\
+\subsection{Random forest.}
+Como explicaremos más adelante, para combinar nuestra implementación del árbol decisión en \textit{CUDA} y el framework de computación en clúster \textit{Spark}, optamos por realizar una implementación de un \textit{random forest} en vez de un único árbol de decisión. \\
 
-\underline{Ventajas.}\\
-\begin{itemize}
-	\item Proporcionan un modelo de caja blanca, fácil de interpretar y comprender.
-	\item Puede ser combinado con otros modelos distintos o en un conjunto de árboles (\textit{random forests}).
-	\item No requieren de un gran preprocesamiento de las muestras antes de ser entrenados.
-	\item A diferencia de otros modelos (como la regresión lineal), pueden resolver problemas de clasificación o regresión no lineales.\\
-\end{itemize}
+Un \textit{\textbf{random forest}} es un conjunto de árboles de decisión, en el que el conjunto de muestras de entrenamiento es distribuido aleatoriamente en un número de árboles determinado por el usuario y, en el que, cada árbol del \textit{random forest}, es entrenado conforme a un árbol de decisión normal. Sin embargo, la evaluación de la muestra, con el fin de obtener la clase a la que pertenece, se realiza evaluando la muestra en cada uno de los árboles que componen el \textit{random forest} y tomando, como salida, la clase que un mayor número de árboles han predicho. \\
 
-\underline{Inconvenientes.}\\
-\begin{itemize}
-	\item Pequeños cambios en el conjunto de datos utilizado para el entrenamiento pueden alterar considerablemente los resultados obtenidos.
-	\item Pueden proporcionar peores resultados que otros modelos no lineales (SVM, redes neuronales, etc) con los mismos datos pero, juntarlos en un conjunto con múltiples árboles, como los \textit{random forest} \cite{randomforest}, puede ayudarnos a solventar el problema, eso sí, eliminando la facilidad para interpretar el modelo que proporciona utilizar un único árbol.
-	\item Encontrar el árbol de decisión óptimo global es un problema NP-completo.
-\end{itemize}
+De esta manera, tenemos un modelo que, de forma similar al árbol de decisión, puede resolver problemas de clasificación o regresión no lineales, no requiere un gran preprocesamiento de las muestras antes de ser entrado para dar buenos resultados y, además, ayuda a evitar el sobreajuste, ya que, al distribuir aleatoriamente las muestras y tomar un promedio de los resultados, ayuda a impedir que el proceso de entrenamiento se especialice en exceso hacia muestra ruidosas. Sin embargo, como ocurría en el árbol, encontrar un \textit{random forest} óptimo global sigue siendo un problema NP-completo y, el modelo obtenido no es tan fácil de interpretar como el conjunto de reglas jerárquicas que presentaba el árbol de decisión.
+
+%\underline{Ventajas.}\\
+%\begin{itemize}
+%	\item Proporcionan un modelo de caja blanca, fácil de interpretar y comprender.
+%	\item Puede ser combinado con otros modelos distintos o en un conjunto de árboles (\textit{random forests}).
+%	\item No requieren de un gran preprocesamiento de las muestras antes de ser entrenados.
+%	\item A diferencia de otros modelos (como la regresión lineal), pueden resolver problemas de clasificación o regresión no lineales.\\
+%\end{itemize}
+
+%\underline{Inconvenientes.}\\
+%\begin{itemize}
+%	\item Pequeños cambios en el conjunto de datos utilizado para el entrenamiento pueden alterar considerablemente los resultados obtenidos.
+	%\item Pueden proporcionar peores resultados que otros modelos no lineales (SVM, redes neuronales, etc) con los mismos datos pero, juntarlos en un conjunto con múltiples árboles, como los \textit{random forest} \cite{randomforest}, puede ayudarnos a solventar el problema, eso sí, eliminando la facilidad para interpretar el modelo que proporciona utilizar un único árbol.
+	%\item Encontrar el árbol de decisión óptimo global es un problema NP-completo.
+%\end{itemize}

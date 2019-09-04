@@ -15,7 +15,7 @@ M.~Zaharia, R.~S. Xin, P.~Wendell, T.~Das, M.~Armbrust, A.~Dave, X.~Meng,
 \newblock Disponible en \url{http://doi.acm.org/10.1145/2934664}.
 
 \bibitem{kohonensom}
-T.~Kohonen, {\em {The self-organizing map}}, vol.~78.
+T.~Kohonen, {\em {The self-organizing map}}, vol.~78, Proceedings of the IEEE.
 \newblock Septiembre 1990.
 
 \bibitem{arbol}
@@ -23,6 +23,44 @@ L.~{Breiman}, J.~H. {Friedman}, R.~A. {Olshen}, y C.~J. {Stone}, {\em
   {Classification and Regression Trees}}.
 \newblock Statistics/Probability Series, Belmont, California, U.S.A.: Wadsworth
   Publishing Company, 1984.
+
+\bibitem{kohonenbatch}
+T.~Kohonen, {\em {Self Organizing maps}}, vol.~30, Springer Series in
+  Information Science.
+\newblock 1995.
+
+\bibitem{compsom}
+J.-C. Fort, P.~Letrémy, y M.~Cottrell, {\em {Advantages and drawbacks of the
+  Batch Kohonen algorithm}}.
+\newblock Enero 2002.
+
+\bibitem{impurity}
+F.~Berzal, J.~C. Cubero, F.~Cuenca, y M.~J. Martín~Bautista, {\em {On the
+  quest for easy to understand splitting rules}}, vol.~44.
+\newblock 2003.
+
+\bibitem{numpy}
+T.~Oliphant, {\em Guide to NumPy}.
+\newblock Enero 2006.
+
+\bibitem{numba}
+S.~Kwan~Lam, A.~Pitrou, y S.~Seibert, {\em {Numba: a LLVM-based Python JIT
+  compiler}}.
+\newblock 11 2015.
+
+\bibitem{cupy}
+R.~Okuta, Y.~Unno, D.~Nishino, S.~Hido, y C.~Loomis, {\em {CuPy: A
+  NumPy-Compatible Library for NVIDIA GPU Calculations}}.
+\newblock 2017.
+\newblock Disponible en
+  \url{http://learningsys.org/nips17/assets/papers/paper_16.pdf}.
+
+\bibitem{xoroshiro}
+S.~Vigna, {\em {Further scramblings of Marsaglia’s xorshift generators}},
+  vol.~315.
+\newblock 2017.
+\newblock Disponible en
+  \url{http://www.sciencedirect.com/science/article/pii/S0377042716305301}.
 
 \bibitem{cudasomonline}
 F.~Codevilla, S.~Botelho, N.~Duarte~Filho, y J.~Gaya, {\em {Parallel High
@@ -50,44 +88,6 @@ D.~Svatensson, {\em {Implementing Streaming Parallel Decision Trees on Graphic
 Y.~Ben-Haim y E.~Tom-Tov, {\em {A Streaming Parallel Decision Tree Algorithm}},
   vol.~11.
 \newblock Febrero 2010.
-
-\bibitem{compsom}
-J.-C. Fort, P.~Letrémy, y M.~Cottrell, {\em {Advantages and drawbacks of the
-  Batch Kohonen algorithm}}.
-\newblock Enero 2002.
-
-\bibitem{impurity}
-F.~Berzal, J.~C. Cubero, F.~Cuenca, y M.~J. Martín~Bautista, {\em {On the
-  quest for easy to understand splitting rules}}, vol.~44.
-\newblock 2003.
-
-\bibitem{randomforest}
-L.~Breiman, {\em {Random Forests}}, vol.~45.
-\newblock Octubre 2001.
-\newblock Disponible en \url{https://doi.org/10.1023/A:1010933404324}.
-
-\bibitem{numpy}
-T.~Oliphant, {\em Guide to NumPy}.
-\newblock Enero 2006.
-
-\bibitem{numba}
-S.~Kwan~Lam, A.~Pitrou, y S.~Seibert, {\em {Numba: a LLVM-based Python JIT
-  compiler}}.
-\newblock 11 2015.
-
-\bibitem{cupy}
-R.~Okuta, Y.~Unno, D.~Nishino, S.~Hido, y C.~Loomis, {\em {CuPy: A
-  NumPy-Compatible Library for NVIDIA GPU Calculations}}.
-\newblock 2017.
-\newblock Disponible en
-  \url{http://learningsys.org/nips17/assets/papers/paper_16.pdf}.
-
-\bibitem{xoroshiro}
-S.~Vigna, {\em {Further scramblings of Marsaglia’s xorshift generators}},
-  vol.~315.
-\newblock 2017.
-\newblock Disponible en
-  \url{http://www.sciencedirect.com/science/article/pii/S0377042716305301}.
 
 \bibitem{reduction}
 M.~Harris, {\em {Optimizing parallel reduction in CUDA}}, vol.~21.

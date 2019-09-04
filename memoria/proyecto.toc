@@ -1,24 +1,23 @@
 \babel@toc {spanish}{}
 \contentsline {chapter}{\numberline {1}Introducci\IeC {\'o}n y motivaci\IeC {\'o}n.}{1}{chapter.1}
 \contentsline {section}{\numberline {1.1}Introducci\IeC {\'o}n y motivaci\IeC {\'o}n.}{1}{section.1.1}
-\contentsline {section}{\numberline {1.2}Estado del arte: trabajos relacionados.}{2}{section.1.2}
-\contentsline {section}{\numberline {1.3}Descripci\IeC {\'o}n del proyecto.}{3}{section.1.3}
-\contentsline {section}{\numberline {1.4}Requisitos de hardware y software para el proyecto.}{3}{section.1.4}
-\contentsline {section}{\numberline {1.5}Planificaci\IeC {\'o}n de tareas.}{4}{section.1.5}
-\contentsline {section}{\numberline {1.6}Objetivos.}{5}{section.1.6}
-\contentsline {section}{\numberline {1.7}Estructura del documento.}{5}{section.1.7}
-\contentsline {chapter}{\numberline {2}Modelos de Soft Computing considerados.}{6}{chapter.2}
-\contentsline {section}{\numberline {2.1}Mapas auto-organizados \textit {(Self Organizing Map)}}{6}{section.2.1}
-\contentsline {subsection}{\numberline {2.1.1}Proceso de entrenamiento.}{7}{subsection.2.1.1}
+\contentsline {section}{\numberline {1.2}Descripci\IeC {\'o}n del proyecto.}{2}{section.1.2}
+\contentsline {section}{\numberline {1.3}Requisitos de hardware y software para el proyecto.}{2}{section.1.3}
+\contentsline {section}{\numberline {1.4}Planificaci\IeC {\'o}n de tareas.}{3}{section.1.4}
+\contentsline {section}{\numberline {1.5}Objetivos.}{4}{section.1.5}
+\contentsline {section}{\numberline {1.6}Estructura del documento.}{4}{section.1.6}
+\contentsline {chapter}{\numberline {2}Modelos de Soft Computing considerados.}{5}{chapter.2}
+\contentsline {section}{\numberline {2.1}Mapas auto-organizados \textit {(Self Organizing Map)}}{5}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Proceso de entrenamiento.}{6}{subsection.2.1.1}
 \contentsline {subsection}{\numberline {2.1.2}Usos del mapa auto-organizado.}{10}{subsection.2.1.2}
 \contentsline {subsection}{\numberline {2.1.3}Mapa auto-organizado batch.}{11}{subsection.2.1.3}
 \contentsline {subsection}{\numberline {2.1.4}Medidas de calidad.}{12}{subsection.2.1.4}
 \contentsline {section}{\numberline {2.2}\IeC {\'A}rboles de decisi\IeC {\'o}n.}{13}{section.2.2}
 \contentsline {subsection}{\numberline {2.2.1}Proceso de entrenamiento.}{13}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Poda de \IeC {\'a}rboles y criterios de terminaci\IeC {\'o}n temprana.}{14}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {2.2.2}Poda de \IeC {\'a}rboles y criterios de terminaci\IeC {\'o}n temprana.}{15}{subsection.2.2.2}
 \contentsline {subsection}{\numberline {2.2.3}Calidad del modelo.}{16}{subsection.2.2.3}
-\contentsline {subsection}{\numberline {2.2.4}Ventajas e inconvenientes.}{16}{subsection.2.2.4}
-\contentsline {chapter}{\numberline {3}Implementaci\IeC {\'o}n.}{18}{chapter.3}
+\contentsline {subsection}{\numberline {2.2.4}Random forest.}{17}{subsection.2.2.4}
+\contentsline {chapter}{\numberline {3}Tecnolog\IeC {\'\i }as utilizadas}{18}{chapter.3}
 \contentsline {section}{\numberline {3.1}CUDA.}{18}{section.3.1}
 \contentsline {subsection}{\numberline {3.1.1}Python, NumPy, Numba y CuPy.}{19}{subsection.3.1.1}
 \contentsline {subsection}{\numberline {3.1.2}Estructura de hebras, bloques y mallas.}{20}{subsection.3.1.2}
@@ -27,31 +26,33 @@
 \contentsline {subsection}{\numberline {3.1.5}Generaci\IeC {\'o}n de n\IeC {\'u}meros pseudoaleatorios en la GPU.}{25}{subsection.3.1.5}
 \contentsline {subsection}{\numberline {3.1.6}Streams.}{26}{subsection.3.1.6}
 \contentsline {section}{\numberline {3.2}Spark.}{27}{section.3.2}
-\contentsline {section}{\numberline {3.3}Proceso de implementaci\IeC {\'o}n.}{29}{section.3.3}
-\contentsline {section}{\numberline {3.4}Desarrollo del mapa auto-organizado de Kohonen.}{29}{section.3.4}
-\contentsline {subsection}{\numberline {3.4.1}Limitaciones del mapa auto-organizado online.}{29}{subsection.3.4.1}
-\contentsline {subsection}{\numberline {3.4.2}Uso de Spark.}{30}{subsection.3.4.2}
-\contentsline {subsection}{\numberline {3.4.3}Representaci\IeC {\'o}n de la estructura de pesos de las neuronas.}{33}{subsection.3.4.3}
-\contentsline {subsection}{\numberline {3.4.4}Kernels implementados.}{34}{subsection.3.4.4}
-\contentsline {subsubsection}{\numberline {3.4.4.1}Generaci\IeC {\'o}n pseudoaleatoria de pesos de neuronas.}{34}{subsubsection.3.4.4.1}
-\contentsline {subsubsection}{\numberline {3.4.4.2}C\IeC {\'a}lculo de los numeradores y denominadores parciales.}{35}{subsubsection.3.4.4.2}
-\contentsline {subsubsection}{\numberline {3.4.4.3}C\IeC {\'a}lculo de los pesos finales de la iteraci\IeC {\'o}n.}{40}{subsubsection.3.4.4.3}
-\contentsline {section}{\numberline {3.5}Desarrollo de un modelo de \IeC {\'a}rbol de decisi\IeC {\'o}n.}{41}{section.3.5}
-\contentsline {subsection}{\numberline {3.5.1}Lista de atributos.}{41}{subsection.3.5.1}
-\contentsline {subsection}{\numberline {3.5.2}Esquema general del algoritmo implementado.}{42}{subsection.3.5.2}
-\contentsline {subsection}{\numberline {3.5.3}La operaci\IeC {\'o}n de scan.}{43}{subsection.3.5.3}
-\contentsline {subsection}{\numberline {3.5.4}C\IeC {\'a}lculo del criterio de Gini.}{45}{subsection.3.5.4}
-\contentsline {subsection}{\numberline {3.5.5}Reorganizaci\IeC {\'o}n de la listas de atributos.}{46}{subsection.3.5.5}
-\contentsline {subsection}{\numberline {3.5.6}Representaci\IeC {\'o}n del \IeC {\'a}rbol.}{46}{subsection.3.5.6}
-\contentsline {subsection}{\numberline {3.5.7}Uso de Spark.}{47}{subsection.3.5.7}
-\contentsline {chapter}{\numberline {4}Desarrollo de pruebas y an\IeC {\'a}lisis de resultados.}{48}{chapter.4}
-\contentsline {section}{\numberline {4.1}Entorno de pruebas.}{48}{section.4.1}
-\contentsline {section}{\numberline {4.2}Conjuntos de datos utilizados.}{49}{section.4.2}
-\contentsline {section}{\numberline {4.3}Experimentos para evaluar el mapa auto-organizado.}{49}{section.4.3}
-\contentsline {subsection}{\numberline {4.3.1}Verificaci\IeC {\'o}n de la implementaci\IeC {\'o}n del modelo.}{49}{subsection.4.3.1}
-\contentsline {subsection}{\numberline {4.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{51}{subsection.4.3.2}
-\contentsline {subsection}{\numberline {4.3.3}Resultados de Nsight sobre la versi\IeC {\'o}n final del algoritmo.}{53}{subsection.4.3.3}
-\contentsline {section}{\numberline {4.4}Experimentos para evaluar el random forest.}{55}{section.4.4}
-\contentsline {subsection}{\numberline {4.4.1}Resultados del uso del profiler sobre la versi\IeC {\'o}n final del algoritmo.}{58}{subsection.4.4.1}
-\contentsline {chapter}{\numberline {5}Conclusiones y trabajos futuros.}{61}{chapter.5}
-\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{64}{chapter*.43}
+\contentsline {chapter}{\numberline {4}Estado del arte: trabajos relacionados.}{29}{chapter.4}
+\contentsline {chapter}{\numberline {5}Implementaci\IeC {\'o}n.}{31}{chapter.5}
+\contentsline {section}{\numberline {5.1}Proceso de implementaci\IeC {\'o}n.}{31}{section.5.1}
+\contentsline {section}{\numberline {5.2}Desarrollo del mapa auto-organizado de Kohonen.}{31}{section.5.2}
+\contentsline {subsection}{\numberline {5.2.1}Limitaciones del mapa auto-organizado online.}{31}{subsection.5.2.1}
+\contentsline {subsection}{\numberline {5.2.2}Uso de Spark.}{32}{subsection.5.2.2}
+\contentsline {subsection}{\numberline {5.2.3}Representaci\IeC {\'o}n de la estructura de pesos de las neuronas.}{35}{subsection.5.2.3}
+\contentsline {subsection}{\numberline {5.2.4}Kernels implementados.}{35}{subsection.5.2.4}
+\contentsline {subsubsection}{\numberline {5.2.4.1}Generaci\IeC {\'o}n pseudoaleatoria de pesos de neuronas.}{35}{subsubsection.5.2.4.1}
+\contentsline {subsubsection}{\numberline {5.2.4.2}C\IeC {\'a}lculo de los numeradores y denominadores parciales.}{38}{subsubsection.5.2.4.2}
+\contentsline {subsubsection}{\numberline {5.2.4.3}C\IeC {\'a}lculo de los pesos finales de la iteraci\IeC {\'o}n.}{43}{subsubsection.5.2.4.3}
+\contentsline {section}{\numberline {5.3}Desarrollo de un modelo de \IeC {\'a}rbol de decisi\IeC {\'o}n.}{44}{section.5.3}
+\contentsline {subsection}{\numberline {5.3.1}Lista de atributos.}{44}{subsection.5.3.1}
+\contentsline {subsection}{\numberline {5.3.2}Esquema general del algoritmo implementado.}{45}{subsection.5.3.2}
+\contentsline {subsection}{\numberline {5.3.3}La operaci\IeC {\'o}n de scan.}{46}{subsection.5.3.3}
+\contentsline {subsection}{\numberline {5.3.4}C\IeC {\'a}lculo del criterio de Gini.}{47}{subsection.5.3.4}
+\contentsline {subsection}{\numberline {5.3.5}Reorganizaci\IeC {\'o}n de la listas de atributos.}{48}{subsection.5.3.5}
+\contentsline {subsection}{\numberline {5.3.6}Representaci\IeC {\'o}n del \IeC {\'a}rbol.}{49}{subsection.5.3.6}
+\contentsline {subsection}{\numberline {5.3.7}Uso de Spark.}{50}{subsection.5.3.7}
+\contentsline {chapter}{\numberline {6}Desarrollo de pruebas y an\IeC {\'a}lisis de resultados.}{52}{chapter.6}
+\contentsline {section}{\numberline {6.1}Entorno de pruebas.}{52}{section.6.1}
+\contentsline {section}{\numberline {6.2}Conjuntos de datos utilizados.}{53}{section.6.2}
+\contentsline {section}{\numberline {6.3}Experimentos para evaluar el mapa auto-organizado.}{53}{section.6.3}
+\contentsline {subsection}{\numberline {6.3.1}Verificaci\IeC {\'o}n de la implementaci\IeC {\'o}n del modelo.}{53}{subsection.6.3.1}
+\contentsline {subsection}{\numberline {6.3.2}Uso del modelo sobre un conjunto de datos grandes dimensiones.}{55}{subsection.6.3.2}
+\contentsline {subsection}{\numberline {6.3.3}Resultados de Nsight sobre la versi\IeC {\'o}n final del algoritmo.}{57}{subsection.6.3.3}
+\contentsline {section}{\numberline {6.4}Experimentos para evaluar el random forest.}{59}{section.6.4}
+\contentsline {subsection}{\numberline {6.4.1}Resultados del uso del profiler sobre la versi\IeC {\'o}n final del algoritmo.}{63}{subsection.6.4.1}
+\contentsline {chapter}{\numberline {7}Conclusiones y trabajos futuros.}{66}{chapter.7}
+\contentsline {chapter}{Bibliograf\IeC {\'\i }a}{69}{chapter*.45}

@@ -1,19 +1,22 @@
 \babel@toc {spanish}{}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Esquema de una red neuronal de Kohonen.\relax }}{7}{figure.caption.7}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Proceso de entrenamiento de una red neuronal de Kohonen.\relax }}{10}{figure.caption.8}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Esquema de una red neuronal de Kohonen.\relax }}{6}{figure.caption.7}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Representaci\IeC {\'o}n gr\IeC {\'a}fica del vecindario para un codebook bidimensional.\relax }}{9}{figure.caption.8}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Proceso de entrenamiento de una red neuronal de Kohonen.\relax }}{10}{figure.caption.9}
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {3.1}{\ignorespaces Distribuci\IeC {\'o}n de bloques de un kernel en SMs.\relax }}{22}{figure.caption.13}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Diagrama de flujo del mapa auto-organizado desarrollado.\relax }}{30}{figure.caption.19}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Representaci\IeC {\'o}n de un array 3D como un array 1D row-major.\relax }}{33}{figure.caption.21}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Una reducci\IeC {\'o}n paralela de una sumatoria.\relax }}{38}{figure.caption.27}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Diagrama de flujo de la implementaci\IeC {\'o}n del \IeC {\'a}rbol de decisi\IeC {\'o}n.\relax }}{42}{figure.caption.33}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Imagen obtenida en el experimento para CPU del mapa auto-organizado.\relax }}{50}{figure.caption.34}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Imagen obtenida en el experimento para GPU del mapa auto-organizado.\relax }}{51}{figure.caption.35}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Gr\IeC {\'a}fica con tiempos promedios y ganancias para SUSY.\relax }}{53}{figure.caption.37}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Speed of Light del kernel evaluado.\relax }}{54}{figure.caption.39}
-\contentsline {figure}{\numberline {4.5}{\ignorespaces An\IeC {\'a}lisis de los warps del kernel.\relax }}{54}{figure.caption.40}
-\contentsline {figure}{\numberline {4.6}{\ignorespaces An\IeC {\'a}lisis de los kernels ejecutados.\relax }}{58}{figure.caption.42}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Diagrama de flujo del mapa auto-organizado desarrollado.\relax }}{33}{figure.caption.19}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Representaci\IeC {\'o}n de un array 3D como un array 1D row-major.\relax }}{36}{figure.caption.21}
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Una reducci\IeC {\'o}n paralela de una sumatoria.\relax }}{40}{figure.caption.27}
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Diagrama de flujo de la implementaci\IeC {\'o}n del \IeC {\'a}rbol de decisi\IeC {\'o}n.\relax }}{45}{figure.caption.33}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Imagen obtenida en el experimento para CPU del mapa auto-organizado.\relax }}{54}{figure.caption.34}
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Imagen obtenida en el experimento para GPU del mapa auto-organizado.\relax }}{55}{figure.caption.35}
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Gr\IeC {\'a}fica con tiempos promedios y ganancias para SUSY.\relax }}{57}{figure.caption.37}
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Speed of Light del kernel evaluado.\relax }}{58}{figure.caption.39}
+\contentsline {figure}{\numberline {6.5}{\ignorespaces An\IeC {\'a}lisis de los warps del kernel.\relax }}{58}{figure.caption.40}
+\contentsline {figure}{\numberline {6.6}{\ignorespaces An\IeC {\'a}lisis de los kernels ejecutados.\relax }}{63}{figure.caption.44}
 \addvspace {10\p@ }

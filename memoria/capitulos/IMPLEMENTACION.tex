@@ -1,6 +1,6 @@
 %!TEX root = ../proyecto.tex
 \chapter{Implementación.}
-\input{capitulos/CUDA}
+%\input{capitulos/CUDA}
 \section{Proceso de implementación.}
 Para realizar la implementación de cada algoritmo hemos realizado un proceso cíclico divido en 3 fases:
 
@@ -37,8 +37,8 @@ Utilizar \textit{Spark} para implementar este algoritmo nos permite afrontar pro
 
 
 El algoritmo empieza en un único nodo de \textit{Spark} utilizando el primer kernel desarrollado, \textit{rand\_weights}, para inicializar de manera pseudoaleatoria los valores de la estructura de pesos, en función de una semilla proporcionada por el usuario. Con esta estructura ya generada, empieza el proceso iterativo en el que:
-\begin{itemize}
-    \item 1) Calculamos el parámetro de control $\sigma$ para la iteración en función de las ecuación correspondiente.
+\begin{enumerate}
+    \item Calculamos el parámetro de control $\sigma$ para la iteración en función de las ecuación correspondiente.
 
 $$\sigma(t) = \left\{
 \begin{array}{ll}
@@ -47,12 +47,12 @@ $$\sigma(t) = \left\{
 \end{array}
 \right.
 $$\\
-    \item 2) Utilizando la transformación \textit{mapPartitions}, en cada partición del \textit{RDD} se aplica la función \textit{gpu\_work\_iter}, que encapsula el segundo  \textit{kernel} desarrollado, \textit{som\_iter}. Este \textit{kernel} se encarga de evaluar los pesos parciales para cada neurona en función de las muestras asociadas a la partición del \textit{RDD}. Puesto que la actualización de pesos es una división entre una sumatoria de vectores, con cada vector del tamaño de una muestra, y una sumatoria de números reales, el objetivo de cada partición será calcular esos numeradores y denominadores, a los que nos referiremos de ahora en adelante como numeradores y denominadores parciales.
+    \item Utilizando la transformación \textit{mapPartitions}, en cada partición del \textit{RDD} se aplica la función \textit{gpu\_work\_iter}, que encapsula el segundo  \textit{kernel} desarrollado, \textit{som\_iter}. Este \textit{kernel} se encarga de evaluar los pesos parciales para cada neurona en función de las muestras asociadas a la partición del \textit{RDD}. Puesto que la actualización de pesos es una división entre una sumatoria de vectores, con cada vector del tamaño de una muestra, y una sumatoria de números reales, el objetivo de cada partición será calcular esos numeradores y denominadores, a los que nos referiremos de ahora en adelante como numeradores y denominadores parciales.
     $$
  W_{i, j} = \frac{\sum_{k=0}^{f} \delta_f(c, [i,j]) \cdot  X(T_k) }{\sum_{k=0}^{f} \delta_f(c, [i,j])}
 $$
-    \item 3) Para finalizar la iteración, \textit{Spark} reúne mediante \textit{collect} las numeradores y denominadores parciales obtenidos y, usando el último \textit{kernel} implementado, \textit{finish\_update} obtiene los pesos finales de la iteración.\\
-\end{itemize}
+    \item Para finalizar la iteración, \textit{Spark} reúne mediante \textit{collect} las numeradores y denominadores parciales obtenidos y, usando el último \textit{kernel} implementado, \textit{finish\_update} obtiene los pesos finales de la iteración.\\
+\end{enumerate}
 
 Este proceso, que consta de 3 fases, es realizado hasta alcanzar el número máximo de iteraciones. Hemos de destacar que todas las particiones han de partir de la mismos pesos en cada iteración para realizar los cálculos. Por ello, al inicio de la iteración, es necesario distribuir la matriz de pesos a cada nodo de \textit{Spark} que realiza esos cálculos y, al final de la iteración, reunir todos los numeradores y denominadores parciales en un único nodo, permitiéndonos obtener los pesos finales de la iteración. \\
 
@@ -473,11 +473,11 @@ Una vez esta estructura es generada para cada atributo del problema en cuestión
 \end{figure}
 Al inicio del algoritmo, tras generar las listas de atributos, se genera un nodo raíz que comprende todas las muestras del conjunto. En ese nodo, hemos de encontrar para qué atributo y qué valor realizamos la partición óptima de los datos. Para ello, se consideran todas las listas de atributos y se toma como posible punto de corte el punto medio entre un valor y el siguiente si no se trata del mismo valor. Asociada a cada una de las particiones, se calcula el criterio de Gini. Una vez realizados todos los cálculos, tomamos como punto de corte aquella que menor criterio de Gini nos de. Utilizando ese punto de corte, generamos dos nuevos nodos para la siguiente iteración, uno que contiene todos los puntos menores o iguales que dicho punto de corte y otro con los mayores. Además, dicho punto es el que utilizamos para generar nuestro nodo de decisión en el árbol entrenado.  Este proceso se repite hasta que no quedan nodos por evaluar. Un nodo no ha de ser evaluado si:\\
 
-\begin{itemize}
-    \item a) Todos los elementos del nodo pertenecen a la misma clase. En ese caso, en vez de un nodo de decisión, generamos un nodo terminal con la clase correspondiente.
-    \item b) Se ha especificado un criterio de profundidad máxima y dicha profundidad ha sido alcanzada. En ese caso, generamos un nodo terminal con la clase más representativa del nodo.
-    \item c) Se ha especificado un límite para el número de elementos mínimo que puede contener y ha sido alcanzado. En ese caso, generamos un nodo terminal de manera similar al caso anterior.
-\end{itemize}
+\begin{enumerate}[a.]
+    \item Todos los elementos del nodo pertenecen a la misma clase. En ese caso, en vez de un nodo de decisión, generamos un nodo terminal con la clase correspondiente.
+    \item Se ha especificado un criterio de profundidad máxima y dicha profundidad ha sido alcanzada. En ese caso, generamos un nodo terminal con la clase más representativa del nodo.
+    \item Se ha especificado un límite para el número de elementos mínimo que puede contener y ha sido alcanzado. En ese caso, generamos un nodo terminal de manera similar al caso anterior.
+\end{enumerate}
 
 
 
@@ -489,16 +489,18 @@ $$scan([a_0, a_1, a_2, ..., a_{n-1}]) = [ a_0, (a_0 \oplus a_1), (a_0 \oplus a_1
 
 La implementación realizada utilizada operaciones directas sobre \textit{warps}, permitiendo que una ejecución más rápida al realizar todas las operaciones directamente sobre los registros del multiprocesador. De manera más específica el procedimiento realizado es el siguiente.\\
 
-\begin{itemize}
-    \item \textbf{1.} Se lanza un kernel con una estructura con un número de hebras por bloque predeterminado por el usuario y el mínimo número de bloques para procesar todo el array.\\
-    \item \textbf{2.} El objetivo de cada bloque es calcular su \textit{scan} local.
-    \item \textbf{2.1} En primer lugar, cada uno de los \textit{warps} del bloque calcula su \textit{scan} local y lo almacena en un array. La operación utilizada para manejar los \textit{warps} es \textbf{shfl\_up\_sync}. Esta operación nos permite realizar una copia y desplazamiento hacia la derecha en el warp en función de una máscara, un valor y un desplazamiento. La máscara nos permite es un conjunto de 32 bits que nos permite indicar cuáles de las 32 hebras han de ser usadas. Para nuestra operación, la máscara está activa para todos las hebras. El valor indica qué valores vamos a utilizar para realizar la operación y ese valor será devuelto en caso de salirnos del rango del warp. Por último, el desplazamiento nos sirve para calcular cuántas posiciones nos hemos de desplazar hacia la derecha. Por ello, empezamos con un desplazamiento de 1 y vamos ampliando siguiendo las potencias binarias inferiores a 32. Para que los resultados ya calculados no sean modificados, nos aseguramos de trabajar sólo con las hebras dentro del warp con índice superior o igual al desplazamiento. Así, al tomar el desplazamiento 1, todos los elementos se suman a su anterior y el primero se mantiene constante. Al tomar el desplazamiento 2, sólo tenemos qué realizar la suma del que había dos posiciones antes, y así, sucesivamente, hasta llegar al último valor. Los últimos valores de cada \textit{scan} local serán guardados en un array en memoria compartida.
+\begin{enumerate}
+    \item Se lanza un kernel con una estructura con un número de hebras por bloque predeterminado por el usuario y el mínimo número de bloques para procesar todo el array.\\
+    \item El objetivo de cada bloque es calcular su \textit{scan} local.
+\end{enumerate}
+\begin{enumerate}[{2.}1]
+    \item En primer lugar, cada uno de los \textit{warps} del bloque calcula su \textit{scan} local y lo almacena en un array. La operación utilizada para manejar los \textit{warps} es \textbf{shfl\_up\_sync}. Esta operación nos permite realizar una copia y desplazamiento hacia la derecha en el warp en función de una máscara, un valor y un desplazamiento. La máscara nos permite es un conjunto de 32 bits que nos permite indicar cuáles de las 32 hebras han de ser usadas. Para nuestra operación, la máscara está activa para todos las hebras. El valor indica qué valores vamos a utilizar para realizar la operación y ese valor será devuelto en caso de salirnos del rango del warp. Por último, el desplazamiento nos sirve para calcular cuántas posiciones nos hemos de desplazar hacia la derecha. Por ello, empezamos con un desplazamiento de 1 y vamos ampliando siguiendo las potencias binarias inferiores a 32. Para que los resultados ya calculados no sean modificados, nos aseguramos de trabajar sólo con las hebras dentro del warp con índice superior o igual al desplazamiento. Así, al tomar el desplazamiento 1, todos los elementos se suman a su anterior y el primero se mantiene constante. Al tomar el desplazamiento 2, sólo tenemos qué realizar la suma del que había dos posiciones antes, y así, sucesivamente, hasta llegar al último valor. Los últimos valores de cada \textit{scan} local serán guardados en un array en memoria compartida.
+    \item Una vez las sumas locales de los warps han sido realizadas, hemos de añadir la suma acumulada obtenida en los \textit{warps} previos para obtener el resultado final del bloque. Para ello, se realiza un \textit{scan} de los \textit{warps} previos, obteniendo el array con las sumas acumuladas previas y estas son aplicadas a los elementos del array correspondientes.\\
+\end{enumerate}
+\begin{enumerate}[3]
+    \item Una vez tenemos el \textit{scan} de cada bloque, hemos de realizar un procedimiento similar para llevar el \textit{scan} local del bloque a todo el array. Esto ha sido realizado, o bien mediante sumas atómicas en el mismo \textit{kernel}, que son más lentas que las operaciones normales, o bien combinando el trabajo con otros \textit{kernels} que tenían que ser lanzados de forma independiente.
 
-    \item \textbf{2.2} Una vez las sumas locales de los warps han sido realizadas, hemos de añadir la suma acumulada obtenida en los \textit{warps} previos para obtener el resultado final del bloque. Para ello, se realiza un \textit{scan} de los \textit{warps} previos, obteniendo el array con las sumas acumuladas previas y estas son aplicadas a los elementos del array correspondientes.\\
-
-    \item \textbf{3} Una vez tenemos el \textit{scan} de cada bloque, hemos de realizar un procedimiento similar para llevar el \textit{scan} local del bloque a todo el array. Esto ha sido realizado, o bien mediante sumas atómicas en el mismo \textit{kernel}, que son más lentas que las operaciones normales, o bien combinando el trabajo con otros \textit{kernels} que tenían que ser lanzados de forma independiente.
-
-\end{itemize}
+\end{enumerate}
 
 
 
@@ -533,13 +535,19 @@ Para finalizar la evaluación de los nodos de un nivel podemos volver a aprovech
 
  Si aplicamos la operación de \textit{scan} sobre este array auxiliar, la suma acumulada en cada posición nos indica el número de elementos que pertenecen al nodo hijo codificado con la etiqueta positiva. Por lo que, partiendo de que previamente estaban ordenados podemos hacer la subdivisión y mantener el orden teniendo en cuenta que:\\
 
- \begin{itemize}
-    \item 1. Si el elemento en cuestión pertenece al nodo hijo izquierda (codificado como positivo en el array auxiliar), su nueva posición en la lista de atributos sería la suma acumulada obtenida en el array auxiliar menos uno (para que el primer índice sea el 0).
-    \item 2. En caso contrario, la nueva posición es el número total de elementos en el nodo hijo izquierda (para que ambos queden separados) más la diferencia de ese total de elementos del nodo hijo izquierda con la suma acumulada del array auxiliar (que nos indicaría cuántos elementos de la clase negativa llevamos hasta el momento) menos uno (porque la indexación empieza en 0).
- \end{itemize}
+ \begin{enumerate}
+    \item Si el elemento en cuestión pertenece al nodo hijo izquierda (codificado como positivo en el array auxiliar), su nueva posición en la lista de atributos sería la suma acumulada obtenida en el array auxiliar menos uno (para que el primer índice sea el 0).
+    \item En caso contrario, la nueva posición es el número total de elementos en el nodo hijo izquierda (para que ambos queden separados) más la diferencia de ese total de elementos del nodo hijo izquierda con la suma acumulada del array auxiliar (que nos indicaría cuántos elementos de la clase negativa llevamos hasta el momento) menos uno (porque la indexación empieza en 0).
+ \end{enumerate}
 
 \subsection{Representación del árbol.}
-Debido a la necesidad de intercomunicación constante entre GPU y CPU el árbol ha sido directamente almacenado en la memoria de la segunda. La representación utilizada para el árbol es una lista de diccionarios de tuplas. En primer lugar, la lista tendrá tantos diccionarios como niveles de profundidad tenga el árbol, siendo el nivel 0 la raíz. El diccionario tendrá como clave de entrada un valor numérico, que se corresponderá a la posición que ocuparía el nodo si recorremos el nivel de izquierda a derecha y no se hubiese podado ningún elemento. De esta manera, si nos encontramos ante un nodo de decisión, sus hijos se encontrarían en el diccionario de la siguiente posición de la lista y sus índices de acceso serían el doble del índice de acceso de su padre o el doble del índice de acceso de su padre más 1, dependiendo de a cuál de los dos hijos queramos acceder. Por último, la descripción que se encuentra en en el diccionario para una clave de acceso es una tupla. Dicha tupla indica si el nodo es decisión o terminal. En el caso de ser un nodo de decisión, dispone de campos para el atributo y su valor de corte. En el caso de ser un nodo terminal, dispone de un campo que indica la clase con la que etiquetar la muestra.\\
+Durante el proceso de entrenamiento, la necesidad de lanzar múltiples \textit{kernels} al no disponer desde Python de paralelismo dinámico ha hecho que hayamos optado por almacenar tanto la estructura del árbol de salida como la que controla los nodos a evaluar en la CPU.\\
+
+La estructura que controla los nodos a evaluar es una lista que contiene todos los nodos activos del nivel y, cada elemento de la lista, es una tupla que contiene el inicio, el fin del nodo y el índice correspondiente a ese nodo si recorremos el nivel de izquierda a derecha y no se hubiese podado ningún elemento. Puesto que es necesario que la CPU acceda a estos datos para controlar el flujo de ejecución de los \textit{kernels} no tiene sentido almacenar la misma en la GPU. \\
+
+En el caso del árbol de salida, deberíamos de almacenar una estructura que nos permita almacenar los valores y atributos de un punto de corte y la clase de salida, si fuese un nodo terminal. Esta estructura podría ser almacenada por la GPU y podría ayudar a obtener mejores resultados, especialmente si disponemos de paralelismo dinámico. Sin embargo, tanto el momento en el que se poda un nodo como en el que se calcula el mejor punto de corte suponen la finalización de un \textit{kernel} y la devolución de datos a la CPU, por lo que añadir un dato más no supondría el cuello de botella si no la mera parada para realizar la transferencia. Además, en temas de escalabilidad, no almacenar la estructura del árbol en la GPU evita un gasto considerable de memoria RAM del dispositivo en un algoritmo con una gran complejidad espacial debido al uso de las listas de atributos en la GPU, que añaden dos campos extras para cada combinación de muestra y atributo que no sea la etiqueta de salida.\\
+
+La representación utilizada para el árbol de salida es una lista de diccionarios de tuplas. En primer lugar, la lista tendrá tantos diccionarios como niveles de profundidad tenga el árbol, siendo el nivel 0 la raíz. El diccionario tendrá como clave de entrada un valor numérico, que se corresponderá a la posición que ocuparía el nodo si recorremos el nivel de izquierda a derecha y no se hubiese podado ningún elemento. De esta manera, si nos encontramos ante un nodo de decisión, sus hijos se encontrarían en el diccionario de la siguiente posición de la lista y sus índices de acceso serían el doble del índice de acceso de su padre o el doble del índice de acceso de su padre más 1, dependiendo de a cuál de los dos hijos queramos acceder. Por último, la descripción que se encuentra en en el diccionario para una clave de acceso es una tupla. Dicha tupla indica si el nodo es decisión o terminal. En el caso de ser un nodo de decisión, dispone de campos para el atributo y su valor de corte. En el caso de ser un nodo terminal, dispone de un campo que indica la clase con la que etiquetar la muestra. 
 
 \subsection{Uso de Spark.}
 Este modelo, al requerir la evaluación independiente de múltiples nodos, como podremos comprobar posteriormente, no escala bien con la generación de árboles profundos o completos. Es por eso que, a la hora de integrar \textit{Spark} en la solución, en vez de generar un único árbol, vamos a generar un \textit{random forest}, es decir, vamos a subdividir la muestras de entrenamiento aleatoriamente de tal manera que cada partición de \textit{Spark} entrenará un árbol y, una vez los árboles han sido entrenados, una muestra a clasificar será evaluada por todos los árboles. La clase de la muestra se corresponderá a la clase que ha sido seleccionada en el mayor número de árboles. \\

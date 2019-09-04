@@ -160,7 +160,41 @@ Para la evaluación de los resultados del \textit{random forest}, hemos utilizad
 
 Puesto que, tanto la versión para GPU como para CPU utilizan el mismo algoritmo pero, adaptado para las correspondientes arquitecturas, la precisión es un factor relevante a la hora de comprobar si la implementación de los algoritmos es correcta, ya que, en caso de una buena implementación, independientemente de haber usado GPU o CPU, obtendríamos precisiones idénticas, y estos resultados podemos compararlos con los obtenidos en aproximaciones similares en la literatura. \\
 
-Además, durante el proceso de implementación, hemos utilizado otros conjuntos de datos, como Spambase \cite{spambase} o \textit{MAGIC} \cite{magic04}, para comprobar los resultados mientras utilizábamos un único árbol.
+Además, durante el proceso de implementación, hemos utilizado otros conjuntos de datos, como Spambase \cite{spambase} o \textit{MAGIC} \cite{magic04}, para comprobar los resultados mientras utilizábamos un único árbol, cuyos resultados podemos ver en la siguiente tablas:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}|c|cc|cc|@{}}
+\toprule
+\textbf{\begin{tabular}[c]{@{}c@{}}SPAMBASE\\ 4601 muestras\\ 57 atributos\end{tabular}} & \multicolumn{1}{c|}{\textit{\textbf{GPU}}} & \textit{\textbf{\begin{tabular}[c]{@{}c@{}}CPU \\ (1 core)\end{tabular}}} & \multicolumn{1}{c|}{\textit{\textbf{GPU}}} & \textit{\textbf{\begin{tabular}[c]{@{}c@{}}CPU\\ (1 core)\end{tabular}}} \\ \midrule
+\textit{\textbf{Profundidad}}                                                            & \multicolumn{2}{c|}{\textit{\textbf{Tiempo (s)}}}                                                                      & \multicolumn{2}{c|}{\textit{\textbf{Precisión (\%)}}}                                                                 \\ \midrule
+\textbf{4}                                                                               & 0,06                                       & 0,19                                                                      & 87,77                                      & 87,77                                                                    \\
+\textbf{5}                                                                               & 0,1                                        & 0,24                                                                      & 89,65                                      & 89,65                                                                    \\
+\textbf{6}                                                                               & 0,14                                       & 0,32                                                                      & 91,04                                      & 91,04                                                                    \\
+\textbf{7}                                                                               & 0,21                                       & 0,42                                                                      & 91,82                                      & 91,82                                                                    \\
+\textbf{8}                                                                               & 0,3                                        & 0,55                                                                      & 92,11                                      & 92,11                                                                    \\ \bottomrule
+\end{tabular}
+\caption{Resultados de evaluar un árbol de decisión con validación cruzada con 10 iteraciones en SPAMBASE}
+\label{tab:spambase}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}|c|cc|cc|@{}}
+\toprule
+\textbf{\begin{tabular}[c]{@{}c@{}}MAGIC04\\ 19020 muestras\\ 10 atributos)\end{tabular}} & \multicolumn{1}{c|}{\textit{\textbf{GPU}}} & \textit{\textbf{\begin{tabular}[c]{@{}c@{}}CPU\\ (1 core)\end{tabular}}} & \multicolumn{1}{c|}{\textit{\textbf{GPU}}} & \textit{\textbf{\begin{tabular}[c]{@{}c@{}}CPU\\ (1 core)\end{tabular}}} \\ \midrule
+\textit{\textbf{Profundidad}}                                                             & \multicolumn{2}{c|}{\textit{\textbf{Tiempo (s)}}}                                                                     & \multicolumn{2}{c|}{\textit{\textbf{Precisión (\%)}}}                                                                 \\ \midrule
+\textbf{4}                                                                                & 0,05                                       & 0,25                                                                     & 79,1                                    & 79,1                                                               \\
+\textbf{5}                                                                                & 0,1                                        & 0,35                                                                     & 81,99                                   & 81,99                                                               \\
+\textbf{6}                                                                                & 0,17                                       & 0,48                                                                     & 82,94                                   & 82,94                                                              \\
+\textbf{7}                                                                                & 0,31                                       & 0,68                                                                     & 84,07                                   & 84,07                                                                 \\
+\textbf{8}                                                                                & 0,55                                       & 0,98                                                                     & 84,42                                   & 84,42                                                                  \\ \bottomrule
+\end{tabular}
+\caption{Resultados de evaluar un árbol de decisión con validación cruzada con 10 iteraciones en MAGIC04.}
+\label{tab:magic04}
+\end{table}
+
+En ambas tablas podemos observar cómo la precisión obtenida en la versión para CPU como la versión para GPU es idéntica, garantizándonos que al menos ambas implementaciones, aunque hayan sido adaptadas para sus arquitecturas correspondientes, proporcionan los mismos resultados. Su elevado porcentaje de precisión, que se parecen a los obtenidos por aproximaciones similares presentes en la literatura llevan a pensar que la implementación es correcta. Por otro lado, aunque hayamos anotado el tiempo de ejecución en este experimento como referencia durante el proceso de desarrollo, hemos de recalcar que estamos comparando una versión del algoritmo en CUDA con una versión secuencial en la que sólo se utiliza uno de los núcleos de la CPU, por lo que es normal que los tiempos de entrenamiento requeridos en la GPU sean inferiores a los que la CPU ha necesitado.\\
 
 Para la evaluación del \textit{random forest} con \textit{SUSY} hemos generado un \textit{random forest} con 12 árboles y hemos utilizado validación cruzada con 10 iteraciones sobre el total de los 5 millones de muestras disponibles en el conjunto de datos. El experimento ha sido realizado múltiples veces, variando la profundidad de 4 a 10. Además, el experimento ha sido repetido 5 veces, anotando los resultados promedios, que podemos observar en la tabla \ref{tab:rf}.\\
 \begin{table}[ht]
@@ -197,7 +231,7 @@ Para concluir este análisis, podemos determinar que varios factores van a influ
 \begin{itemize}
 \item Para considerar utilizar este modelo hemos de estar trabajando con bases de datos de una combinación de número de muestras y número de atributos considerablemente grandes.
 \item El número de árboles utilizados va a influir tanto en la precisión como en el tiempo de ejecución. Por regla generar, un mayor número de árboles va a mejorar la precisión pero va a reducir la velocidad de entrenamiento si se va a utilizar una única GPU. En el caso de disponer de un clúster, tener un número de GPUs igual al número de árboles nos permitiría obtener los mejores resultados, siempre y cuando el tiempo de comunicación entre los nodos del clúster no sea demasiado alto.
-\item Dependiendo del problema a resolver podremos variar el número de árboles o la profundidad que queremos usar para entrenar. Además, mientras que en el ejemplo propuesto obtenemos una precisión por debajo de otras alternativas, en ejemplos más simples, como en \textit{Spambase} \cite{spambase} o \textit{MAGIC} \cite{magic04} obtenemos precisiones muy competentes con otros resultados encontrados en la literatura (un 91,9 \% y un 82,4 \%, respectivamente, para profundidad 10).
+\item Dependiendo del problema a resolver podremos variar el número de árboles o la profundidad que queremos usar para entrenar. Como veíamos antes, para casos más pequeños, como \textit{Spambase} o \textit{MAGIC04}, en los que utilizábamos un único árbol obteníamos resultandos competentes con la literatura en términos de precisión (92,11 \% para Spambase y 84,42 \% para MAGIC04, utilizando árboles de profundidad 8 en ambos casos).
 \end{itemize}
 
 \subsection{Resultados del uso del profiler sobre la versión final del algoritmo.}

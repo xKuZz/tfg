@@ -141,6 +141,7 @@ pdfproducer = {pdflatex}
 \makeatother
 
 \usepackage{pdfpages}
+\usepackage{enumerate}
 \begin{document}
 \input{portada/portada}
 \input{prefacios/prefacio}  
@@ -157,7 +158,7 @@ pdfproducer = {pdflatex}
 
 La tecnología propietaria \textit{CUDA (Computer Unified Device Architecture)} \cite{cuda} de NVIDIA, presentada en junio de 2007 y aplicable tanto a la arquitectura de las tarjetas gráficas de la misma marca como al modelo de programación genérico asociado, a lo largo de la última década, ha supuesto un gran cambio en las implementaciones paralelas de algoritmos y, además, su uso es muy popular en la comunidad científica.\\
 
-La estructura de la GPU \textit{(Graphics Processing Unit)}, utilizando un mayor número de núcleos a cambio de una velocidad de reloj más baja a la que podemos encontrar en una CPU \textit{(Central Processing Unit)}, es de especial utilidad en operaciones masivamente paralelas, pudiendo llegar a proporcionar tiempos de ejecución considerablemente superiores a los que podría llegar a proporcionar una CPU.\\
+La estructura de la GPU \textit{(Graphics Processing Unit)}, utilizando un mayor número de núcleos a cambio de una velocidad de reloj más baja a la que podemos encontrar en una CPU \textit{(Central Processing Unit)}, es de especial utilidad en operaciones masivamente paralelas, pudiendo llegar a proporcionar tiempos de ejecución considerablemente mejores a los que podríamos obtener usando una CPU.\\
 
 Por otro lado, los algoritmos y técnicas de \textit{Soft Computing} se corresponden con una rama de la Inteligencia Artificial en la que no podemos calcular soluciones exactas en tiempo polinómico y/o en los que la información es incompleta, incierta o inexacta.\\
 
@@ -165,19 +166,8 @@ El propósito de este trabajo de fin de grado es la implementación en \textit{C
 
 Tras evaluar varias opciones, se optó por desarrollar dos modelos distintos: los mapa auto-organizados de Kohonen \cite{kohonensom} y los árboles de decisión \cite{arbol}.\\
 
-\section{Estado del arte: trabajos relacionados.}
-La paralelización en \textit{CUDA} de los mapas auto-organizados de Kohonen y de los árboles de decisión son problemas que han sido previamente estudiados en la literatura.\\
-
-En \textbf{\textit{Parallel High Dimensional Self Organizing Maps Using CUDA}}, Codevilla, Bothelo, Filho y Gaya \cite{cudasomonline} proponen una implementación en \textit{CUDA} para la formulación tradicional del mapa auto-organizado de Kohonen. En ella, proponen una versión en la que cada iteración se subdivide en 3 fases. Una primera, en la que con un valor \textit{p} arbitrario, menor que el número de hebras por bloque, que indica cuantos ``pasos'' debe realizar una hebra para el cálculo de la distancia euclídea, es decir, un reparto de los cálculos necesarios para obtener la distancia euclídea que depende de un parámetro indicado por el usuario; una reducción, para encontrar la mejor distancia entre las neuronas; y un método para la adaptación de pesos de neuronas cuyo grado de paralelismo depende de dimensión del problema (tamaño de una neurona). \\
-
-En \textbf{\textit{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using CUDA}}, Daneshpajouh, Delisle, Boisson, Krajecki y Zakaria \cite{cudasombatch} plantean una adaptación en CUDA para la versión iterativa de cómputo en \textit{batchs} del mapa auto-organizado de Kohonen. En ella, aprovechan las capacidades de concurrencia disponibles en los dispositivos CUDA, paralelizando parte del algoritmo y dejando otra parte para ser realizada con la CPU.\\
-
-Con respecto a los árboles de decisión, \textbf{\textit{CUDT: a CUDA based decision tree algorithm}}, de Lo, Chang, Sheu, Chiu y Yuan \cite{cudt}, será la base de la implementación que nosotros vamos a realizar y se basa en el uso de la operación de la suma prefija, suma acumulada o \textit{scan} para resolver árboles de decisión cuyo objetivo es la clasificación de problemas con respuesta binaria.\\
-
-Aparte de la aproximación por especialización presentada en el trabajo anterior, otra alternativa, más frecuente y versátil, en la que contamos que diferentes tipos de problemas que se pueden resolver, se basa en la discretización de las variables utilizadas durante la construcción del árbol y el uso de histogramas para ello. Esto lo podemos ver en \textbf{\textit{Implementing Streaming Parallel Decision Trees on Graphic Processing Units}}, de Svantesson \cite{svatensson}, donde el objeto principal de su trabajo es paralelizar en \textit{CUDA} los cálculos asociados a los histogramas utilizados en \textbf{\textit{Streaming Parallel Decision Trees}}, de Ben-Haim y Tom-Tov \cite{spdt}, un algoritmo para la paralelización de árboles para CPU.\\
-
 \section{Descripción del proyecto.}
-En este proyecto se pretende que el alumno diseñe, desarrolle e implemente modelos en paralelo asociados a tradicionales algoritmos de \textit{Soft Somputing}. Para ello se utlizará el lenguaje \textit{CUDA}, pudiendo de esta manera aprovechar las características de los dispositivos GPUs. Para probar estos modelos se escogerán problemas relacionados con Big Data y que tengan una gran carga computacional.
+En este proyecto se pretende que el alumno diseñe, desarrolle e implemente modelos en paralelo asociados a algoritmos tradicionales de \textit{Soft Somputing}. Para ello se utilizará el lenguaje \textit{CUDA}, pudiendo de esta manera aprovechar las características de los dispositivos GPUs. Para probar estos modelos se escogerán problemas relacionados con Big Data y que tengan una gran carga computacional.
 
 \section{Requisitos de hardware y software para el proyecto.}
 \underline{Requisitos de \textit{hardware}}\\
@@ -234,13 +224,25 @@ Este proyecto fue desarrollado mayoritariamente durante el segundo cuatrimestre 
 \begin{itemize}
     \item En el primer capítulo, \textbf{Introducción y motivación}, hemos comentado los propósitos para la realización de este trabajo y el grado de consecución de los objetivos planteados.
     \item En el segundo capítulo, \textbf{Modelos de Soft Computing considerados}, explicamos los fundamentos teóricos de los algoritmos de \textit{Soft Computing} que hemos decidido paralelizar.
-    \item En el tercer capítulo, \textbf{Implementación}, comentamos el proceso de desarrollo seguido así como explicamos las soluciones finales implementadas y comentamos algunas de las alternativas y problemas que surgieron durante la realización de las implementaciones.
-    \item En el cuarto capítulo, \textbf{Desarrollo de pruebas y análisis de resultados}, indicamos qué pruebas se han realizado, mostramos los resultados obtenidos y analizamos en profundidad las implicaciones de los mismos.
+    \item En el tercer capítulo, \textbf{Estado del arte: trabajos relacionados}, realizamos un breve repaso de algunas implementaciones de los modelos propuestos que hace uso de CUDA presentes en la literatura.
+    \item En el cuarto capítulo, \textbf{Implementación}, comentamos el proceso de desarrollo seguido así como explicamos las soluciones finales implementadas y comentamos algunas de las alternativas y problemas que surgieron durante la realización de las implementaciones.
+    \item En el quinto capítulo, \textbf{Desarrollo de pruebas y análisis de resultados}, indicamos qué pruebas se han realizado, mostramos los resultados obtenidos y analizamos en profundidad las implicaciones de los mismos.
     \item En el último capítulo, \textbf{Conclusiones y trabajos futuros}, finalizamos el trabajo destacando las implicaciones más importantes de los resultados obtenidos y mostramos posibles alternativas para ampliar nuestro trabajo.
 \end{itemize}
 
 %\input{capitulos/TECNOLOGIAS}
 \input{capitulos/MODELOS}
+\input{capitulos/CUDA}
+\chapter{Estado del arte: trabajos relacionados.}
+La paralelización en \textit{CUDA} de los mapas auto-organizados de Kohonen y de los árboles de decisión son problemas que han sido previamente estudiados en la literatura.\\
+
+En \textbf{\textit{Parallel High Dimensional Self Organizing Maps Using CUDA}}, Codevilla, Bothelo, Filho y Gaya \cite{cudasomonline} proponen una implementación en \textit{CUDA} para la formulación tradicional del mapa auto-organizado de Kohonen. En ella, proponen una versión en la que cada iteración se subdivide en 3 fases. Una primera, en la que con un valor \textit{p} arbitrario, menor que el número de hebras por bloque, que indica cuantos ``pasos'' debe realizar una hebra para el cálculo de la distancia euclídea, es decir, un reparto de los cálculos necesarios para obtener la distancia euclídea que depende de un parámetro indicado por el usuario; una reducción, para encontrar la mejor distancia entre las neuronas; y un método para la adaptación de pesos de neuronas cuyo grado de paralelismo depende de dimensión del problema (tamaño de una neurona). \\
+
+En \textbf{\textit{Parallel Batch Self-Organizing Map on Graphics Processing Unit Using CUDA}}, Daneshpajouh, Delisle, Boisson, Krajecki y Zakaria \cite{cudasombatch} plantean una adaptación en CUDA para la versión iterativa de cómputo en \textit{batchs} del mapa auto-organizado de Kohonen. En ella, aprovechan las capacidades de concurrencia disponibles en los dispositivos CUDA, paralelizando parte del algoritmo y dejando otra parte para ser realizada con la CPU.\\
+
+Con respecto a los árboles de decisión, \textbf{\textit{CUDT: a CUDA based decision tree algorithm}}, de Lo, Chang, Sheu, Chiu y Yuan \cite{cudt}, será la base de la implementación que nosotros vamos a realizar y se basa en el uso de la operación de la suma prefija, suma acumulada o \textit{scan} para resolver árboles de decisión cuyo objetivo es la clasificación de problemas con respuesta binaria.\\
+
+Aparte de la aproximación por especialización presentada en el trabajo anterior, existe otra alternativa, más frecuente, versátil y aplicable a diferentes tipos de problemas a resolver, se basa en la discretización de las variables utilizadas durante la construcción del árbol y el uso de histogramas para ello. Esto lo podemos ver en \textbf{\textit{Implementing Streaming Parallel Decision Trees on Graphic Processing Units}}, de Svantesson \cite{svatensson}, donde el objeto principal de su trabajo es paralelizar en \textit{CUDA} los cálculos asociados a los histogramas utilizados en \textbf{\textit{Streaming Parallel Decision Trees}}, de Ben-Haim y Tom-Tov \cite{spdt}, un algoritmo para la paralelización de árboles para CPU.\\
 \input{capitulos/IMPLEMENTACION}
 \input{capitulos/PRUEBAS}
 \input{capitulos/CONCLUSIONES}
