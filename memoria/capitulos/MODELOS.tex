@@ -8,7 +8,7 @@ A principio de la década de los 80, el científico finlandés Teuvo Kohonen \ci
 	
 	\item La red neuronal de Kohonen tiene \textbf{dos capas}. Una capa de entrada, con tantas neuronas como características o atributos tenga el vector que representa a la muestra que vaya a ser evaluada por la red, es decir, tanto una muestra como la capa de entrada tendrán la misma dimensión y, una característica, podría ser, por ejemplo, la altura o el peso de una persona. La segunda capa es la capa competitiva o capa de Kohonen, de un tamaño a decidir por el usuario y una estructura habitualmente bidimensional, aunque podría perfectamente usarse cualquier otro número de dimensiones.
 
-	\item Asociado a cada neurona de la capa competitiva, tenemos un vector de referencia variable $w_i(t) \in {\rm I\!R}^n, i=1,2, ..., k$, es un decir un vector de ``referencia'' con respecto a la representación vectorial de las muestras estadísticas $\vec{X} = \vec{X}(t) \in {\rm I\!R}^n$ que se corresponden al conjunto de datos de entrada para el entrenamiento del modelo. Estos vectores también son denominados vectores de pesos y, al conjunto de ellos, se le denomina \textit{codebook}. En los casos en los que el algoritmo sea aplicado para realizar clustering, dicho vector representará el valor promedio de los vectores de características de las muestras asociadas al clúster de su neurona. 
+	\item Asociado a cada neurona de la capa competitiva, tenemos un vector de referencia variable $w_i(t) \in {\rm I\!R}^n, i=1,2, ..., k$, es decir, un vector de ``referencia'' con respecto a la representación vectorial de las muestras estadísticas $\vec{X} = \vec{X}(t) \in {\rm I\!R}^n$ que se corresponden al conjunto de datos de entrada para el entrenamiento del modelo. Estos vectores también son denominados vectores de pesos y, al conjunto de ellos, se le denomina \textit{codebook}. En los casos en los que el algoritmo sea aplicado para realizar clustering, dicho vector representará el valor promedio de los vectores de características de las muestras asociadas al clúster de su neurona. 
 
 	\item Asociado a cada neurona de la capa competitiva, tenemos un vector de pesos sinápticos obtenido a través de las conexiones con la capa de entrada, que es modificado durante el proceso de aprendizaje. A dicho vector de pesos se le llama vector de referencia, y representa el valor promedio de la categoría asociada a esa neurona. El conjunto de todos esos vectores de referencia es denominado \textit{codebook}.
 
@@ -30,15 +30,15 @@ A principio de la década de los 80, el científico finlandés Teuvo Kohonen \ci
 
 Sea $\vec{X}$ un vector, que representa una secuencia de muestras estadísticas de un observable $x=x(t) \in {\rm I\!R}$, donde $t$ es el instante o iteración de la extracción de la muestra y un conjunto de vectores de referencia variables (\textit{codebook}), $w_i(t)$, que representaremos de forma abreviada como el vector $\vec{W(t)}: w_i(t) \in {\rm I\!R} \; | i: 0, 1, 2, ..., n $, donde los $w_i(0)$ están inicializados a un valor aleatorio siguiendo una distribución uniforme entre 0 y 1, se realizan los siguientes pasos, de forma iterativa, hasta alcanzar el número de iteraciones máximo $\lambda$, que determina el usuario como criterio de terminación para el proceso de entrenamiento.\\
 
-En primer lugar, una muestra del vector $\vec{X}$ \textbf{será comparada simultáneamente con cada vector de referencia} $\vec{W(t)} = \{w_0(t), w_1(t), ..., w_i(t), ...,$ ${w_{n-1}}(t)\}$ en cada instante de tiempo $t$, utilizando para ello la distancia euclídea entre vectores, $||{X(t)w_i(t)}||_n$. Otras formulaciones para la distancia, como por ejemplo, la distancia de Mahalanobis, podrían haber sido usadas en su lugar. \\
+En primer lugar, una muestra del vector $\vec{X}$ \textbf{será comparada simultáneamente con cada vector de referencia} $\vec{W(t)} = \{w_0(t), w_1(t), ..., w_i(t), ...,$ ${w_{n-1}}(t)\}$ en cada instante de tiempo $t$, utilizando para ello la distancia euclídea entre vectores, $||{X(t)-w_i(t)}||_n$. Otras formulaciones para la distancia, como por ejemplo, la distancia de Mahalanobis, podrían haber sido usadas en su lugar. \\
 
 A continuación, se determina \textbf{el vector de referencia más parecido a la muestra evaluada} en el instante $t$, y, a la ubicación que ocupa dicho vector de referencia (en índices) en el $codebook$, se le denomina \textbf{BMU \textit{(Best Matching Unit)}}.
 
-$$ BMU(X(t)) = argmin_{w \in \vec{W}}{||Xw||}_n$$
+$$ BMU(X(t)) = argmin_{w \in \vec{W}}{||X-w||}_n$$
 
 La función $argmin$ devuelve la posición del vector en la que se alcanza el valor mínimo y, a la distancia entre la muestra del instante $t$ y su mejor vector de referencia la denominaremos
 
-$$ D(X(t)) = min_{w \in \vec{W}}{||Xw||}_n$$. 
+$$ D(X(t)) = min_{w \in \vec{W}}{||X-w||}_n$$
 
 Una vez se ha seleccionado la BMU, se inicia un proceso de \textbf{actualización de los vectores de referencia} presentes en el vector $\vec{W}$. La obtención de un mejor ajuste para la siguiente iteración se realiza mediante la actualización del conjunto de vectores de referencia en función de la distancia entre la muestra y la BMU y la posición de la BMU en el vector $\vec{W}$. Este ajuste lo vamos a reflejar añadiendo a cada vector de referencia el término $\Delta W(t)$.
 
@@ -61,7 +61,7 @@ $$\\
 
 El tamaño del vecindario, $\sigma$, es utilizado para el cálculo de una función de vecindario, que en función del parámetro $\sigma$ y la distancia (en índices) entre la BMU de cada vector de referencia $\vec{W(t)}$ pondera la modificación que va a ser realizada, permitiendo mantener propiedades topográficas y haciendo que, conforme nos alejamos (en índices) de la posición de la BMU en el vector $\vec{W}$ los cambios realizados sean menores. La función de vecindario, $\delta_f$, viene dada por:
 
-$$\delta_i(t) = e ^{-\frac{||BMU(X(t))-(i)||}{2\sigma(t)^2}}. $$\\	
+$$\delta_i(t) = e ^{-\frac{||BMU(X(t))-i||}{2\sigma(t)^2}}. $$\\	
 
 
 En la figura \ref{img:vecindario}, podemos observar una representación gráfica del vector $\vec{W}$ en un codebook bidimensional. Cada uno de los puntos rojos se corresponde con un vector de referencia, la BMU ha sido destacada de color amarillo y la región alrededor de la BMU que va a sufrir cambios significativos, el vecindario, queda delimitada con círculo alrededor de la BMU cuyo radio es $\sigma^2$.
@@ -122,15 +122,32 @@ El proceso de entrenamiento previamente mencionado se corresponde al del mapa au
 
 En esta versión, la regla para la actualización de los vectores de referencia se procesan múltiples muestras del conjunto de datos de entrada, ya sea el conjunto de datos entero en cada iteración, como ocurre en nuestra implementación, o tomando un subconjunto aleatorio de muestras con reemplazo. Durante cada iteración, se recorren todas las muestras a ser evaluadas y, para cada una de ellas, se determina la BMU de forma similar a la versión \textit{online}. A continuación, procedemos a actualizar el conjunto de vectores de referencia de la siguiente manera:\\
 
-1 - Para cada muestra, $X_j$ consideramos un subconjunto de los vectores de referencia del vector $\vec{W}$ alrededor de la BMU, al que denominamos $\vec{W_A} = \{w_{BMU(j)-\sigma^2}, ..., w_{BMU(j)}, ..., w_{BMU(j)+ \sigma^2} \}$\\
+1 - Para cada muestra, $X_j$ consideramos un subconjunto de los vectores de referencia del vector $\vec{W}$ alrededor de la BMU, al que denominamos $\vec{W_A(i)} = \{w_{BMU(i)-\sigma^2}, ..., w_{BMU(i)}, ..., w_{BMU(i)+ \sigma^2} \}$\\
 
-2 - Cada vector de referencia posee dos variables que nos permitirán obtener el vector de referencia para la próxima iteración mediante la realización del cociente entre ambas. Ambas serán inicializadas a 0 y cuando el vector de referencia en cuestión se encuentre dentro del rango $W_A$ para una muestra específica x, sumaremos al numerador el producto de la función de vecindario para la muestra X, su BMU y la posición que ocupa (en índices) el vector de referencia en el vector $\vec{w}$ y, en el denominaremos, sumaremos tan sólo el valor escalar de la función de vecindario. \\
+2 - Cada vector de referencia posee dos variables que nos permitirán obtener el vector de referencia para la próxima iteración mediante la realización del cociente entre ambas. Ambas serán inicializadas a 0 y cuando el vector de referencia en cuestión se encuentre dentro del rango $\vec{W_A(i)}$ para una muestra específica x, sumaremos al numerador el producto de la función de vecindario para la muestra X, su BMU y la posición que ocupa (en índices) el vector de referencia en el vector $\vec{w}$ y, en el denominador, sumaremos tan sólo el valor escalar de la función de vecindario. \\
+
+$$ \delta_{i}'(x, t) = e^{-\frac{||BMU(x) - i||}{2\sigma^2(t)}}$$
+
+$$
+W_{i}^{*}(t)= \frac{\Sigma_{x \in X, BMU(x) \in \vec{W_A(i)}}\delta_{i}'(x, t) \cdot x}{\Sigma_{x \in X, BMU(x) \in \vec{W_A(i)}}\delta'_{i}(x, t)}
+$$
+
+$$
+W_{i}(t+1) = \left\{
+\begin{array}{ll}
+W_{i}^{*}(t) \; & si  \; \; {\Sigma_{x \in X, BMU(x) \in \vec{W_A(i)}}\delta'_{i}(x, t)} > 0 \\
+W_{i}(t) & en \; caso \; contrario.
+\end{array}
+\right.
+$$
+
 
 3 - El cociente entre ambas conforma el valor del vector de referencia para la próxima iteración. Por tanto, hemos calculado nuestro nuevo vector de referencia como un promedio de las muestras de las que ha sido BMU y las muestras que han sido activadas en posiciones (en índices) del vector $\vec{W}$ cercanas ponderadas en función de esa distancia, dando más relevancia a las muestra más cercanas.\\
+	
 
 El uso del modelo \textit{batch} frente al modelo tradicional nos va a permitir paralelizar el algoritmo de forma mucho más eficiente, ya que, mientras que, en la versión \textit{online}, debíamos actualizar los vectores de referencia tras cada iteración, en la versión \textit{batch} podemos evaluar un conjunto de muestras de forma simultánea y, al estar evaluando múltiples muestras y por el nuevo método de actualización de los vectores de referencia converge en un número de iteraciones considerablemente inferior al necesario en el primero. Sin embargo, como comentan \textit{Jean-Claude Fort, Patrick Letremy y Marie Cottrell} \cite{compsom}, el método de entrenamiento utilizado en la versión \textit{batch} del algoritmo presenta una mayor dependencia de la inicialización de los vectores de pesos en el instante inicial, pudiendo proporcionar clusters muy desbalanceados o una peor representación de las características topográficas que la versión \textit{online}.
 
-En el resto del documento nos referiremos a cada vector de referencia como pesos asociados a las neuronas y con estructura o ``matriz'' de pesos haremos referencia al vector $\vec{W}$
+En el resto del documento nos referiremos a cada vector de referencia como pesos asociados a las neuronas y denominaremos estructura o ``matriz'' de pesos al vector $\vec{W}$
 
 
 \subsection{Medidas de calidad.}
@@ -144,7 +161,7 @@ $$\\
 
 El \textbf{error topográfico} mide la capacidad que ha tenido el modelo de conservar las propiedades topográficas del conjunto de muestras de entrenamiento. Podemos medir dicho error como:\\
 $$
-u(x = \left\{
+u(x) = \left\{
 \begin{array}{ll}
 1 & si \; su \; BMU \; y \; la \; segunda \; BMU \; son \; adyacentes.\\
 0 & en \; caso \; contrario.
@@ -228,13 +245,13 @@ De entre las técnicas de poda \textit{post-pruning} destacan dos:\\
 
 $error(T, S)$ es el error del árbol $T$ sobre el conjunto de datos $S$, que viene dado por el número de muestras cuya clase de salida original no se corresponde a la que el árbol que la evalúa predice.\\ $poda(T, t)$ es el árbol obtenido de podar el subárbol $t$ del árbol $T$.\\
 
-En cada iteración, se elimina el subárbol que minimiza la diferencia entre el error obtenido de la operación aplicada al subárbol $t$ y el error al aplicarlo al conjunto total de datos, normalizado respecto de la diferencia entre el número de hojas del árbol antes y después de la poda realizada, respectivamente.
+En cada iteración, se elimina el subárbol que minimiza la diferencia entre el error obtenido de la operación aplicada al subárbol $t$ y el error al aplicarlo al conjunto total de datos, normalizado respecto de la diferencia entre el número de hojas del árbol antes y después de la poda realizada, respectivamente:
 
 $$
 \frac{error(poda(T, t), S) - error(T, S)}{|hojas(T)| - |hojas(poda(T, t))|}
 $$
 
-Una vez generados todos los árboles $T_0$ a $T_r$ se selecciona aquel que proporciona una mayor precisión.\\
+Una vez generados todos los árboles $T_0$ a $T_r$ se selecciona aquél que proporciona una mayor precisión.\\
 
 \end{itemize}
 Generalmente, las técnicas de poda \textit{post-pruning} suelen dar mejores resultados pero son más costosas computacionalmente.

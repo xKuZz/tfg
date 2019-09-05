@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.3.15)  29 APR 2019 23:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2019.3.15)  5 SEP 2019 05:39
 entering extended mode
 **./SOM.tex
 (SOM.tex
 LaTeX2e <2018-04-01> patch level 5
 ! Undefined control sequence.
 l.1 \chapter
-            {Mapas autoorganizados.}
+            {Mapas auto-organizados.}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
@@ -20,7 +20,7 @@ Type  H <return>  for immediate help.
  ...                                              
                                                   
 l.1 \chapter{M
-              apas autoorganizados.}
+              apas auto-organizados.}
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
@@ -33,6 +33,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no u in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no o in font nullfont!
+Missing character: There is no - in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no g in font nullfont!
@@ -96,6 +97,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no u in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no o in font nullfont!
+Missing character: There is no - in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no g in font nullfont!
@@ -130,6 +132,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no u in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no o in font nullfont!
+Missing character: There is no - in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no g in font nullfont!
@@ -565,7 +568,7 @@ Overfull \hbox (2.77779pt too wide) in paragraph at lines 5--6
 
 ! Undefined control sequence.
 l.7 \section
-            {Arquitectura de una mapa autoorganizado.}
+            {Arquitectura de una mapa auto-organizado.}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
@@ -580,7 +583,7 @@ Type  H <return>  for immediate help.
  ...                                              
                                                   
 l.7 \section{A
-              rquitectura de una mapa autoorganizado.}
+              rquitectura de una mapa auto-organizado.}
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
@@ -609,6 +612,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no u in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no o in font nullfont!
+Missing character: There is no - in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no g in font nullfont!
@@ -1345,7 +1349,7 @@ my insertion and my current dilemma will both disappear.
 
 ! Undefined control sequence.
 l.18 \section
-             {Proceso de entrenamiento de un mapa autoorganizado.}
+             {Proceso de entrenamiento de un mapa auto-organizado.}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
@@ -1386,6 +1390,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no u in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no o in font nullfont!
+Missing character: There is no - in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no g in font nullfont!
@@ -10557,7 +10562,7 @@ Missing character: There is no . in font nullfont!
  
 Here is how much of TeX's memory you used:
  34 strings out of 492970
- 386 string characters out of 3135855
+ 404 string characters out of 3135855
  65596 words of memory out of 3000000
  4002 multiletter control sequences out of 15000+200000
  4294 words of font info for 16 fonts, out of 3000000 for 9000

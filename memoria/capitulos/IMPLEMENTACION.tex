@@ -14,13 +14,13 @@ Para realizar la implementación de cada algoritmo hemos realizado un proceso c�
 Para implementar los mapas auto-organizados de Kohonen, primero consideramos la versión tradicional \textit{online} y, posteriormente, tras ver las limitaciones de la primera, evaluamos la versión computada en \textit{batchs}, que ha sido implementada tanto para CPU, usando \textit{NumPy}, como para CUDA, usando \textit{Numba}.
 
 \subsection{Limitaciones del mapa auto-organizado online.}
-Mientras que la implementación del mapa auto-organizado \textit{online} fue el punto de partida para la realización de este trabajo tuvimos que descartar esta versión del algoritmo, ya que, el objetivo de este trabjo es resolver problemas con un gran número de muestras utilizando \textit{CUDA} y \textit{Spark}.\\
+Mientras que la implementación del mapa auto-organizado \textit{online} fue el punto de partida para la realización de este trabajo, tuvimos que descartar esta versión del algoritmo, ya que, el objetivo de este trabajo es resolver problemas con un gran número de muestras utilizando \textit{CUDA} y \textit{Spark}.\\
 
 En esta versión, en cada iteración, se selecciona una única muestra del conjunto de datos y ésta es evaluada para actualizar los pesos de las neuronas, que serán el punto de partida de la siguiente iteración, limitando a una el número de muestras que pueden procesarse a la vez y, por tanto, secuencializando el proceso.\\
 
-La opción más apropiada para paralelizar este versión del algoritmo sería procesar una única muestra usando tantas hebras como neuronas tenga el mapa de salida. En ese caso, en cada iteración, cada hebra podría calcular su distancia euclídea de la muestra con los pesos de la neurona asociada a la hebra, usaríamos el algoritmo de la reducción, que explicaremos posteriormente, para encontrar la BMU y, cada hebra, realizaría la actualización de los pesos de su neurona, si procediera. Sin embargo, este procedimiento sólo conseguiría ganancias significativas con respecto a su versión para CPU con un mapa de neuronas considerablemente grande, factor que no parece razonable en un algoritmo cuyo principal uso es el \textit{clustering}.\\
+La opción más apropiada para paralelizar esta versión del algoritmo sería procesar una única muestra usando tantas hebras como neuronas tenga el mapa de salida. En ese caso, en cada iteración, cada hebra podría calcular su distancia euclídea de la muestra con los pesos de la neurona asociada a la hebra, usaríamos el algoritmo de la reducción, que explicaremos posteriormente, para encontrar la BMU y, cada hebra, realizaría la actualización de los pesos de su neurona, si ese fuera el caso. Sin embargo, este procedimiento sólo conseguiría ganancias significativas con respecto a su versión para CPU con un mapa de neuronas considerablemente grande, factor que no parece razonable en un algoritmo cuyo principal uso es aprovechar las ventajas que proporciona el \textit{clustering} para procesar cantidades muy grandes de datos.\\
 
-Determinadas estas limitaciones y, dado que nuestro objetivo es evaluar un conjunto con un número de muestras elevado, optamos por implementar la versión del mapa auto-organizado que nos permite evaluar múltiples muestras simultáneamente, el mapa auto-organizado \textit{batch}.\\
+Determinadas estas limitaciones y, dado que nuestro objetivo es evaluar un conjunto con un número de muestras elevado, optamos por implementar la versión del mapa auto-organizado que nos permite evaluar múltiples muestras simultáneamente, conocido como el mapa auto-organizado \textit{batch}.\\
 
 
 Para el desarrollo de esta versión del algoritmo hemos combinado el uso de \textit{CUDA} mediante \textit{Numba} y \textit{Spark}. En primer lugar, vamos a ver un esquema general del uso de \textit{Spark} para afrontar nuestro algoritmo iterativo y, a continuación, explicaremos en detalle la implementación de los \textit{kernels} para \textit{CUDA}.
@@ -28,17 +28,17 @@ Para el desarrollo de esta versión del algoritmo hemos combinado el uso de \tex
 \subsection{Uso de Spark.}
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.39]{imagenes/flujosparksom.png}
+\includegraphics[scale=0.25]{imagenes/flujosparksom.png}
 \caption{Diagrama de flujo del mapa auto-organizado desarrollado.}
 \label{image:flujosparksom}
 \end{figure}
 
-Utilizar \textit{Spark} para implementar este algoritmo nos permite afrontar problemas de tamaños superiores a la capacidad de memoria de nuestro dispositivo, siempre que la memoria necesaria para evaluar una partición del \textit{RDD} quepa en la memoria del dispositivo, como llevar la implementación realizada a un clúster con múltiples nodos, si cada nodo tiene acceso a un dispositivo \textit{CUDA} con todas las dependencias de \textit{software} instaladas.\\
+Utilizar \textit{Spark} para implementar este algoritmo nos permite afrontar problemas de tamaños superiores a la capacidad de memoria de nuestro dispositivo, siempre que la memoria necesaria para evaluar una partición del \textit{RDD} quepa en la memoria del dispositivo, y llevar la implementación realizada a un clúster con múltiples nodos, si cada nodo tiene acceso a un dispositivo \textit{CUDA} con todas las dependencias de \textit{software} instaladas.\\
 
 
-El algoritmo empieza en un único nodo de \textit{Spark} utilizando el primer kernel desarrollado, \textit{rand\_weights}, para inicializar de manera pseudoaleatoria los valores de la estructura de pesos, en función de una semilla proporcionada por el usuario. Con esta estructura ya generada, empieza el proceso iterativo en el que:
+El algoritmo comienza con un  único nodo de \textit{Spark}, utilizando el primer kernel desarrollado, \textit{rand\_weights}, para de esta forma inicializar de manera pseudoaleatoria los valores de la estructura de pesos, en función de una semilla proporcionada por el usuario. Con esta estructura ya generada, empieza el proceso iterativo en el que:
 \begin{enumerate}
-    \item Calculamos el parámetro de control $\sigma$ para la iteración en función de las ecuación correspondiente.
+    \item Calculamos el parámetro de control $\sigma$ para la iteración en función de las ecuaciones correspondientes.
 
 $$\sigma(t) = \left\{
 \begin{array}{ll}
@@ -56,7 +56,7 @@ $$
 
 Este proceso, que consta de 3 fases, es realizado hasta alcanzar el número máximo de iteraciones. Hemos de destacar que todas las particiones han de partir de la mismos pesos en cada iteración para realizar los cálculos. Por ello, al inicio de la iteración, es necesario distribuir la matriz de pesos a cada nodo de \textit{Spark} que realiza esos cálculos y, al final de la iteración, reunir todos los numeradores y denominadores parciales en un único nodo, permitiéndonos obtener los pesos finales de la iteración. \\
 
-Para que \textit{Spark} pueda realizar esa distribución a lo largo de un clúster es necesario que, al final de la iteración, se haga la transferencia de memoria de dispositivo a \textit{host} de los pesos parciales y, al inicio de la iteración, se haga la transferencia de \textit{host} a dispositivo de la pesos de las neuronas correspondientes a esa iteración.\\
+Para que \textit{Spark} pueda realizar esa distribución a lo largo de un clúster es necesario que, al final de la iteración, se haga la transferencia desde la memoria de dispositivo al \textit{host} ,de los pesos parciales y, al inicio de la iteración, se haga la transferencia desde el \textit{host} al dispositivo de la pesos de las neuronas correspondientes a esa iteración.\\
 
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}

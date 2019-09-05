@@ -7,11 +7,11 @@ La intercomunicación entre \textit{host} y dispositivo sigue un modelo maestro-
 
 Es de vital importancia a la hora de trabajar con la GPU de tener en cuenta que:\\
 \begin{itemize}
-    \item La GPU tiene muchos más núcleos \textit{(cores)} que una CPU, lo que nos permite realizar mucha más operaciones en el mismo instante. Sin embargo, esto viene a expensas de un menor número de operaciones por segundo de cada núcleo, ya que para disfrutar de la cantidad masiva de núcleos que tiene una GPU es necesario que ésta opere a una frecuencia más baja.
+    \item La GPU tiene muchos más núcleos \textit{(cores)} que una CPU, lo que nos permite realizar muchas más operaciones en el mismo instante. Sin embargo, esto viene a expensas de un menor número de operaciones por segundo de cada núcleo, ya que para disfrutar de la cantidad masiva de núcleos que tiene una GPU es necesario que ésta opere a una frecuencia más baja.
 
-    \item La GPU tiene su propia estructura de memoria, que ha de usar para poder realizar operaciones. Dentro de la jerarquía de memoria encontramos memoria RAM similar a la que utiliza la CPU a través de la placa base, así como varios niveles de caché. Además, hemos de tener en cuenta que a la hora de ejecutar algo en la GPU vamos a tener un gasto extra de tiempo por el traspaso de información de CPU a GPU y viceversa. Minimizar la información que ha de traspasarse en ambos sentidos así como intentar que toda la información necesaria sea transferida a la vez para sacar máximo potencial del PCI Express y exprimir al máximo posible el uso eficiente de la memoria caché, que en \cuda es habitualmente realizado mediante el manejo de la ``memoria compartida'' es fundamental para obtener mejores resultados, especialmente, aquellos en los que el cuello de botella es la transferencia de datos.
+    \item La GPU tiene su propia estructura de memoria, que ha de usar para poder realizar operaciones. Dentro de la jerarquía de memoria encontramos memoria RAM similar a la que utiliza la CPU a través de la placa base, así como varios niveles de caché. Además, hemos de tener en cuenta que a la hora de ejecutar algo en la GPU vamos a tener un gasto extra de tiempo por el traspaso de información de CPU a GPU y viceversa. Minimizar la información que ha de traspasarse en ambos sentidos así como intentar que toda la información necesaria sea transferida a la vez para sacar máximo potencial del PCI Express y exprimir al máximo posible el uso eficiente de la memoria caché, que  es habitualmente realizado en \cuda mediante el manejo de la ``memoria compartida'', fundamental para obtener mejores resultados, especialmente, aquellos en los que el cuello de botella es la transferencia de datos.
 
-    \item Como la GPU tiene su propia memoria dedicada de un tamaño limitado hemos de hacer hincapié en no utilizar soluciones que generan demasiada complejidad espacial, ya que limitan la escalabilidad de los algoritmos.
+    \item Como la GPU tiene su propia memoria dedicada de un tamaño limitado hemos de hacer hincapié en no utilizar soluciones que generan demasiada complejidad espacial, ya que limitan la escalabilidad de los algoritmos y la denominada ``memoria compartida'' se asigna a cada bloque del grid de la GPU.
 \end{itemize}
 
 \subsection{Python, NumPy, Numba y CuPy.}
@@ -19,14 +19,14 @@ Para desarrollar el código asociado a este proyecto, hemos optado por utilizar 
 
 \textbf{NumPy} \cite{numpy} es un paquete de código abierto para Python diseñado para la computación científica. El paquete proporciona una potente estructura de datos para trabajar con arrays N-dimensionales y herramientas para realizar una gran cantidad de operaciones sobre los mismos (operaciones de cálculo matricial, algoritmos de álgebra lineal y generación de números pseudoaleatorios, entre otros).\\
 
-\textbf{Numba} \cite{numba} es un paquete para Python, cuyo objetivo es la aceleración compilando fragmentos de código con el compilador LLVM y, dando la oportunidad de paralelizar código, tanto para la CPU como para la GPU. En concreto, para las GPUs CUDA, proporciona al usuario un subconjunto de las características de CUDA con un nivel de abstracción mayor. Con eso, no sólo conseguimos poder trabajar con CUDA desde Python sino, también evitar, si lo deseamos, manejar las transferencias de memoria entre \textit{host} y dispositivo o la necesidad de indicar todos los tipos a la hora de inicializar un \textit{kernel} entre otras ventajas.\\
+\textbf{Numba} \cite{numba} es un paquete para Python, cuyo objetivo es la aceleración compilando fragmentos de código con el compilador LLVM y proporcionar la oportunidad de paralelizar código, tanto para la CPU como para la GPU. En concreto, para los dispositivos CUDA, este paquete proporciona al usuario un subconjunto de las características de CUDA con un nivel de abstracción mayor. Con eso, no sólo conseguimos poder trabajar con CUDA desde Python sino también evitar, si lo deseamos, manejar las transferencias de memoria entre \textit{host} y \textit{dispositivo} o la necesidad de indicar todos los tipos a la hora de inicializar un \textit{kernel}, entre otras ventajas.\\
 
-\textbf{CuPy} \cite{cupy} es otro paquete de Python que, por un lado y, de manera similar a Numba, nos permite generar kernels de manera similar a los de C/C++, así como facilidades para generar kernels en los que se implementa reducciones u operaciones elemento a elemento en un array. Además, CuPy está implementado de manera que permite utilizar directamente sus estructuras de datos sobre kernels de Numba, lo que nos permite combinar elementos de ambos paquetes según nos interese. \\
+\textbf{CuPy} \cite{cupy} es otro paquete de Python que, por un lado y, de manera similar a Numba, nos permite generar kernels de manera similar a los de C/C++, así como facilidades para generar kernels en los que se implementa reducciones u operaciones elemento a elemento en un array. Además, CuPy está implementado de manera que permite utilizar directamente sus estructuras de datos sobre kernels de Numba, lo que nos permite combinar elementos de ambos paquetes (CuPy y Numba) según nos interese. \\
 
-Por otro lado, proporciona una API similar a la de NumPy, pero las operaciones están implementadas utilizando CUDA y, tienen algunas diferencias notables entre sí, como que: el generador de pseudoaleatorios de CuPy sólo puede usar un valor escalar y, el de NumPy, puede usar también un array con múltiples valores para generar más entropía; utilizar índices por encima del tamaño de un array genera un error en NumPy pero, en CuPy, vuelve a recorrer el array desde el principio; o que, mientras que en NumPy puedes utilizar objetos de Python, en CuPy sólo puedes usar tipos de datos numéricos y booleanos.\\
+Por otro lado, CuPy proporciona un API similar a la de NumPy, pero las operaciones están implementadas utilizando CUDA y, tienen algunas diferencias notables entre sí, como que: el generador de pseudoaleatorios de CuPy sólo puede usar un valor escalar y, el de NumPy, puede usar también un array con múltiples valores para generar más entropía; utilizar índices por encima del tamaño de un array genera un error en NumPy pero, en CuPy, vuelve a recorrer el array desde el principio; o que, mientras que en NumPy se puede utilizar objetos de Python, en CuPy sólo se pueden utilizar tipos de datos numéricos y booleanos.\\
 
 \subsection{Estructura de hebras, bloques y mallas.}
-El \textbf{\textit{kernel}} es un fragmento de código especial, destino a ser ejecutado en el dispositivo, en el que se indica las instrucciones que ha de ejecutar una hebra.\\
+El \textbf{\textit{kernel}} es un fragmento de código especial, destinado a ser ejecutado en el dispositivo, en el que se indica las instrucciones qué ha de ejecutar una hebra.\\
 \begin{code}
 \begin{minted}[fontsize=\footnotesize]{python}
 from numba import cuda
@@ -48,14 +48,14 @@ if __name__ == '__main__':
   tpb = 128
   # Calculamos el número de bloques necesario
   bloques = ejemplo.size // tpb + 1
-  # Lanzamos el kernel con bloques de 128 hebras
+  # Lanzamos el kernel con bloques de 128 hebras cada uno
   aumentar_en_1[bloques, tpb](ejemplo)
 \end{minted}
 \captionof{listing}{Kernel para incrementar en 1 los elementos de un array.\\\\}
 \label{code:numbaexample}
 \end{code}
 
-Las \textbf{hebras} son la unidad mínima en la arquitectura \cudanospace. Cada hebra es ejecutada por un núcleo \cuda y es consciente, en tiempo de ejecución, de su identificador dentro del bloque así como del identificador del bloque en el que se encuentra y el tamaño del mismo, permitiéndonos así repartir el trabajo en función de dichos valores.\\
+Las \textbf{hebras} son la unidad mínima en la arquitectura \cudanospace. Cada hebra es ejecutada por un núcleo \cuda y es consciente, en tiempo de ejecución, de su identificador dentro del bloque así como del identificador del bloque en el que se encuentra y del tamaño del mismo, permitiéndonos así repartir el trabajo en función de dichos valores.\\
 
 El \textbf{bloque} se corresponde a un conjunto de hebras que ejecuta el mismo \textit{kernel} y pueden cooperar entre sí. Al conjunto de esos bloques, se le denomina \textbf{``grid'' o malla}. \\
 
@@ -81,26 +81,26 @@ Tanto las hebras dentro de un bloque, como los bloques dentro de una malla, pued
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=1.0]{imagenes/blocks.png}
-\caption{Distribución de bloques de un kernel en SMs.}
+\includegraphics[scale=0.2]{imagenes/cuda.png}
+\caption{Jerarquía de hebras y memoria en CUDAs.}
 \label{img:cudablocks}
 \end{figure}
 
-Al lanzar un \textit{kernel} hemos de utilizar al menos un bloque de $N$ hebras. Además, en los casos unidimensionales, el número de hebras por bloque está limitado a un máximo que depende de la tarjeta gráfica en cuestión, habitualmente 1024 hebras. No obstante, ni el uso de un único bloque de N hebras ni N bloques de 1 hebra es recomendable, ya que estaríamos dejando gran parte de la capacidad de computación paralela del dispositivo \cuda sin ser usada. En el primer caso, al haber un único bloque, sólo estaríamos haciendo uso de uno de los múltiples SMs que nos ofrece el dispositivo CUDA; en el segundo caso, al tener cada bloque una hebra, dado que los hebras de un bloque se ejecutan en \textit{warps}, cada bloque usaría 1 de las 32 hebras disponibles. 
+Al lanzar un \textit{kernel} hemos de utilizar al menos un bloque de $N$ hebras. Además, en los casos unidimensionales, el número de hebras por bloque está limitado a un máximo que depende de la tarjeta gráfica en cuestión, habitualmente 1024 hebras. No obstante, ni el uso de un único bloque de N hebras ni N bloques de 1 hebra es recomendable, ya que estaríamos dejando gran parte de la capacidad de computación paralela del dispositivo \cuda sin ser usada. En el primer caso, al haber un único bloque, sólo estaríamos haciendo uso de uno de los múltiples SMs que nos ofrece el dispositivo CUDA; en el segundo caso, al tener cada bloque una hebra, dado que los hebras de un bloque se ejecutan en \textit{warps}, en cada bloque sólo se estaría utilizando 1 de las 32 hebras disponibles. 
 
 
 \subsection{Estructura de memoria y memoria compartida.}
-Dentro de la tarjeta gráfica, nos encontramos con distintos niveles de memoria. Una vez los datos necesarios han sido traspasados del \textit{host} al dispositivo a través del bus PCI Express, esos datos son almacenados en una memoria DRAM de propósito general del dispositivo. Cuando un \textit{kernel} solicita datos de esta memoria, de manera similar a como ocurre en una CPU, los datos solicitados y los colindantes en memoria son colocados a través de varios niveles de caché, que tiene tamaño más limitado que la memoria DRAM pero con un acceso de lectura y escritura mucho más rápido.\\
+Dentro de la tarjeta gráfica, nos encontramos con distintos niveles de memoria. Una vez los datos necesarios han sido traspasados del \textit{host} al dispositivo a través del bus PCI Express, esos datos son almacenados en una memoria DRAM de propósito general del dispositivo. Cuando un \textit{kernel} solicita datos de esta memoria, de manera similar a como ocurre en una CPU, los datos solicitados y los colindantes en memoria son colocados a través de varios niveles de caché, que tiene un tamaño más limitado que la memoria DRAM, pero con un acceso de lectura y escritura mucho más rápido.\\
 
 \begin{table}[H]
 \centering
-\begin{tabular}{@{}cccc@{}}
+\begin{tabular}{@{}lccc@{}}
 \toprule
 \textbf{\textbf{Memoria}} & \textbf{\textbf{Localización}}                                  & \textbf{\begin{tabular}[c]{@{}c@{}}Acceso\\ (E = Escribir)\\ (L = Leer)\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Existente\\ hasta fin\\ de\end{tabular}} \\ \midrule
-\textbf{Registro}         & Caché                                                           & Kernel (E/L)                                                                          & Hebra                                                                       \\
-\textbf{Local}            & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & Kernel (E/L)                                                                          & Hebra                                                                       \\
-\textbf{Compartida}       & Caché                                                           & Kernel (E/L)                                                                          & Bloque                                                                      \\
-\textbf{Global}           & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Host (E/L)\\ Kernel (E/L)\end{tabular}                     & \begin{tabular}[c]{@{}c@{}}Aplicación\\ o uso de free\end{tabular}          \\
+\textbf{Registro}         & Caché                                                           & Kernel (E/L)                                                                          & Hebra                                                                      \\ \midrule
+\textbf{Local}            & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & Kernel (E/L)                                                                          & Hebra                                                                       \\ \midrule
+\textbf{Compartida}       & Caché                                                           & Kernel (E/L)                                                                          & Bloque                                                                      \\ \midrule
+\textbf{Global}           & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Host (E/L)\\ Kernel (E/L)\end{tabular}                     & \begin{tabular}[c]{@{}c@{}}Aplicación\\ o uso de free\end{tabular}          \\ \midrule
 \textbf{Constante}        & \begin{tabular}[c]{@{}c@{}}DRAM\\ (Caché tras uso)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Host (E/L)\\ Kernel (L)\end{tabular}                       & \begin{tabular}[c]{@{}c@{}}Aplicación \\ o uso de free\end{tabular}         \\ \bottomrule
 \end{tabular}
 \caption{Resumen de los tipos de memoria en CUDA.}
@@ -111,7 +111,7 @@ Dentro de la tarjeta gráfica, nos encontramos con distintos niveles de memoria.
 La \textbf{memoria compartida} es una abstracción para una región especial de la caché asociada a un bloque que es explícitamente usada por el programador en el \textit{kernel}, agilizando así considerablemente las transferencias de memoria en el dispositivo. En el cuadro \ref{tab:cudamemory}, podemos ver un resumen de los tipos de memoria existentes, dónde se pueden usar y dónde se encuentran dichos datos en el dispositivo.\\
 
 
-Si utilizamos los arrays N-dimensionales de NumPy, no tenemos la necesidad de realizar las transferencias de memoria. No obstante, es recomendable manejarlas manualmente para evitar cualquier transferencia de datos entre \textit{host} y dispositivo innecesaria. 
+Si utilizamos los arrays N-dimensionales de NumPy, no tenemos la necesidad de realizar las transferencias de memoria. No obstante, es recomendable manejarlas manualmente para evitar cualquier transferencia innecesaria de datos entre \textit{host} y dispositivo. 
 
 \begin{table}[ht]
 \begin{tabular}{@{}ll@{}}
@@ -119,7 +119,7 @@ Si utilizamos los arrays N-dimensionales de NumPy, no tenemos la necesidad de re
 \textbf{Función}                                                                                                          & \textbf{Definición}                                                                                                                                            \\ \midrule
 \textbf{\begin{tabular}[c]{@{}l@{}}cuda.device\_array(dimensiones,\\                                  tipo)\end{tabular}} & \begin{tabular}[c]{@{}l@{}}Declara un array con las dimensiones \\ y tipo de datos dados en memoria \\ global. Invocada desde \textit{host}.\end{tabular}      \\ \midrule
 \textbf{cuda.to\_device(array)}                                                                                           & \begin{tabular}[c]{@{}l@{}}Envía array de la memoria del \textit{host} \\ a la memoria global del \\ dispositivo. Invocada desde \textit{host}.\end{tabular}   \\ \midrule
-\textbf{d\_array.copy\_to\_host()}                                                                                        & \begin{tabular}[c]{@{}l@{}}Método para enviar d\_array de la \\ memoria del dispositivo a la del \\ \textit{host}. Invocada desde \textit{host}.\end{tabular}  \\ \midrule
+\textbf{nombre\_array.copy\_to\_host()}                                                                                        & \begin{tabular}[c]{@{}l@{}}Método para enviar nombre\_array de \\ la memoria del dispositivo a la del \\ \textit{host}. Invocada desde \textit{host}.\end{tabular}  \\ \midrule
 \textbf{\begin{tabular}[c]{@{}l@{}}cuda.local.array(dimensiones,\\                              tipo)\end{tabular}}       & \begin{tabular}[c]{@{}l@{}}Declara un array con las dimensiones\\ y tipo de datos dados en memoria \\ local. Invocada desde \textit{kernel}.\end{tabular}      \\ \midrule
 \textbf{\begin{tabular}[c]{@{}l@{}}cuda.shared.array(dimensiones,\\                                  tipo)\end{tabular}}  & \begin{tabular}[c]{@{}l@{}}Declara un array con las dimensiones\\ y tipo de datos dados en memoria \\ compartida. Invocada desde \textit{kernel}.\end{tabular} \\ \bottomrule
 \end{tabular}
@@ -128,9 +128,9 @@ Si utilizamos los arrays N-dimensionales de NumPy, no tenemos la necesidad de re
 \end{table}
 
 \subsection{Sincronización y operaciones atómicas.}
-Es frecuente la necesidad de que múltiples hebras cooperen, usando datos en alguna región de memoria del dispositivo, a la que tienen acceso de forma simultánea. En estos casos, podríamos encontrarnos ante el riesgo de una dependencia de datos de tipo \textit{RAW (Read After Write)}, es decir, una situación en la que se lee un dato antes de que los cálculos previos que necesitamos se hayan realizado. Para evitar este tipo de dependencias, \cuda proporciona varios mecanismos para sincronizar las hebras usadas, de los que vamos a destacar los dos usados en este trabajo.\\
+Es frecuente la necesidad de que múltiples hebras cooperen, usando datos en alguna región de memoria del dispositivo, a la que tienen acceso de forma simultánea. En estos casos, podríamos encontrarnos ante el riesgo de una dependencia de datos de tipo \textit{RAW (Read After Write)}, es decir, una situación en la que se lee un dato antes que los cálculos previos que necesitamos se hayan realizado. Para evitar este tipo de dependencias, \cuda proporciona varios mecanismos para sincronizar las hebras utilizadas, de los que vamos a destacar los dos usados en este trabajo.\\
 
-Por un lado, si no estamos utilizando los \textit{streams} de \cudanospace, característica que permite lanzar \textit{kernels} distintos de forma concurrente, tenemos garantizado que un \textit{kernel} no será ejecutado hasta que el \textit{kernel} anterior no haya terminado de procesarse. El uso de múltiples \textit{kernels} no es recomendable si no es necesario, ya que, cuando queden pocas operaciones por realizar en uno de los \textit{kernels}, parte del dispositivo podría no estar realizando cálculo alguno, y, en el lanzamiento de cada \textit{kernel}, existe un pequeño intervalo de tiempo desde que el \textit{host} invoca el \textit{kernel} y éste empieza a ser ejecutado en la GPU.\\ 
+Por un lado, si no estamos utilizando los \textit{streams} de \cudanospace, característica que permite lanzar \textit{kernels} distintos de forma concurrente, tenemos garantizado que un \textit{kernel} no será ejecutado hasta que el \textit{kernel} anterior no haya terminado de procesarse. El uso de múltiples \textit{kernels} no es recomendable si no es necesario, ya que, cuando queden pocas operaciones por realizar en uno de los \textit{kernels}, parte del dispositivo podría no estar realizando cálculo alguno, y, en el lanzamiento de cada \textit{kernel}, existe un pequeño intervalo de tiempo desde que el \textit{host} invoca el \textit{kernel} y éste empieza a ser ejecutado en la GPU. No obstante, a veces, podríamos encontrar situaciones en la que la concurrencia de los \textit{kernels} ayude a que el SM no esté ocioso, resultado de la ejecución de operaciones bloqueantes de un sólo kernel o alcanzar bifurcaciones del código donde se podrían intercalar la ejecución de 2 \textit{streams}, que se explicarán posteriormente.\\ 
 
 Por otro lado, dentro de un bloque, podemos sincronizar todas las hebras del mismo mediante el uso de la función \textbf{\textit{cuda.syncthreads()}}. Esta función, que es invocada desde un \textit{kernel}, garantiza que todas las instrucciones hasta el punto de invocación han sido ejecutadas por todas las hebras del bloque. Para ello, las hebras que ya han realizado los cálculos se quedan esperando a que las otras terminen, por lo que sólo debe usarse cuando sea necesario.\\
 
@@ -180,6 +180,8 @@ pseudoaleatorios[mi_array.size // tpb + 1, tpb](rng_states, mi_array)
 \label{code:randoms}
 \end{code}
 
+El resultado del código \ref{code:randoms}, por consiguiente, parte de una serie de números aleatorios \textit{(float32)} que cada hebra guarda en la posición de ``mi\_array'' que coincide con su identificador de hebra, repartidas en 20 bloques de 512 hebras. ($mi\_array.size \;div \;512 + 1 = 20$)\\
+
 \subsection{Streams.}
 Un \textbf{stream} en \textit{CUDA} es una secuencia de órdenes (lanzamiento de \textit{kernels}, transferencias de memoria, etc.) enviadas desde el \textit{host} al dispositivo. Mientras que la secuencia de órdenes dentro de un \textit{stream} ha de ser ejecutada secuencialmente, las órdenes entre los \textit{streams} pueden intercalarse, potencialmente permitiendo un mejor uso de los recursos al ejecutar múltiples \textit{kernels} de forma concurrente. \\
 
@@ -221,23 +223,26 @@ cuda.synchronize()
 \label{code:streams}
 \end{code}
 
+En el código fuente \ref{code:streams} obtenemos dos arrays tras la finalización del mismo. El primero de ellos, ``array1'' es inicializado con unos, transferido a la memoria global del dispositivo y, haciendo uso del \textit{kernel} presentado previamente, aumentamos en 1 el contenido de los mismos, obteniendo un array de 100000 doses con el uso de 782 bloques ($d\_array1.size \;div \;128 + 1 = 782$) de 128 hebras. Tras realizar los cálculos, los resultados son devueltos a la memoria del host.\\
+
+En el caso de ``array2'', hemos tomado un array de 100000 elementos sin inicializar, hemos transferido el array a la memoria global del dispositivo y, haciendo uso del \textit{kernel} para la generación de pseudoaleatorios, hemos obtenido un array cuyos elementos han sido inicializados pseudoaleatoriamente utilizando el mismo número de bloques y hebras por bloques que en el caso de ``array1''. Durante la ejecución, el uso de los \textit{streams}, abre la posibilidad de que las operaciones relacionadas con ``array1'' y las operaciones relacionadas con ``array2'' puedan ser ejecutadas de forma concurrente.
 \section{Spark.}
 
 
 
 \textbf{\textit{Apache Spark}} es un \textit{framework} de código abierto y propósito general para sistemas distribuidos de computación en clúster, que proporciona una API utilizable desde los lenguajes de programación en Scala, Java, Python y R; y proporciona herramientas de alto nivel como ML/MLib, una librería con algoritmos de \textit{machine learning}. \\
 
-El \textit{framework} fundamenta su arquitectura en el \textit{RDD (Resilient Distributed DataSet)}, que es una estructura de datos de sólo lectura distribuida en un clúster de máquinas, mantenida durante toda la computación y con tolerancia a fallos. El hecho de que el RDD sea inmutable, es decir, de sólo lectura, facilita la distribución del trabajo a lo largo del clúster aunque implica que las acciones que transforman los datos, necesiten crear un nuevo \textit{RDD} para los resultados. Existen dos formas básicas de generar un \textit{RDD} en \textit{Spark}: paralelizando una colección existente en el código que controla la ejecución de \textit{Spark} o leyendo los datos de un sistema de almacenamiento. \\
+El \textit{framework} fundamenta su arquitectura en el \textit{RDD (Resilient Distributed DataSet)}, que es una estructura de datos de sólo lectura distribuida en un clúster de máquinas, mantenida durante toda la computación y con tolerancia a fallos. El hecho de que el RDD sea inmutable, es decir, de sólo lectura, facilita la distribución del trabajo a lo largo del clúster aunque implica que las acciones que transforman los datos necesiten crear un nuevo \textit{RDD} para los resultados. Existen dos formas básicas de generar un \textit{RDD} en \textit{Spark}: paralelizando una colección existente en el código que controla la ejecución de \textit{Spark} o leyendo los datos de un sistema de almacenamiento. \\
 
-Al poder utilizar la \textit{API} desde \textit{Python} podemos combinar de una manera simple el uso de \textit{Spark} y \textit{CUDA}. El uso de ambas nos proporcion, entre otras, las siguientes ventajas:\\
+Al poder utilizar la \textit{API} desde \textit{Python} podemos combinar de una manera simple el uso de \textit{Spark} y \textit{CUDA}. El uso de ambas nos proporciona, entre otras, las siguientes ventajas:\\
 
 \begin{itemize}
-  \item \textit{Spark} nos proporciona herramientas para la lectura de datos desde un sistema de almacenamiento.
-  \item El código que realicemos combinando \textit{Spark} y \textit{CUDA} podría ser usado tanto en una única máquina como en un clúster.
+  \item \textit{Spark} hace disponibles herramientas para la lectura de datos desde un sistema de almacenamiento.
+  \item El código que realicemos combinando \textit{Spark} y \textit{CUDA} podría ser utilizado tanto en una única máquina como en un clúster.
   \item Si trabajamos con una única máquina, podemos solucionar problemas de escalabilidad ajustando el número de particiones (subdivisiones del RDD) y el número de ejecutores (número de procesos que podrían ejecutarse simultáneamente) para, por ejemplo, evitar quedarnos sin memoria \textit{RAM} en el dispositivo.\\
 \end{itemize}
 
-La distribución de trabajo en Spark en este proyecto se realizará utilizando la transformación \textit{mapPartitions} del \textit{RDD}, que generará un nuevo RDD a partir de los resultados obtenidos al aplicar la función pasada a \textit{mapPartitions} como parámetro a cada una de las funciones. \\
+La distribución de trabajo en Spark en este proyecto se realizará utilizando la transformación \textit{mapPartitions} del \textit{RDD}, que generará un nuevo RDD a partir de los resultados obtenidos al aplicar la función pasada a \textit{mapPartitions} como parámetro. \\
 
 \begin{code}
 \begin{minted}{python}
@@ -276,3 +281,5 @@ output_np = output.collect()
 \captionof{listing}{Uso de Spark con Numba.\\}
 \label{code:spark}
 \end{code}
+
+En el código \ref{code:spark} inicializamos un array de 100000 ceros \textit(float32) usando \textit{NumPy}. Mediante el uso de la función \textbf{parallelize} de \textit{PySpark}, generamos un RDD a partir de la colección. La función \textit{gpu\_work} va a ser ejecutada en cada partición del RDD, potencialmente almacenadas en diferentes nodos del clúster, que lanzará el mínimo número de bloques con 128 hebras por bloque para invocar el \textit{kernel aumentar\_en\_1}. Utilizando \textbf{mapPartitions} y \textbf{collect} de \textit{PySpark}, en primer lugar indicamos la función a ejecutar sobre cada partición del RDD y con la segunda iniciamos el procesamiento de la misma y almacenamos los resultados. Por tanto, \textit{output\_np}, será un array que contendrá 100000 unos.
