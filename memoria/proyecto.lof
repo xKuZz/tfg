@@ -5,7 +5,7 @@
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Representaci\IeC {\'o}n gr\IeC {\'a}fica del vecindario para un codebook bidimensional.\relax }}{9}{figure.caption.8}
 \contentsline {figure}{\numberline {2.3}{\ignorespaces Proceso de entrenamiento de una red neuronal de Kohonen.\relax }}{10}{figure.caption.9}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Jerarqu\IeC {\'\i }a de hebras y memoria en CUDAs.\relax }}{23}{figure.caption.13}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Jerarqu\IeC {\'\i }a de hebras y memoria en CUDA.\relax }}{23}{figure.caption.13}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {5.1}{\ignorespaces Diagrama de flujo del mapa auto-organizado desarrollado.\relax }}{35}{figure.caption.19}
